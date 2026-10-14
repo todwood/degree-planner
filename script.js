@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isAnnual = true;
 
   function updatePricing() {
+    if (billingToggle) billingToggle.setAttribute('aria-checked', String(isAnnual));
     if (isAnnual) {
       billingToggle.classList.remove('monthly');
       annualLabel.classList.add('active');
@@ -131,8 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      tabButtons.forEach(b => b.classList.remove('active'));
+      tabButtons.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
       btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      if (panel) panel.setAttribute('aria-labelledby', btn.id);
 
       const tabKey = btn.getAttribute('data-tab');
       const data = useCaseData[tabKey];
@@ -170,23 +173,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 4. Mobile Menu Toggle
+  // 4. Mobile Menu Toggle (class based so it survives window resizes)
   const mobileToggle = document.getElementById('mobileToggle');
   const navLinks = document.getElementById('navLinks');
   if (mobileToggle && navLinks) {
-    mobileToggle.addEventListener('click', () => {
-      const isVisible = navLinks.style.display === 'flex';
-      navLinks.style.display = isVisible ? 'none' : 'flex';
-      if (!isVisible) {
-        navLinks.style.flexDirection = 'column';
-        navLinks.style.position = 'absolute';
-        navLinks.style.top = '100%';
-        navLinks.style.left = '0';
-        navLinks.style.width = '100%';
-        navLinks.style.background = '#FFFFFF';
-        navLinks.style.padding = '24px';
-        navLinks.style.boxShadow = '0 16px 32px rgba(0,0,0,0.1)';
-      }
+    const setMenu = (open) => {
+      navLinks.classList.toggle('open', open);
+      mobileToggle.setAttribute('aria-expanded', String(open));
+    };
+    mobileToggle.addEventListener('click', () => setMenu(!navLinks.classList.contains('open')));
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+    window.matchMedia('(min-width: 769px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
+  }
+
+  // 5. Early-access form (demo: nothing is sent or stored)
+  const signupForm = document.getElementById('signupForm');
+  const formStatus = document.getElementById('formStatus');
+  if (signupForm && formStatus) {
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      formStatus.textContent = 'Demo mode: sign-ups are not connected yet, so your email was not stored.';
+      signupForm.reset();
     });
   }
 });
