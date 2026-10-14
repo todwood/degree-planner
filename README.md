@@ -32,4 +32,7 @@
 ---
 
 ## License
-MIT License. Crafted with precision.
+- **Source code** (`index.html`, `styles.css`, `script.js`, `execution/`): [MIT License](LICENSE).
+- **Written content and design**: [Creative Commons Attribution 4.0 (CC BY 4.0)](LICENSE-CONTENT.md).
+
+> **Concept site for educational purposes.** The companies, customers, statistics and compliance claims shown are fictional placeholders.
