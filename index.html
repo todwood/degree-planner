@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Synapse AI — The Autonomous Intelligence Infrastructure</title>
   <meta name="description" content="Next-generation cognitive workflows for visionary enterprises. High-precision AI orchestration at global scale.">
+  <meta name="theme-color" content="#6C5CE7">
+  <link rel="canonical" href="https://todwood.github.io/synapse-ai/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236C5CE7'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23F5F000'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Synapse AI — The Autonomous Intelligence Infrastructure">
+  <meta property="og:description" content="Deploy fault-tolerant cognitive agents with mathematical precision.">
+  <meta property="og:url" content="https://todwood.github.io/synapse-ai/">
+  <meta name="twitter:card" content="summary">
   
   <!-- Google Fonts: Poppins (Headings) & Montserrat (Body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +22,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
 
   <!-- Navigation -->
   <header class="navbar" id="navbar">
@@ -25,7 +34,7 @@
         <span class="logo-text">Synapse<span>AI</span></span>
       </a>
 
-      <nav class="nav-links" id="navLinks">
+      <nav class="nav-links" id="navLinks" aria-label="Primary">
         <a href="#features">Platform</a>
         <a href="#how-it-works">Architecture</a>
         <a href="#use-cases">Solutions</a>
@@ -39,12 +48,14 @@
           <span>Start Free</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation" aria-expanded="false" aria-controls="navLinks">
           <span></span><span></span><span></span>
         </button>
       </div>
     </div>
   </header>
+
+  <main id="main">
 
   <!-- Hero Section -->
   <section class="hero-section">
@@ -52,11 +63,11 @@
     <div class="ambient-glow glow-2"></div>
     
     <div class="container hero-content">
-      <div class="hero-badge">
+      <a href="#features" class="hero-badge">
         <span class="badge-dot"></span>
         <span class="badge-text">Synapse 3.5 is Live</span>
-        <span class="badge-accent">Explore Next-Gen Reasoning &rarr;</span>
-      </div>
+        <span class="badge-link">Explore Next-Gen Reasoning &rarr;</span>
+      </a>
 
       <h1 class="hero-title">
         The Autonomous Intelligence Infrastructure for <span class="gradient-text">Frontier Teams</span>
@@ -339,15 +350,15 @@
       <h2 class="section-title">Built for Mission-Critical Workflows</h2>
       <p class="section-subtitle">Discover how forward-thinking engineering teams deploy Synapse.</p>
 
-      <div class="usecase-tabs">
-        <button class="tab-btn active" data-tab="infra">DevOps & Cloud</button>
-        <button class="tab-btn" data-tab="data">Data Engineering</button>
-        <button class="tab-btn" data-tab="security">SecOps & Compliance</button>
-        <button class="tab-btn" data-tab="growth">Product Analytics</button>
+      <div class="usecase-tabs" role="tablist" aria-label="Use cases">
+        <button class="tab-btn active" id="tab-infra" role="tab" aria-selected="true" aria-controls="infra" data-tab="infra">DevOps & Cloud</button>
+        <button class="tab-btn" id="tab-data" role="tab" aria-selected="false" aria-controls="infra" data-tab="data">Data Engineering</button>
+        <button class="tab-btn" id="tab-security" role="tab" aria-selected="false" aria-controls="infra" data-tab="security">SecOps & Compliance</button>
+        <button class="tab-btn" id="tab-growth" role="tab" aria-selected="false" aria-controls="infra" data-tab="growth">Product Analytics</button>
       </div>
 
       <div class="usecase-display">
-        <div class="tab-panel active" id="infra">
+        <div class="tab-panel active" id="infra" role="tabpanel" aria-labelledby="tab-infra" aria-live="polite">
           <div class="panel-info">
             <h3>Autonomous Zero-Downtime Infrastructure Migrations</h3>
             <p>Orchestrate multi-region database sharding, container rollouts, and cluster autoscaling without human intervention.</p>
@@ -385,7 +396,7 @@
 
       <div class="billing-toggle-wrapper">
         <span class="toggle-label" id="monthlyLabel">Monthly</span>
-        <button class="toggle-switch" id="billingToggle" aria-label="Toggle Billing Interval">
+        <button class="toggle-switch" id="billingToggle" role="switch" aria-checked="true" aria-label="Annual billing">
           <span class="toggle-knob"></span>
         </button>
         <span class="toggle-label active" id="annualLabel">Annual <span class="discount-badge">Save 20%</span></span>
@@ -461,13 +472,14 @@
           Join thousands of visionary engineers shipping reliable AI systems without compromising on determinism or security.
         </p>
 
-        <form class="cta-form" id="signupForm" onsubmit="event.preventDefault(); alert('Welcome to Synapse AI! We have reserved your deployment slot.');">
+        <form class="cta-form" id="signupForm">
           <input type="email" placeholder="Enter your work email" required class="cta-input" aria-label="Work email">
           <button type="submit" class="btn-primary btn-lg">
             <span>Request Early Access</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </form>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
 
         <div class="cta-perks">
           <span>&checkmark; 14-day unrestricted trial</span>
@@ -477,6 +489,8 @@
       </div>
     </div>
   </section>
+
+  </main>
 
   <!-- Footer -->
   <footer class="footer">
