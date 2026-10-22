@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" fill="none" width="320" height="64">
-  <!-- 15-degree shear gold accent box -->
+  <!-- 15-degree shear gold accent box with DP monogram -->
   <g transform="skewX(-15)">
     <rect x="25" y="14" width="36" height="36" rx="4" fill="#B5A36A" />
-    <text x="43" y="39" font-family="'Obviously', 'Arial Black', sans-serif" font-weight="900" font-size="22" fill="#000000" text-anchor="middle" transform="skewX(15)">LU</text>
+    <text x="43" y="39" font-family="'Obviously', 'Trade Gothic Next', 'Arial Black', sans-serif" font-weight="900" font-size="20" fill="#000000" text-anchor="middle" transform="skewX(15)">DP</text>
   </g>
   <!-- Wordmark -->
-  <text x="75" y="32" font-family="'Obviously', 'Trade Gothic Next', 'Arial Black', sans-serif" font-weight="800" font-size="20" fill="#FFFFFF" letter-spacing="1.5">LINDENWOOD</text>
-  <text x="75" y="47" font-family="'Trade Gothic Next', 'Trade Gothic', Arial, sans-serif" font-weight="600" font-size="11" fill="#B5A36A" letter-spacing="3">UNIVERSITY</text>
+  <text x="75" y="32" font-family="'Obviously', 'Trade Gothic Next', 'Arial Black', sans-serif" font-weight="800" font-size="19" fill="#FFFFFF" letter-spacing="1.2">DEGREE PLANNER</text>
+  <text x="75" y="47" font-family="'Trade Gothic Next', 'Trade Gothic', Arial, sans-serif" font-weight="600" font-size="10" fill="#B5A36A" letter-spacing="2.2">ACADEMIC ADVISING SYSTEM</text>
 </svg>
