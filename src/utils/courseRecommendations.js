@@ -11,8 +11,8 @@
 import masterDb from '../data/masterDatabase.json' with { type: 'json' };
 import baseHistoricalFulfillments from '../data/historicalFulfillments.json' with { type: 'json' };
 
-const BUCKET_TO_CANONICAL_TOKEN = {
-  comp_1: 'REQ_GE_COMP1',
+export const BUCKET_TO_CANONICAL_TOKEN = {
+  comp_1: 'ENGL 15000',
   comp_2: 'REQ_GE_COMP2',
   math: 'REQ_GE_MATH',
   us_hist_gov: 'REQ_GE_US_HIST_GOV',

@@ -233,12 +233,22 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       expect(art.FA_I_8wk).toBe(true);
       expect(art.SU_8wk).toBe(true);
 
-      // Verify REQ_GE_COMP1 eligible courses & default
+      // Verify legacy REQ_GE_COMP1 alias resolves to concrete ENGL 15000
       const comp1Req = await dbAdapter.getCourse('REQ_GE_COMP1');
       expect(comp1Req).toBeDefined();
-      expect(comp1Req.eligible_courses).toContain('ENGL 15000');
-      expect(comp1Req.eligible_courses).toContain('EPP 15000');
-      expect(comp1Req.default_course).toBe('ENGL 15000');
+      expect(comp1Req.code).toBe('ENGL 15000');
+      expect(comp1Req.title).toBe('Composition I (GE-Comm)');
+
+      const legacyGe1 = await dbAdapter.getCourse('GE 1');
+      expect(legacyGe1).toBeDefined();
+      expect(legacyGe1.code).toBe('ENGL 15000');
+
+      // Verify underlying placeholder entry preserved in catalog
+      const comp1Placeholder = (await dbAdapter.getPlaceholders()).find((p) => p.code === 'REQ_GE_COMP1');
+      expect(comp1Placeholder).toBeDefined();
+      expect(comp1Placeholder.eligible_courses).toContain('ENGL 15000');
+      expect(comp1Placeholder.eligible_courses).toContain('EPP 15000');
+      expect(comp1Placeholder.default_course).toBe('ENGL 15000');
 
       // 3. Natural Science with Lab carries 4 credits
       const natSci = await dbAdapter.getCourse('REQ_GE_NAT_SCI_LAB');
@@ -283,7 +293,7 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       const prereqCodes = engl17.prereq_logic.items.map((i) => i.code);
       expect(prereqCodes).toContain('ENGL 15000');
       expect(prereqCodes).toContain('EPP 15000');
-      expect(prereqCodes).toContain('REQ_GE_COMP1');
+      expect(prereqCodes).not.toContain('REQ_GE_COMP1');
 
       const epp15 = await dbAdapter.getCourse('EPP 15000');
       expect(epp15.title).toBe('Composition I - English for Academic Purposes (GE-Comm)');
@@ -357,12 +367,12 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       const parsedEmpty = processRawCourseRecords([]);
       const audit = runWaterfallAudit(parsedEmpty, 'cybersecurity_bs_2026', masterDb);
 
-      // Unmet Composition I emits REQ_GE_COMP1 placeholder
-      const comp1Item = audit.remainingCourseItems.find((c) => c.code === 'REQ_GE_COMP1');
+      // Unmet Composition I emits concrete ENGL 15000 course
+      const comp1Item = audit.remainingCourseItems.find((c) => c.code === 'ENGL 15000');
       expect(comp1Item).toBeDefined();
-      expect(comp1Item.type).toBe('placeholder');
-      expect(comp1Item.eligible_courses).toEqual(['ENGL 15000', 'EPP 15000']);
-      expect(comp1Item.default_course).toBe('ENGL 15000');
+      expect(comp1Item.type).toBe('concrete');
+      expect(comp1Item.isPlaceholder).toBe(false);
+      expect(comp1Item.title).toBe('Composition I (GE-Comm)');
 
       // Unmet Composition II emits concrete ENGL 17000
       const comp2Item = audit.remainingCourseItems.find((c) => c.code === 'ENGL 17000');
@@ -475,11 +485,11 @@ describe('Phase 1: Master Database Integrity Verification', () => {
         expect(missingCode.startsWith('REQ_')).toBe(false);
       }
 
-      // 4. Prerequisite sequencing: ENGL 17000 cannot be scheduled before REQ_GE_COMP1
+      // 4. Prerequisite sequencing: ENGL 17000 cannot be scheduled before ENGL 15000
       const engl17000 = await dbAdapter.getCourse('ENGL 17000');
       const firstSem = schedule.semesters[0]; // Fall 2026
 
-      // Try moving ENGL 17000 to FA-I with empty completed set (REQ_GE_COMP1 not completed)
+      // Try moving ENGL 17000 to FA-I with empty completed set (ENGL 15000 not completed)
       const moveConflict = validateScheduleMove(
         { ...engl17000, compactCode: 'ENGL17000' },
         firstSem,
@@ -490,7 +500,7 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       expect(moveConflict.hasConflict).toBe(true);
       expect(moveConflict.conflicts.some((c) => c.type === 'PREREQUISITE_UNMET')).toBe(true);
 
-      // When REQ_GE_COMP1 is completed prior (or in FA-I when scheduling into FA-II), prereq is satisfied!
+      // When ENGL 15000 is completed prior (or in FA-I when scheduling into FA-II), prereq is satisfied!
       const chainedMove = validateScheduleMove(
         { ...engl17000, compactCode: 'ENGL17000' },
         firstSem,
@@ -500,7 +510,7 @@ describe('Phase 1: Master Database Integrity Verification', () => {
             ...firstSem,
             lanes: {
               ...firstSem.lanes,
-              'FA-I': [{ code: 'REQ_GE_COMP1', compactCode: 'REQ_GE_COMP1', type: 'placeholder' }]
+              'FA-I': [{ code: 'ENGL 15000', compactCode: 'ENGL15000', type: 'concrete' }]
             }
           }
         ],

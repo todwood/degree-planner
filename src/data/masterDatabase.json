@@ -3047,13 +3047,10 @@
           },
           {
             "code": "EPP 15000"
-          },
-          {
-            "code": "REQ_GE_COMP1"
           }
         ]
       },
-      "prereq_display": "ENGL 15000 or EPP 15000 or REQ_GE_COMP1 with grade of C or higher",
+      "prereq_display": "ENGL 15000 or EPP 15000 with grade of C or higher",
       "coreq_codes": [],
       "legacy_substitutions": [],
       "math_placement_eligible": false,

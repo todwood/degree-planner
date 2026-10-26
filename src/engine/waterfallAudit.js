@@ -53,7 +53,7 @@ const KNOWN_HD_COMPACT_CODES = new Set([
 ]);
 
 export const BUCKET_TO_CANONICAL_TOKEN = {
-  comp_1: 'REQ_GE_COMP1',
+  comp_1: 'ENGL 15000',
   comp_2: 'ENGL 17000',
   math: 'REQ_GE_MATH',
   us_hist_gov: 'REQ_GE_US_HIST_GOV',
@@ -477,6 +477,7 @@ export function runWaterfallAudit(
     if (bucketId === 'comp_1' || bucketId === 'comp_2') {
       const candidateCodes = bucketId === 'comp_1' ? ['ENGL15000', 'EPP15000'] : ['ENGL17000'];
       let matched = null;
+      const bucketWarnings = [];
 
       for (const cCode of candidateCodes) {
         const candidate = unclaimedPool.get(cCode);
@@ -491,7 +492,7 @@ export function runWaterfallAudit(
             break;
           } else {
             // Grade is D (or C-): counts toward 120 total credits, but leaves Composition bucket UNFULFILLED!
-            compositionGatekeeperWarnings.push({
+            bucketWarnings.push({
               bucketId,
               courseCode: candidate.code,
               grade: candidate.grade,
@@ -499,6 +500,10 @@ export function runWaterfallAudit(
             });
           }
         }
+      }
+
+      if (!matched && bucketWarnings.length > 0) {
+        compositionGatekeeperWarnings.push(...bucketWarnings);
       }
 
       geBucketsResult.push({
@@ -749,37 +754,19 @@ export function runWaterfallAudit(
   for (const b of geBucketsResult) {
     if (!b.fulfilled) {
       if (b.bucket_id === 'comp_1') {
-        const cat = catalogByCompact.get('REQ_GE_COMP1');
+        const cat = catalogByCompact.get('ENGL15000');
         remainingCourseItems.push({
           ...(cat || {}),
-          code: 'REQ_GE_COMP1',
-          compactCode: 'REQ_GE_COMP1',
-          department: 'GE',
-          number: 10100,
-          title: b.requiresHD ? 'GE: Composition I (HD) (3cr)' : (cat?.title || 'GE: Composition I (3cr)'),
+          code: 'ENGL 15000',
+          compactCode: 'ENGL15000',
+          department: 'ENGL',
+          number: 15000,
+          title: cat?.title || 'Composition I (GE-Comm)',
           credits: 3,
           category: 'GE',
           geBucketId: b.bucket_id,
-          eligible_courses: cat?.eligible_courses || ['ENGL 15000', 'EPP 15000'],
-          default_course: cat?.default_course || 'ENGL 15000',
-          selected_course: 'ENGL 15000',
-          type: 'placeholder',
-          isPlaceholder: true,
-          system_locked: true,
-          requiresHD: Boolean(b.requiresHD),
-          needs_hd: Boolean(b.requiresHD),
-          offered_sessions: cat?.offered_sessions || ['FA-I', 'FA-II', 'Fall-16wk', 'SP-I', 'SP-II', 'Spring-16wk', 'SU'],
-          FA_I_8wk: true,
-          FA_II_8wk: true,
-          FA_16wk: true,
-          SP_I_8wk: true,
-          SP_II_8wk: true,
-          SP_16wk: true,
-          SU_8wk: true,
-          modalities: cat?.modalities || ['Online', 'OnGround'],
-          prereq_logic: null,
-          coreq_codes: [],
-          verification_status: 'Verified'
+          type: 'concrete',
+          isPlaceholder: false
         });
       } else if (b.bucket_id === 'comp_2') {
         const cat = catalogByCompact.get('ENGL17000');

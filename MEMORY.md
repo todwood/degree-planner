@@ -1008,4 +1008,31 @@
     - Expanded card: rendered full title `PSY 10000 Principles of Psychology (GE-SocSci)`, Advisor Tip callout, and one-click copy button with "Copied!" feedback state.
     - Screenshot captured: `.tmp/course_recommendations_refined.png`.
 
+### 63. Composition I (ENGL 15000) Migration and EPP 15000 Audit Equivalence
+- **Objective:**
+  - Replace the legacy placeholder token `REQ_GE_COMP1` with concrete institutional course `ENGL 15000` (Composition I) throughout the program and audit pipeline.
+  - Implement full audit equivalence for `EPP 15000` (Composition I - English for Academic Purposes), allowing it to satisfy the Composition I line item with 0 unfulfilled core warnings when completed with grade C or higher.
+  - Update `ENGL 17000` (Composition II) prerequisite logic to require `ENGL 15000 or EPP 15000` (dropping `REQ_GE_COMP1`).
+  - Update legacy alias maps in `dbAdapter.js` (`GE 1`, `GE_COMP_1`, and `REQ_GE_COMP1`) to resolve to concrete `ENGL 15000` for backwards compatibility.
+  - Symmetrize unfulfilled Composition I emission in `remainingCourseItems` to produce concrete `ENGL 15000` (`type: 'concrete'`, `isPlaceholder: false`), mirroring `comp_2` (`ENGL 17000`) and `math` (`MTH 14100`).
+- **Implementation:**
+  1. *Master Database (`src/data/masterDatabase.json`):*
+     - In `courses`, updated `ENGL 17000` prerequisite logic to `items: [{ "code": "ENGL 15000" }, { "code": "EPP 15000" }]` and `prereq_display: "ENGL 15000 or EPP 15000 with grade of C or higher"`.
+     - Preserved catalog definition of `ENGL 15000` as concrete course with `credits: 3`, `title: "Composition I (GE-Comm)"`, and `legacy_substitutions: ["EPP 15000"]`.
+  2. *Audit Gatekeeper & Remaining Emission (`src/engine/waterfallAudit.js`):*
+     - Updated `BUCKET_TO_CANONICAL_TOKEN.comp_1 = 'ENGL 15000'`.
+     - In `Composition I & II Gatekeeper`, evaluated candidate codes `['ENGL15000', 'EPP15000']`. If either course is present with grade >= C (or Current/Scheduled), claimed course into `geBucketsResult`, marked `fulfilled = true`, and omitted any low-grade warnings for that bucket so `compositionGatekeeper.satisfied` evaluates to `true`.
+     - In `remainingCourseItems`, updated unmet `comp_1` emission to push concrete course `ENGL 15000` (`type: 'concrete'`, `isPlaceholder: false`), eliminating `REQ_GE_COMP1`.
+  3. *Database Adapter & Recommendations Utility (`src/data/dbAdapter.js`, `src/utils/courseRecommendations.js`):*
+     - In `PLACEHOLDER_LEGACY_ALIASES`, mapped `'GE 1': 'ENGL 15000'`, `'GE_COMP_1': 'ENGL 15000'`, `'REQ_GE_COMP1': 'ENGL 15000'`, `'REQGECOMP1': 'ENGL 15000'`.
+     - In `getCourseSync`, added early alias resolution for mapped canonical tokens so queries for `REQ_GE_COMP1`, `GE 1`, or `GE_COMP_1` resolve cleanly to `ENGL 15000`.
+     - In `src/utils/courseRecommendations.js`, updated and exported `BUCKET_TO_CANONICAL_TOKEN.comp_1 = 'ENGL 15000'`.
+  4. *Verification Suites (`tests/waterfallComposition.test.js`, `tests/masterDatabase.test.js`):*
+     - Created comprehensive test suite `tests/waterfallComposition.test.js` with 10 test specs covering token mapping, alias resolution, unfulfilled concrete emission, recommendation guard, ENGL 15000 vs. EPP 15000 audit equivalence, grade D gatekeeper warnings, and prerequisite chaining with `ENGL 17000`.
+     - Updated `tests/masterDatabase.test.js` to assert concrete `ENGL 15000` emission and prerequisite validation.
+- **Verification:**
+  - Full Vitest suite: 8 test files, 95 / 95 unit tests passing (100%).
+  - Production build: `npm run build` compiled cleanly with 0 errors in 3.90s.
+
+
 

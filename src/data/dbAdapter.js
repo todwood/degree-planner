@@ -28,7 +28,7 @@ const LOCAL_STORAGE_KEY = 'lu_degree_planner_db_v1';
  */
 export const PLACEHOLDER_LEGACY_ALIASES = {
   // Legacy Waterfall Audit codes -> Canonical Tokens
-  'GE 1': 'REQ_GE_COMP1',
+  'GE 1': 'ENGL 15000',
   'GE 2': 'REQ_GE_COMP2',
   'GE 3': 'REQ_GE_MATH',
   'GE 4': 'REQ_GE_US_HIST_GOV',
@@ -71,7 +71,9 @@ export const PLACEHOLDER_LEGACY_ALIASES = {
   'GE_HC2': 'REQ_GE_HC_ELEC',
   'GE_ELEC1': 'REQ_GE_ELEC1',
   'GE_ELEC2': 'REQ_GE_ELEC2',
-  'GE_COMP_1': 'REQ_GE_COMP1',
+  'GE_COMP_1': 'ENGL 15000',
+  'REQ_GE_COMP1': 'ENGL 15000',
+  'REQGECOMP1': 'ENGL 15000',
   'GE_COMP_2': 'REQ_GE_COMP2',
   'GE_MATH': 'REQ_GE_MATH',
   'GE_US_HIST_GOV': 'REQ_GE_US_HIST_GOV',
@@ -344,21 +346,27 @@ class DatabaseAdapter {
   getCourseSync(code) {
     if (!code) return null;
     const raw = String(code).trim().toUpperCase();
+    const compact = raw.replace(/\s+/g, '');
     const list = this.memoryCache?.courses || seedData.courses || [];
 
-    // 1. Direct match on code
+    // 1. Resolve via legacy alias table if explicitly mapped to another canonical course (e.g. 'GE 1', 'GE_COMP_1', or 'REQ_GE_COMP1' -> 'ENGL 15000')
+    const canonicalToken = PLACEHOLDER_LEGACY_ALIASES[raw] || PLACEHOLDER_LEGACY_ALIASES[compact];
+    if (canonicalToken && canonicalToken.toUpperCase() !== raw && canonicalToken.toUpperCase() !== compact) {
+      const aliasFound = list.find((c) => c.code.toUpperCase() === canonicalToken.toUpperCase());
+      if (aliasFound) return aliasFound;
+    }
+
+    // 2. Direct match on code
     let found = list.find((c) => c.code.toUpperCase() === raw);
     if (found) return found;
 
-    // 2. Direct match on compact code (e.g. 'ICS21300' or 'REQ_GE_ART')
-    const compact = raw.replace(/\s+/g, '');
+    // 3. Direct match on compact code (e.g. 'ICS21300' or 'REQ_GE_ART')
     found = list.find(
       (c) => (c.compactCode || c.code.replace(/\s+/g, '')).toUpperCase() === compact
     );
     if (found) return found;
 
-    // 3. Resolve via legacy alias table
-    const canonicalToken = PLACEHOLDER_LEGACY_ALIASES[raw] || PLACEHOLDER_LEGACY_ALIASES[compact];
+    // 4. Fallback resolve via legacy alias table
     if (canonicalToken) {
       found = list.find((c) => c.code.toUpperCase() === canonicalToken.toUpperCase());
       if (found) return found;
