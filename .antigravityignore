@@ -1,0 +1,30 @@
+# Secrets and environment
+.env
+.env.*
+!.env.example
+
+# Local scratch and sample files (FERPA / local calibration)
+.tmp/
+*.tmp
+
+# Dependencies and virtual environments
+node_modules/
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build and distribution outputs
+dist/
+build/
+out/
+.vite/
+
+# Logs and system artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.system_generated/

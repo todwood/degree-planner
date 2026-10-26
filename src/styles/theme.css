@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Degree Planner Brand Colors (Digital Gold & Tactile Palette) */
+  --lu-gold-standard: #B5A36A;
+  --lu-gold-accessible: #857542;
+  --lu-black: #000000;
+  --lu-white: #FFFFFF;
+
+  /* Approved Neutral Tints */
+  --lu-bg-canvas: #F8F7F4;
+  --lu-gold-tint-10: #F7F5EE;
+  --lu-gold-tint-20: #EFEBD9;
+  --lu-text-primary: #111111;
+  --lu-text-secondary: #4B5563;
+  --lu-text-muted: #6B7280;
+  --lu-bg-past: #F3F4F6;
+  --lu-border-subtle: #E5E7EB;
+
+  /* Tactile Weight Flexibility Scale */
+  --lu-flex-easy-bg: #F0F9FF;
+  --lu-flex-easy-border: #0284C7;
+  --lu-flex-easy-text: #0369A1;
+
+  --lu-flex-effort-bg: #FFFBEB;
+  --lu-flex-effort-border: #D97706;
+  --lu-flex-effort-text: #92400E;
+
+  --lu-flex-fixed-bg: #1E293B;
+  --lu-flex-fixed-border: #0F172A;
+  --lu-flex-fixed-text: #0F172A;
+  --lu-flex-fixed-pill-bg: #1E293B;
+  --lu-flex-fixed-pill-text: #FFFFFF;
+
+  /* Conflict States */
+  --lu-conflict-border: #DC2626;
+  --lu-conflict-bg: #FEF2F2;
+
+  /* Typography */
+  --font-display: "Obviously", "Trade Gothic Next", "Trade Gothic", Arial, sans-serif;
+  --font-sans: "Trade Gothic Next", "Trade Gothic", Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--lu-bg-canvas);
+  color: var(--lu-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+.lu-shear {
+  transform: skewX(-15deg);
+}
+
+.lu-shear-content {
+  transform: skewX(15deg);
+}

@@ -1,0 +1,4330 @@
+{
+  "version": "1.0.0",
+  "catalog_years": [
+    {
+      "id": "2024-2025",
+      "acalog_catoid": 7,
+      "numeric_start_year": 2024,
+      "active": true
+    },
+    {
+      "id": "2025-2026",
+      "acalog_catoid": 10,
+      "numeric_start_year": 2025,
+      "active": true
+    },
+    {
+      "id": "2026-2027",
+      "acalog_catoid": 12,
+      "numeric_start_year": 2026,
+      "active": true
+    }
+  ],
+  "programs": [
+    {
+      "id": "cybersecurity_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "acalog_poid": 2148,
+      "name": "Cybersecurity, BS",
+      "program_type": "Major",
+      "total_program_credits": 66,
+      "requirements": {
+        "major_core_credits": 60,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "ICS 32700",
+          "ICS 32800",
+          "ICS 41200",
+          "ICS 41500",
+          "ICS 41700",
+          "ICS 42100",
+          "ICS 42300",
+          "ICS 42400",
+          "ICS 43200",
+          "ICS 43300",
+          "ICS 48900",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33400",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "MTH 14100 dual-satisfies the GE-Math bucket and Major Math requirement. Total program credits: 66."
+      }
+    },
+    {
+      "id": "it_app_dev_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "acalog_poid": 2151,
+      "name": "Information Technology, BS - Applications Development Emphasis",
+      "program_type": "Major",
+      "total_program_credits": 66,
+      "requirements": {
+        "major_core_credits": 24,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "emphasis_credits": 36,
+        "emphasis_courses": [
+          "ICS 43200",
+          "IIT 31400",
+          "IIT 34020",
+          "IIT 34050",
+          "IIT 37700",
+          "IIT 37800",
+          "IIT 41000",
+          "IIT 45200",
+          "IIT 47700",
+          "IIT 47800",
+          "IIT 47900",
+          "IIT 48900"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "IIT 45200 is offered in Summer only. Capstone is IIT 48900. Total program credits: 66."
+      }
+    },
+    {
+      "id": "it_networking_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "acalog_poid": 2152,
+      "name": "Information Technology, BS - Networking Emphasis",
+      "program_type": "Major",
+      "total_program_credits": 60,
+      "requirements": {
+        "major_core_credits": 24,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "emphasis_credits": 30,
+        "emphasis_courses": [
+          "ICS 32300",
+          "ICS 32301",
+          "ICS 32400",
+          "ICS 32401",
+          "ICS 32500",
+          "ICS 32501",
+          "ICS 43400",
+          "IIT 36600",
+          "IIT 36700",
+          "IIT 48900"
+        ],
+        "cisco_concurrent_lab_exemption_rules": {
+          "rule": "Students must enroll concurrently in Cisco lecture (5cr) + lab (1cr) unless they transferred one or more Cisco courses with a C or better, passed a Cisco course under a prior catalog, or hold a current Cisco certification with experiential learning credit."
+        },
+        "retired_course_notes": "Legacy catalog years containing ICS 32600 (5cr) and ICS 32601 (1cr) flag an advisor recommendation to roll forward to the 2024-2025+ catalog or file a Policy Exception (PE).",
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "Total program credits: 60 (24 major core + 30 emphasis + 6 math dual-counted)."
+      }
+    },
+    {
+      "id": "cybersecurity_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "acalog_poid": 2048,
+      "name": "Cybersecurity, BS",
+      "program_type": "Major",
+      "total_program_credits": 66,
+      "requirements": {
+        "major_core_credits": 60,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "ICS 32700",
+          "ICS 32800",
+          "ICS 41200",
+          "ICS 41500",
+          "ICS 41700",
+          "ICS 42100",
+          "ICS 42300",
+          "ICS 42400",
+          "ICS 43200",
+          "ICS 43300",
+          "ICS 48900",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33400",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "2025-2026 Catalog Year. Total program credits: 66."
+      }
+    },
+    {
+      "id": "it_app_dev_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "acalog_poid": 2051,
+      "name": "Information Technology, BS - Applications Development Emphasis",
+      "program_type": "Major",
+      "total_program_credits": 66,
+      "requirements": {
+        "major_core_credits": 24,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "emphasis_credits": 36,
+        "emphasis_courses": [
+          "ICS 43200",
+          "IIT 31400",
+          "IIT 34020",
+          "IIT 34050",
+          "IIT 37700",
+          "IIT 37800",
+          "IIT 41000",
+          "IIT 45200",
+          "IIT 47700",
+          "IIT 47800",
+          "IIT 47900",
+          "IIT 48900"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "2025-2026 Catalog Year. Total program credits: 66."
+      }
+    },
+    {
+      "id": "it_networking_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "acalog_poid": 2052,
+      "name": "Information Technology, BS - Networking Emphasis",
+      "program_type": "Major",
+      "total_program_credits": 60,
+      "requirements": {
+        "major_core_credits": 24,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "emphasis_credits": 30,
+        "emphasis_courses": [
+          "ICS 32300",
+          "ICS 32301",
+          "ICS 32400",
+          "ICS 32401",
+          "ICS 32500",
+          "ICS 32501",
+          "ICS 43400",
+          "IIT 36600",
+          "IIT 36700",
+          "IIT 48900"
+        ],
+        "cisco_concurrent_lab_exemption_rules": {
+          "rule": "Students must enroll concurrently in Cisco lecture (5cr) + lab (1cr) unless exempt."
+        },
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "2025-2026 Catalog Year. Total program credits: 60."
+      }
+    },
+    {
+      "id": "cybersecurity_bs_2024",
+      "catalog_year_id": "2024-2025",
+      "acalog_poid": 1948,
+      "name": "Cybersecurity, BS",
+      "program_type": "Major",
+      "total_program_credits": 66,
+      "requirements": {
+        "major_core_credits": 60,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "ICS 32700",
+          "ICS 32800",
+          "ICS 41200",
+          "ICS 41500",
+          "ICS 41700",
+          "ICS 42100",
+          "ICS 42300",
+          "ICS 42400",
+          "ICS 43200",
+          "ICS 43300",
+          "ICS 48900",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33400",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "2024-2025 Catalog Year. Total program credits: 66."
+      }
+    },
+    {
+      "id": "it_app_dev_bs_2024",
+      "catalog_year_id": "2024-2025",
+      "acalog_poid": 1951,
+      "name": "Information Technology, BS - Applications Development Emphasis",
+      "program_type": "Major",
+      "total_program_credits": 66,
+      "requirements": {
+        "major_core_credits": 24,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "emphasis_credits": 36,
+        "emphasis_courses": [
+          "ICS 43200",
+          "IIT 31400",
+          "IIT 34020",
+          "IIT 34050",
+          "IIT 37700",
+          "IIT 37800",
+          "IIT 41000",
+          "IIT 45200",
+          "IIT 47700",
+          "IIT 47800",
+          "IIT 47900",
+          "IIT 48900"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "2024-2025 Catalog Year. Total program credits: 66."
+      }
+    },
+    {
+      "id": "it_networking_bs_2024",
+      "catalog_year_id": "2024-2025",
+      "acalog_poid": 1952,
+      "name": "Information Technology, BS - Networking Emphasis",
+      "program_type": "Major",
+      "total_program_credits": 60,
+      "requirements": {
+        "major_core_credits": 24,
+        "major_core_courses": [
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 31000",
+          "IIT 21500",
+          "IIT 22000",
+          "IIT 33500",
+          "IIT 35100",
+          "IIT 48100"
+        ],
+        "emphasis_credits": 30,
+        "emphasis_courses": [
+          "ICS 32300",
+          "ICS 32301",
+          "ICS 32400",
+          "ICS 32401",
+          "ICS 32500",
+          "ICS 32501",
+          "ICS 43400",
+          "IIT 36600",
+          "IIT 36700",
+          "IIT 48900"
+        ],
+        "cisco_concurrent_lab_exemption_rules": {
+          "rule": "Students must enroll concurrently in Cisco lecture (5cr) + lab (1cr) unless exempt."
+        },
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "REQ_GE_MATH",
+            "title": "Mathematics Elective (GE-Math)",
+            "credits": 3,
+            "required": true,
+            "type": "placeholder"
+          }
+        ],
+        "notes": "2024-2025 Catalog Year. Total program credits: 60."
+      }
+    },
+    {
+      "id": "cs_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "acalog_poid": 2145,
+      "name": "Computer Science, BS",
+      "program_type": "Major",
+      "total_program_credits": 60,
+      "requirements": {
+        "major_core_credits": 45,
+        "major_core_courses": [
+          "CSC 10100",
+          "CSC 20100",
+          "CSC 20200",
+          "CSC 30100",
+          "CSC 30200",
+          "CSC 40100",
+          "CSC 40200",
+          "ICS 21300",
+          "ICS 21400",
+          "ICS 48900"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "MTH 15100",
+            "title": "College Algebra",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          }
+        ],
+        "notes": "Computer Science, BS. Total program credits: 60."
+      }
+    },
+    {
+      "id": "math_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "acalog_poid": 2140,
+      "name": "Mathematics, BS",
+      "program_type": "Major",
+      "total_program_credits": 48,
+      "requirements": {
+        "major_core_credits": 42,
+        "major_core_courses": [
+          "MTH 15100",
+          "MTH 15200",
+          "MTH 27100",
+          "MTH 27200",
+          "MTH 30100",
+          "MTH 31100",
+          "MTH 31500"
+        ],
+        "math_credits": 6,
+        "math_courses": [
+          {
+            "code": "MTH 14100",
+            "title": "Basic Statistics",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          },
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 3,
+            "required": true,
+            "type": "concrete"
+          }
+        ],
+        "notes": "Mathematics, BS. Total program credits: 48."
+      }
+    }
+  ],
+  "ge_waterfall_schema": [
+    {
+      "bucket_id": "comp_1",
+      "order": 1,
+      "name": "Composition I",
+      "required_credits": 3,
+      "min_grade": "C",
+      "eligible_courses": [
+        "ENGL 15000",
+        "EPP 15000"
+      ],
+      "matcher_type": "COURSE_CODE_LIST",
+      "description": "Grade of C or higher required. Grade of D counts toward 120 credits but leaves bucket unfulfilled."
+    },
+    {
+      "bucket_id": "comp_2",
+      "order": 2,
+      "name": "Composition II",
+      "required_credits": 3,
+      "min_grade": "C",
+      "eligible_courses": [
+        "ENGL 17000"
+      ],
+      "matcher_type": "COURSE_CODE_LIST",
+      "description": "Grade of C or higher required in ENGL 17000."
+    },
+    {
+      "bucket_id": "math",
+      "order": 3,
+      "name": "Mathematics",
+      "required_credits": 3,
+      "min_grade": "D",
+      "eligible_courses": [
+        "MTH 14100"
+      ],
+      "matcher_type": "MAJOR_OVERLAP",
+      "description": "MTH 14100 Basic Statistics dual-satisfies GE-Math and Major Math requirements (credits summed once)."
+    },
+    {
+      "bucket_id": "us_hist_gov",
+      "order": 4,
+      "name": "U.S. Government or History",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        "USHisGov",
+        "GE-Civ",
+        "HIST 10500",
+        "HIST 10600",
+        "PS 15500"
+      ],
+      "description": "GE-Human Culture: U.S. History/Government (Title contains USHisGov or GE-Civ)."
+    },
+    {
+      "bucket_id": "soc_sci",
+      "order": 5,
+      "name": "Social Science",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        "SocSci",
+        "PSY 10000",
+        "SOC 10200",
+        "ANT 11200",
+        "ECON 23010",
+        "ECON 23020"
+      ],
+      "description": "GE-Social Science."
+    },
+    {
+      "bucket_id": "nat_sci_lab",
+      "order": 6,
+      "name": "Natural Science with Lab",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "NAT_SCI_LAB",
+      "match_patterns": [
+        "NatSciLec/Lab",
+        "NatSciLab",
+        "BSC 10000",
+        "ESC 10000",
+        "CHM 10000"
+      ],
+      "description": "1 course with NatSciLec/Lab (4cr) OR 2 courses: NatSciLec + NatSciLab."
+    },
+    {
+      "bucket_id": "sci_elective",
+      "order": 7,
+      "name": "Social or Natural Science Elective",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        "SocSci",
+        "NatSci"
+      ],
+      "description": "Additional unclaimed course matching SocSci or NatSci."
+    },
+    {
+      "bucket_id": "stem_elective",
+      "order": 8,
+      "name": "Social Science, Natural Science, or Math Elective",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "STEM_OR_MAJOR_MATH",
+      "description": "Satisfied by the second Major Math requirement (Any GE-Math course, 3cr) required by CS/IT majors."
+    },
+    {
+      "bucket_id": "arts",
+      "order": 9,
+      "name": "Arts",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        ":Art",
+        "ART 18100",
+        "TA 11700",
+        "MUS 10000"
+      ],
+      "description": "GE-Human Culture: Arts (Title contains :Art)."
+    },
+    {
+      "bucket_id": "lit",
+      "order": 10,
+      "name": "Literature",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        ":Lit",
+        "ENGL 20100",
+        "ENGL 20200",
+        "ENGL 21600"
+      ],
+      "description": "GE-Human Culture: Literature (Title contains :Lit)."
+    },
+    {
+      "bucket_id": "human_culture_1",
+      "order": 11,
+      "name": "Human Culture Elective I (Non-Literature, Non-Arts)",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "HUMAN_CULTURE_NON_LIT_NON_ART",
+      "description": "Title contains GE-HC (History, Religion, Philosophy, Foreign Language/Culture) excluding :Art and :Lit."
+    },
+    {
+      "bucket_id": "human_culture_2",
+      "order": 12,
+      "name": "Human Culture Elective II",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        "GE-HC"
+      ],
+      "description": "Any remaining unclaimed course containing GE-HC."
+    },
+    {
+      "bucket_id": "ge_elective_1",
+      "order": 13,
+      "name": "General Education Elective I",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        "(GE"
+      ],
+      "description": "Any remaining unclaimed course containing (GE."
+    },
+    {
+      "bucket_id": "ge_elective_2",
+      "order": 14,
+      "name": "General Education Elective II",
+      "required_credits": 3,
+      "min_grade": "D",
+      "matcher_type": "TITLE_CONTAINS",
+      "match_patterns": [
+        "(GE"
+      ],
+      "description": "Any remaining unclaimed course containing (GE."
+    }
+  ],
+  "degree_policies": {
+    "min_total_credits": 120,
+    "min_upper_level_credits": 42,
+    "upper_level_min_number": 30000,
+    "min_lindenwood_residency_credits": 30,
+    "min_institutional_residency_credits": 30,
+    "final_residency_credits": 24,
+    "major_residency_rule": "MAX(18cr, 40%)",
+    "major_residency_min_credits": 18,
+    "major_residency_min_percent": 0.4,
+    "minor_emphasis_certificate_residency_min_percent": 0.4,
+    "min_cumulative_gpa": 2,
+    "min_major_gpa": 2,
+    "human_diversity_requirement": {
+      "required_courses": 2,
+      "required_credits": 6,
+      "attribute_tag": "/HD",
+      "description": "2 courses (6 credits) carrying the Human Diversity (/HD) attribute across all claimed courses."
+    },
+    "composition_grade_gatekeeper": {
+      "courses": [
+        "ENGL 15000",
+        "EPP 15000",
+        "ENGL 17000"
+      ],
+      "min_grade": "C",
+      "description": "Grades of C or higher required in Composition I and II. Grade of D counts toward 120 credits but leaves GE bucket unfulfilled."
+    },
+    "first_year_seminar_waiver": {
+      "courses": [
+        "UNIV 10100",
+        "UNIV 10101",
+        "UNIV 10102",
+        "LUL 10100"
+      ],
+      "condition": "Total Transfer (TR) Credits > 0",
+      "description": "Automatically waived/complete if the student has any transfer credits (TR > 0)."
+    },
+    "missouri_core_42_waiver": {
+      "condition": "CORE 42 Certified",
+      "exemptions": [
+        "MTH 14100"
+      ],
+      "human_diversity_check": true,
+      "description": "Transfer students with Missouri CORE 42 complete waive all GE except major requirements (MTH 14100), provided they satisfy the 2-course /HD rule."
+    },
+    "excluded_grades": [
+      "F",
+      "W",
+      "AF",
+      "WF",
+      "INC",
+      "DROPPED"
+    ],
+    "excluded_course_numbers_below": 10000
+  },
+  "courses": [
+    {
+      "code": "ICS 21300",
+      "department": "ICS",
+      "number": "21300",
+      "title": "Foundations of Information Technology",
+      "credits": 3,
+      "description": "An introduction to foundational concepts in information technology including hardware, software, networks, and data management.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 21400",
+      "department": "ICS",
+      "number": "21400",
+      "title": "Foundations of Networking",
+      "credits": 3,
+      "description": "Introduction to computer networks, data communications, OSI and TCP/IP models, architectures, and networking standards.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Corequisite: ICS 21300",
+      "coreq_codes": [
+        "ICS 21300"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 31000",
+      "department": "ICS",
+      "number": "31000",
+      "title": "Foundations of Cybersecurity",
+      "credits": 3,
+      "description": "Fundamental security principles, threats, attacks, defenses, authentication, cryptography, and risk assessment.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21300"
+          },
+          {
+            "code": "ICS 21400"
+          }
+        ]
+      },
+      "prereq_display": "ICS 21300 AND ICS 21400",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32700",
+      "department": "ICS",
+      "number": "32700",
+      "title": "Network and Cloud Security",
+      "credits": 3,
+      "description": "Exploration of security issues in modern computer networks and cloud environments, including firewalls, IDS/IPS, and security postures.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II",
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21400"
+          },
+          {
+            "code": "ICS 31000"
+          },
+          {
+            "code": "IIT 22000"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "ICS 21400 AND ICS 31000 AND IIT 22000 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32800",
+      "department": "ICS",
+      "number": "32800",
+      "title": "Digital Forensics and Cyber Investigation",
+      "credits": 3,
+      "description": "Techniques for computer crime investigation, forensic imaging, file system analysis, digital evidence handling, and legal compliance.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-I",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 32700"
+      },
+      "prereq_display": "ICS 32700",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 41200",
+      "department": "ICS",
+      "number": "41200",
+      "title": "Linux Server Installation & Configuration",
+      "credits": 3,
+      "description": "Installation, configuration, maintenance, security hardening, and scripting in enterprise Linux operating systems.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-I"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21300"
+          },
+          {
+            "code": "MTH 14100"
+          },
+          {
+            "op": "OR",
+            "items": [
+              {
+                "code": "IIT 22000"
+              },
+              {
+                "code": "CSC 35500"
+              }
+            ]
+          }
+        ]
+      },
+      "prereq_display": "ICS 21300 AND MTH 14100 AND (IIT 22000 OR CSC 35500)",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 41500",
+      "department": "ICS",
+      "number": "41500",
+      "title": "Cloud Computing Essentials and Best Practices",
+      "credits": 3,
+      "description": "Cloud service models, infrastructure deployment, security paradigms, resource management, and best practice architectures.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-I"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "IIT 22000"
+          },
+          {
+            "code": "ICS 21300"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "IIT 22000 AND ICS 21300 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [
+        "ICS 41100"
+      ],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 41700",
+      "department": "ICS",
+      "number": "41700",
+      "title": "Hybrid Cloud Architecture and Management",
+      "credits": 3,
+      "description": "Designing, integrating, maintaining, and automating hybrid cloud architectures across on-premises and multi-cloud providers.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 41500"
+      },
+      "prereq_display": "ICS 41500",
+      "coreq_codes": [],
+      "legacy_substitutions": [
+        "ICS 41400"
+      ],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 42100",
+      "department": "ICS",
+      "number": "42100",
+      "title": "Ethical Hacking",
+      "credits": 3,
+      "description": "Methodologies and tools used by penetration testers to identify, exploit, and remediate system and network vulnerabilities ethically.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "OR",
+        "items": [
+          {
+            "code": "ICS 32700"
+          },
+          {
+            "code": "CSC 45500"
+          }
+        ]
+      },
+      "prereq_display": "ICS 32700 OR CSC 45500",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 42300",
+      "department": "ICS",
+      "number": "42300",
+      "title": "Advanced Penetration Testing",
+      "credits": 3,
+      "description": "Deep-dive offensive testing against modern operating systems, web applications, and network infrastructures with red-teaming techniques.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 42100"
+      },
+      "prereq_display": "ICS 42100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 42400",
+      "department": "ICS",
+      "number": "42400",
+      "title": "Cybersecurity Analysis",
+      "credits": 3,
+      "description": "Threat hunting, behavioral analysis, Security Operations Center (SOC) operations, and log correlation techniques.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 42100"
+      },
+      "prereq_display": "ICS 42100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 43200",
+      "department": "ICS",
+      "number": "43200",
+      "title": "Secure Software Development",
+      "credits": 3,
+      "description": "Application security concepts, OWASP Top 10 defenses, secure code review, and development lifecycle security integrations.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-I",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 31000"
+          },
+          {
+            "code": "MTH 14100"
+          },
+          {
+            "op": "OR",
+            "items": [
+              {
+                "code": "IIT 21500"
+              },
+              {
+                "code": "CSC 10011"
+              },
+              {
+                "code": "CSC 24400"
+              }
+            ]
+          }
+        ]
+      },
+      "prereq_display": "ICS 31000 AND MTH 14100 AND (IIT 21500 OR CSC 10011 OR CSC 24400)",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 43300",
+      "department": "ICS",
+      "number": "43300",
+      "title": "Web Based Application Security",
+      "credits": 3,
+      "description": "Assessing and defending web-based applications, client-server security protocols, injection flaws, and web services protection.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "SP-II"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 32700"
+          },
+          {
+            "op": "OR",
+            "items": [
+              {
+                "code": "IIT 21500"
+              },
+              {
+                "code": "CSC 10011"
+              }
+            ]
+          }
+        ]
+      },
+      "prereq_display": "ICS 32700 AND (IIT 21500 OR CSC 10011)",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 48900",
+      "department": "ICS",
+      "number": "48900",
+      "title": "Cybersecurity Capstone",
+      "credits": 3,
+      "description": "Comprehensive integration project demonstrating cybersecurity mastery, incident handling, defense posture design, and reporting.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "SP-I"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "LAST_FULL_SEMESTER",
+        "min_credits": 90
+      },
+      "prereq_display": "Senior Status (90+ credits) and Last Full Semester",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 21500",
+      "department": "IIT",
+      "number": "21500",
+      "title": "Programming Logic and Design",
+      "credits": 3,
+      "description": "Fundamental programming structures, logic development, pseudocode, flowcharting, modular design, and control structures.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II",
+        "SP-I",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21300"
+          },
+          {
+            "op": "OR",
+            "items": [
+              {
+                "code": "MTH 11000"
+              },
+              {
+                "code": "MTH 14100"
+              },
+              {
+                "op": "MATH_PLACEMENT"
+              }
+            ]
+          }
+        ]
+      },
+      "prereq_display": "ICS 21300 AND (MTH 11000 OR MTH 14100+ OR Math Placement)",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": true,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 22000",
+      "department": "IIT",
+      "number": "22000",
+      "title": "Hardware and Operating Systems",
+      "credits": 3,
+      "description": "Personal computer hardware architecture, storage systems, device configuration, installation, and operating system management.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "SP-I",
+        "SP-II"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 21300"
+      },
+      "prereq_display": "ICS 21300",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 33400",
+      "department": "IIT",
+      "number": "33400",
+      "title": "Ethical Issues in Cybersecurity",
+      "credits": 3,
+      "description": "Ethical, legal, societal, and regulatory dilemmas facing cybersecurity practitioners, data privacy frameworks, and professional codes.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "SP-II"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 31000"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "ICS 31000 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 33500",
+      "department": "IIT",
+      "number": "33500",
+      "title": "Blockchain Technology for Business",
+      "credits": 3,
+      "description": "Decentralized ledgers, smart contracts, cryptographic consensus algorithms, token economics, and enterprise blockchain deployments.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "SP-I",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "OR",
+        "items": [
+          {
+            "code": "IIT 21500"
+          },
+          {
+            "code": "CSC 10011"
+          }
+        ]
+      },
+      "prereq_display": "IIT 21500 OR CSC 10011",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 35100",
+      "department": "IIT",
+      "number": "35100",
+      "title": "Database Analysis and Design Concepts",
+      "credits": 3,
+      "description": "Relational database concepts, entity-relationship modeling, normalization, SQL queries, DDL, DML, and database administration.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II",
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "OR",
+        "items": [
+          {
+            "code": "IIT 21500"
+          },
+          {
+            "code": "CSC 10011"
+          }
+        ]
+      },
+      "prereq_display": "IIT 21500 OR CSC 10011",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 48100",
+      "department": "IIT",
+      "number": "48100",
+      "title": "Project Management in Information Technology",
+      "credits": 3,
+      "description": "Project lifecycle, scope management, scheduling, risk estimation, agile and waterfall methodologies in technology initiatives.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II",
+        "SP-I",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 21300"
+      },
+      "prereq_display": "ICS 21300",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 31400",
+      "department": "IIT",
+      "number": "31400",
+      "title": "Agile Software Development",
+      "credits": 3,
+      "description": "Agile methodologies, Scrum, sprint planning, user stories, continuous delivery, and collaborative software engineering.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 21300"
+      },
+      "prereq_display": "ICS 21300",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 34020",
+      "department": "IIT",
+      "number": "34020",
+      "title": "Mobile Applications Programming",
+      "credits": 3,
+      "description": "Mobile application development lifecycle, UI widgets, responsive layouts, data persistence, and cross-platform tooling.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "IIT 47900"
+      },
+      "prereq_display": "IIT 47900",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 34050",
+      "department": "IIT",
+      "number": "34050",
+      "title": "C# Programming",
+      "credits": 3,
+      "description": "Object-oriented programming using C# and .NET framework, class structures, interfaces, LINQ, and modern software design patterns.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "IIT 31400"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "IIT 31400 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 37700",
+      "department": "IIT",
+      "number": "37700",
+      "title": "Fundamentals of HTML",
+      "credits": 3,
+      "description": "Modern semantic HTML5, CSS3 styling, responsive web layouts, accessibility standards, and document structuring.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-I"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "op": "OR",
+            "items": [
+              {
+                "code": "IIT 21500"
+              },
+              {
+                "code": "CSC 10011"
+              }
+            ]
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "(IIT 21500 OR CSC 10011) AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 37800",
+      "department": "IIT",
+      "number": "37800",
+      "title": "Applications in Web Development",
+      "credits": 3,
+      "description": "Front-end and back-end integration, client-side scripting with JavaScript, DOM manipulation, asynchronous requests, and web APIs.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "IIT 47700"
+      },
+      "prereq_display": "IIT 47700",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 41000",
+      "department": "IIT",
+      "number": "41000",
+      "title": "Systems Analysis and Design",
+      "credits": 3,
+      "description": "Software development life cycle, requirement modeling, UML diagrams, architectural patterns, feasibility, and implementation planning.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-I"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21300"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "ICS 21300 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 45200",
+      "department": "IIT",
+      "number": "45200",
+      "title": "Database Application Implementation",
+      "credits": 3,
+      "description": "Advanced database application design, stored procedures, triggers, ORMs, and application database connectivity. Offered strictly in Summer.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": true,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "IIT 35100"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "IIT 35100 AND MTH 14100 (Forced Summer Offering)",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Forced Summer Exception: Offered in Summer only"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 47700",
+      "department": "IIT",
+      "number": "47700",
+      "title": "Fundamentals of User Interface Design",
+      "credits": 3,
+      "description": "User experience (UX) and user interface (UI) principles, human-computer interaction, wireframing, prototyping, and accessibility.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "IIT 34050"
+          },
+          {
+            "code": "IIT 37700"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "IIT 34050 AND IIT 37700 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 47800",
+      "department": "IIT",
+      "number": "47800",
+      "title": "Applications in Object-Oriented Web Development",
+      "credits": 3,
+      "description": "Server-side web development using modern object-oriented languages, MVC architecture, sessions, and web service consumption.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "IIT 47700"
+      },
+      "prereq_display": "IIT 47700",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 47900",
+      "department": "IIT",
+      "number": "47900",
+      "title": "Applications in Multi-Tiered Web Programming",
+      "credits": 3,
+      "description": "Multi-tier application architecture, business logic tier separation, persistent storage layers, and secure distributed communications.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "OR",
+        "items": [
+          {
+            "code": "IIT 47800"
+          },
+          {
+            "op": "COREQ",
+            "code": "IIT 47700"
+          }
+        ]
+      },
+      "prereq_display": "IIT 47800 OR Corequisite: IIT 47700",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 48900",
+      "department": "IIT",
+      "number": "48900",
+      "title": "Information Technology Capstone",
+      "credits": 3,
+      "description": "Culminating team or individual software/systems implementation project integrating degree skills with comprehensive documentation and review.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II",
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "LAST_FULL_SEMESTER",
+        "min_credits": 90
+      },
+      "prereq_display": "Senior Status (90+ credits) and Last Full Semester",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32300",
+      "department": "ICS",
+      "number": "32300",
+      "title": "Cisco I-Introduction to Networks",
+      "credits": 5,
+      "description": "Architecture, structure, functions, components, and models of the Internet and computer networks. Cisco CCNA preparation lecture.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround",
+        "Email2OL"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 43400"
+      },
+      "prereq_display": "ICS 43400",
+      "coreq_codes": [
+        "ICS 32301"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Cisco Concurrent Lab Exemption Rule applies"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32301",
+      "department": "ICS",
+      "number": "32301",
+      "title": "Introduction to Networks Lab",
+      "credits": 1,
+      "description": "Hands-on laboratory configuration of switches, routers, IP addressing, and cabling corresponding to ICS 32300.",
+      "fee_info": "$50 Lab Fee",
+      "offered_sessions": [
+        "FA-I"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround",
+        "Email2OL"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 43400"
+      },
+      "prereq_display": "ICS 43400 (Corequisite: ICS 32300)",
+      "coreq_codes": [
+        "ICS 32300"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Must take concurrently with ICS 32300 unless exempt"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32400",
+      "department": "ICS",
+      "number": "32400",
+      "title": "Cisco II-Routing and Switching Essentials",
+      "credits": 5,
+      "description": "Architecture, components, and operations of routers and switches in a small network. VLANs, dynamic routing, and ACLs.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround",
+        "Email2OL"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 32300"
+      },
+      "prereq_display": "ICS 32300",
+      "coreq_codes": [
+        "ICS 32401"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Cisco Concurrent Lab Exemption Rule applies"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32401",
+      "department": "ICS",
+      "number": "32401",
+      "title": "Routing and Switching Lab",
+      "credits": 1,
+      "description": "Hands-on laboratory configuration of dynamic routing protocols, VLANs, trunking, and access control lists.",
+      "fee_info": "$50 Lab Fee",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround",
+        "Email2OL"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 32300"
+      },
+      "prereq_display": "ICS 32300 (Corequisite: ICS 32400)",
+      "coreq_codes": [
+        "ICS 32400"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Must take concurrently with ICS 32400 unless exempt"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32500",
+      "department": "ICS",
+      "number": "32500",
+      "title": "Cisco III-Scaling Networks",
+      "credits": 5,
+      "description": "Architecture, components, and operations of routers and switches in larger, complex networks. OSPF, EIGRP, STP, and EtherChannel.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-I"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround",
+        "Email2OL"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 32400"
+      },
+      "prereq_display": "ICS 32400",
+      "coreq_codes": [
+        "ICS 32501"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Cisco Concurrent Lab Exemption Rule applies"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32501",
+      "department": "ICS",
+      "number": "32501",
+      "title": "Scaling Networks Lab",
+      "credits": 1,
+      "description": "Hands-on laboratory configuration of enterprise campus topologies, hierarchical routing, link aggregation, and network monitoring.",
+      "fee_info": "$50 Lab Fee",
+      "offered_sessions": [
+        "SP-I"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround",
+        "Email2OL"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ICS 32400"
+      },
+      "prereq_display": "ICS 32400 (Corequisite: ICS 32500)",
+      "coreq_codes": [
+        "ICS 32500"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Must take concurrently with ICS 32500 unless exempt"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 43400",
+      "department": "ICS",
+      "number": "43400",
+      "title": "Network Management",
+      "credits": 3,
+      "description": "Network monitoring tools, SNMP, automation scripts, performance baseline auditing, fault tolerance, and disaster planning.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21400"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "ICS 21400 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 36600",
+      "department": "IIT",
+      "number": "36600",
+      "title": "Fundamentals of Data Center Virtualization",
+      "credits": 3,
+      "description": "Hypervisor technologies, virtual storage networks, ESXi, cluster resource management, virtual network switches, and high availability.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21400"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "ICS 21400 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "IIT 36700",
+      "department": "IIT",
+      "number": "36700",
+      "title": "Fundamentals of Cloud Computing",
+      "credits": 3,
+      "description": "Public, private, and hybrid cloud architectures, virtualization infrastructures, cloud service models, and virtual data centers.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": {
+        "op": "AND",
+        "items": [
+          {
+            "code": "ICS 21400"
+          },
+          {
+            "code": "MTH 14100"
+          }
+        ]
+      },
+      "prereq_display": "ICS 21400 AND MTH 14100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 41100",
+      "department": "ICS",
+      "number": "41100",
+      "title": "Cloud Computing Concepts (Legacy)",
+      "credits": 3,
+      "description": "Legacy cloud computing coursework, direct replacement course is ICS 41500.",
+      "fee_info": "$0",
+      "offered_sessions": [],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Replaced by ICS 41500",
+      "coreq_codes": [],
+      "legacy_substitutions": [
+        "ICS 41500"
+      ],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Legacy course replaced by ICS 41500"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 41400",
+      "department": "ICS",
+      "number": "41400",
+      "title": "Cloud Architecture (Legacy)",
+      "credits": 3,
+      "description": "Legacy cloud architecture coursework, direct replacement course is ICS 41700.",
+      "fee_info": "$0",
+      "offered_sessions": [],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Replaced by ICS 41700",
+      "coreq_codes": [],
+      "legacy_substitutions": [
+        "ICS 41700"
+      ],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Legacy course replaced by ICS 41700"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32600",
+      "department": "ICS",
+      "number": "32600",
+      "title": "Cisco IV-Connecting Networks (Retired)",
+      "credits": 5,
+      "description": "Retired legacy Cisco IV lecture. Catalog recommends rolling forward to 2024-2025+ catalog or filing PE.",
+      "fee_info": "$0",
+      "offered_sessions": [],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Retired Course",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Retired course: roll forward to 2024-2025+ catalog or file PE"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ICS 32601",
+      "department": "ICS",
+      "number": "32601",
+      "title": "Connecting Networks Lab (Retired)",
+      "credits": 1,
+      "description": "Retired legacy Cisco IV lab. Catalog recommends rolling forward to 2024-2025+ catalog or filing PE.",
+      "fee_info": "$0",
+      "offered_sessions": [],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Retired Course",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Retired course: roll forward to 2024-2025+ catalog or file PE"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "MTH 11000",
+      "department": "MTH",
+      "number": "11000",
+      "title": "Intermediate Algebra",
+      "credits": 3,
+      "description": "Linear and quadratic equations, inequalities, graphs, polynomials, and rational expressions.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "MTH 14100",
+      "department": "MTH",
+      "number": "14100",
+      "title": "Basic Statistics (GE-Math)",
+      "credits": 3,
+      "description": "Descriptive statistics, elementary probability, normal distribution, sampling distributions, hypothesis testing, and confidence intervals.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 11000 or Math Placement",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Dual-satisfies GE-Math and Major Math requirements"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "MTH 15100",
+      "department": "MTH",
+      "number": "15100",
+      "title": "College Algebra (GE-Math)",
+      "credits": 3,
+      "description": "Functions and graphs, polynomial and rational functions, exponential and logarithmic functions, systems of equations.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 11000 or Math Placement",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "MTH 15200",
+      "department": "MTH",
+      "number": "15200",
+      "title": "Precalculus: Elementary Functions (GE-Math)",
+      "credits": 3,
+      "description": "Trigonometric functions, identities, inverse trigonometric functions, and analytic trigonometry.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "MTH 15100"
+      },
+      "prereq_display": "MTH 15100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "MTH 27100",
+      "department": "MTH",
+      "number": "27100",
+      "title": "Calculus I (GE-Math)",
+      "credits": 5,
+      "description": "Limits, derivatives, applications of differentiation, antiderivatives, and definite integrals.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "MTH 15200"
+      },
+      "prereq_display": "MTH 15200 or Math Placement",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "MTH 27200",
+      "department": "MTH",
+      "number": "27200",
+      "title": "Calculus II",
+      "credits": 5,
+      "description": "Integration techniques, applications of definite integrals, infinite sequences and series, parametric equations, and polar coordinates.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "MTH 27100"
+      },
+      "prereq_display": "MTH 27100",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "CSC 10011",
+      "department": "CSC",
+      "number": "10011",
+      "title": "Introduction to Programming",
+      "credits": 3,
+      "description": "Introductory programming concepts, algorithm development, control structures, and basic object orientation.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "CSC 24400",
+      "department": "CSC",
+      "number": "24400",
+      "title": "Programming in Python",
+      "credits": 3,
+      "description": "Python programming syntax, data structures, modules, file I/O, object-oriented concepts, and basic scripting.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "CSC 35500",
+      "department": "CSC",
+      "number": "35500",
+      "title": "Operating Systems",
+      "credits": 3,
+      "description": "Processes, threads, CPU scheduling, synchronization, deadlocks, memory management, and file systems.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "CSC 10011"
+      },
+      "prereq_display": "CSC 10011",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "CSC 45500",
+      "department": "CSC",
+      "number": "45500",
+      "title": "Information Security",
+      "credits": 3,
+      "description": "Cryptographic tools, user authentication, access control, database security, malware, and intrusion detection.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "CSC 35500"
+      },
+      "prereq_display": "CSC 35500",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ENGL 15000",
+      "department": "ENGL",
+      "number": "15000",
+      "title": "Composition I (GE-Comm)",
+      "credits": 3,
+      "description": "College writing emphasizing critical reading, rhetorical analysis, drafting, revision, and analytical composition.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Grade of C or higher required to satisfy Composition I",
+      "coreq_codes": [],
+      "legacy_substitutions": [
+        "EPP 15000"
+      ],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Gatekeeper: Grade of C or higher required"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "EPP 15000",
+      "department": "EPP",
+      "number": "15000",
+      "title": "Composition I - English for Academic Purposes (GE-Comm)",
+      "credits": 3,
+      "description": "Academic composition tailored for international and English-language learners.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Grade of C or higher required to satisfy Composition I",
+      "coreq_codes": [],
+      "legacy_substitutions": [
+        "ENGL 15000"
+      ],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Gatekeeper: Grade of C or higher required"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "ENGL 17000",
+      "department": "ENGL",
+      "number": "17000",
+      "title": "Composition II (GE-Comm)",
+      "credits": 3,
+      "description": "Advanced argumentative writing, academic research methodologies, source synthesis, and documentation.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "OR",
+        "items": [
+          {
+            "code": "ENGL 15000"
+          },
+          {
+            "code": "EPP 15000"
+          },
+          {
+            "code": "REQ_GE_COMP1"
+          }
+        ]
+      },
+      "prereq_display": "ENGL 15000 or EPP 15000 or REQ_GE_COMP1 with grade of C or higher",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Gatekeeper: Grade of C or higher required"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "UNIV 10100",
+      "department": "UNIV",
+      "number": "10100",
+      "title": "First-Year Experience",
+      "credits": 3,
+      "description": "Introduction to collegiate success, academic resources, community engagement, and intellectual growth.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "Waived automatically if Total Transfer (TR) Credits > 0",
+      "coreq_codes": [],
+      "legacy_substitutions": [
+        "UNIV 10101",
+        "UNIV 10102",
+        "LUL 10100"
+      ],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Waived for transfer students with TR > 0"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "HIST 10500",
+      "department": "HIST",
+      "number": "10500",
+      "title": "U.S. History to 1877 (GE-HC: USHisGov)",
+      "credits": 3,
+      "description": "Survey of political, economic, cultural, and social developments of the United States from colonial origins through Reconstruction.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk",
+        "Online"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "PS 15500",
+      "department": "PS",
+      "number": "15500",
+      "title": "American National Government (GE-HC: USHisGov / GE-Civ)",
+      "credits": 3,
+      "description": "Constitutional foundations, federalism, branches of government, civil liberties, interest groups, and political behavior.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "PSY 10000",
+      "department": "PSY",
+      "number": "10000",
+      "title": "Principles of Psychology (GE-SocSci)",
+      "credits": 3,
+      "description": "Survey of psychology including biological bases of behavior, sensation, perception, learning, cognition, development, and social psychology.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "SOC 10200",
+      "department": "SOC",
+      "number": "10200",
+      "title": "Basic Concepts of Sociology (GE-SocSci / HD)",
+      "credits": 3,
+      "description": "Sociological perspectives on social structure, culture, stratification, race, gender, institutions, and social change. Carries Human Diversity (/HD).",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Carries Human Diversity (/HD) attribute"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "BSC 10000",
+      "department": "BSC",
+      "number": "10000",
+      "title": "Concepts in Biology with Lab (GE-NatSciLec/Lab)",
+      "credits": 4,
+      "description": "General biology for non-majors exploring cellular biology, genetics, evolution, diversity, and ecology with integrated lab.",
+      "fee_info": "$75 Lab Fee",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ESC 10000",
+      "department": "ESC",
+      "number": "10000",
+      "title": "Physical Geology with Lab (GE-NatSciLec/Lab)",
+      "credits": 4,
+      "description": "Earth materials, plate tectonics, geological hazards, minerals, rocks, erosion, and planetary processes with integrated lab.",
+      "fee_info": "$75 Lab Fee",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ART 18100",
+      "department": "ART",
+      "number": "18100",
+      "title": "Art Appreciation (GE-Human Culture: Art)",
+      "credits": 3,
+      "description": "Visual arts appreciation covering aesthetic elements, artistic media, art history, and critical analysis of major art works.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "TA 11700",
+      "department": "TA",
+      "number": "11700",
+      "title": "Introduction to Theatre (GE-Human Culture: Art)",
+      "credits": 3,
+      "description": "Theatrical arts, dramatic literature, playwriting, performance, directing, stage design, and historical theatrical styles.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ENGL 20100",
+      "department": "ENGL",
+      "number": "20100",
+      "title": "World Literature I (GE-Human Culture: Literature)",
+      "credits": 3,
+      "description": "Masterpieces of world literature from antiquity through the Renaissance in cultural and historical context.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ENGL 15000"
+      },
+      "prereq_display": "ENGL 15000",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ENGL 21600",
+      "department": "ENGL",
+      "number": "21600",
+      "title": "African American Literature (GE-Human Culture: Literature / HD)",
+      "credits": 3,
+      "description": "Survey of African American literature from slave narratives through the Harlem Renaissance to contemporary writers. Carries Human Diversity (/HD).",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": {
+        "op": "COURSE",
+        "code": "ENGL 15000"
+      },
+      "prereq_display": "ENGL 15000",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Carries Human Diversity (/HD) attribute"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "REL 20000",
+      "department": "REL",
+      "number": "20000",
+      "title": "World Religions (GE-HC / HD)",
+      "credits": 3,
+      "description": "Comparative study of world religions including Hinduism, Buddhism, Judaism, Christianity, and Islam. Carries Human Diversity (/HD).",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Carries Human Diversity (/HD) attribute"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "PHL 10000",
+      "department": "PHL",
+      "number": "10000",
+      "title": "Introduction to Philosophy (GE-HC)",
+      "credits": 3,
+      "description": "Introduction to major philosophical questions: epistemology, metaphysics, ethics, political philosophy, and logic.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete"
+    },
+    {
+      "code": "ANT 11200",
+      "department": "ANT",
+      "number": "11200",
+      "title": "Cultural Anthropology (GE-HC / HD)",
+      "credits": 3,
+      "description": "Comparative study of human cultures, kinship, religion, linguistics, economic systems, and cultural change. Carries Human Diversity (/HD).",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [
+        "Carries Human Diversity (/HD) attribute"
+      ],
+      "type": "concrete"
+    },
+    {
+      "code": "REQ_GE_COMP1",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "comp_1",
+      "department": "ENGL",
+      "number": "15000",
+      "title": "GE: Composition I (3cr)",
+      "short_title": "GE Composition I",
+      "credits": 3,
+      "description": "General Education requirement in written communication (Composition I). Requires a grade of C or higher in ENGL 15000 (Composition I) or EPP 15000 (Composition I - English for Academic Purposes).",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "eligible_courses": [
+        "ENGL 15000",
+        "EPP 15000"
+      ],
+      "default_course": "ENGL 15000"
+    },
+    {
+      "code": "REQ_GE_COMP2",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "comp_2",
+      "department": "ENGL",
+      "number": "17000",
+      "title": "General Education: Composition II",
+      "short_title": "GE Composition II",
+      "credits": 3,
+      "description": "General Education requirement in advanced research and argumentation (Composition II). Requires a grade of C or higher in ENGL 17000 (Research and Argumentation).",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_MATH",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "math",
+      "department": "MTH",
+      "number": "14100",
+      "title": "GE: Mathematics (3cr)",
+      "short_title": "GE Mathematics",
+      "credits": 3,
+      "description": "General Education requirement in mathematical reasoning. Fulfills 3 credits of quantitative analysis. Satisfied by MTH 14100 Basic Statistics, which dual-satisfies the Major Math requirement, or by any approved GE-Math course (MTH 15100+).",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_US_HIST_GOV",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "us_hist_gov",
+      "department": "HIST",
+      "number": "10500",
+      "title": "General Education: U.S. History / Government",
+      "short_title": "GE U.S. Hist/Gov",
+      "credits": 3,
+      "description": "General Education requirement in American history or national government. Recommended options: HIST 10500 (U.S. History to 1877), HIST 10600 (U.S. History since 1877), or PS 15500 (American National Government).",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_SOC_SCI",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "soc_sci",
+      "department": "SOC",
+      "number": "10000",
+      "title": "General Education: Social Science",
+      "short_title": "GE Social Science",
+      "credits": 3,
+      "description": "General Education requirement in social sciences. Recommended options: PSY 10000 (Principles of Psychology), SOC 10200 (Basic Concepts of Sociology /HD), ANT 11200, ECON 23010, or ECON 23020.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_NAT_SCI_LAB",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "nat_sci_lab",
+      "department": "SCI",
+      "number": "10000",
+      "title": "General Education: Natural Science with Lab",
+      "short_title": "GE Natural Science w/ Lab",
+      "credits": 4,
+      "description": "General Education requirement in natural science with laboratory component (4 credits). Recommended options: BSC 10000 (Concepts in Biology with Lab), ESC 10000 (Physical Geology with Lab), CHM 10000, or PHY 10000.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_SCI_ELEC",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "sci_elective",
+      "department": "SCI",
+      "number": "10000",
+      "title": "General Education: Science Elective",
+      "short_title": "GE Science Elective",
+      "credits": 3,
+      "description": "General Education elective satisfied by any additional course in social sciences or natural sciences (PSY, SOC, ECON, ANT, BSC, ESC, CHM, PHY, SCI).",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_ART",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "arts",
+      "department": "ART",
+      "number": "10000",
+      "title": "General Education: Fine Arts",
+      "short_title": "GE Fine Arts",
+      "credits": 3,
+      "description": "General Education requirement in Human Culture: Arts. Fulfills 3 credits of creative and aesthetic inquiry. Recommended options: ART 18100 (Art Appreciation), TA 11700 (Introduction to Theatre), MUS 10000 (Music Appreciation), or DAN 10100.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_LIT",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "lit",
+      "department": "ENGL",
+      "number": "20000",
+      "title": "General Education: Literature",
+      "short_title": "GE Literature",
+      "credits": 3,
+      "description": "General Education requirement in Human Culture: Literature. Recommended options: ENGL 20100 (World Literature I), ENGL 20200 (World Literature II), or ENGL 21600 (African American Literature /HD).",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_HC_NON_LIT_ART",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "human_culture_1",
+      "department": "HIST",
+      "number": "10000",
+      "title": "General Education: Human Culture I (Non-Literature, Non-Arts)",
+      "short_title": "GE Human Culture I",
+      "credits": 3,
+      "description": "General Education requirement in Human Culture excluding Literature and Arts. Recommended areas: World History, Religion (REL 20000 /HD), Philosophy (PHL 10000), or Foreign Languages and Cultures (SPA, FRN).",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_HC_ELEC",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "human_culture_2",
+      "department": "REL",
+      "number": "10000",
+      "title": "General Education: Human Culture II",
+      "short_title": "GE Human Culture II",
+      "credits": 3,
+      "description": "Secondary General Education requirement in Human Culture. Any remaining course carrying the GE-HC attribute across History, Philosophy, Religion, Arts, Literature, or Foreign Language.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_ELEC1",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "ge_elective_1",
+      "department": "GE",
+      "number": "10000",
+      "title": "General Education: Elective I",
+      "short_title": "GE Elective I",
+      "credits": 3,
+      "description": "General Education elective chosen from any approved course carrying a General Education attribute across departments.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_GE_ELEC2",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "ge_bucket",
+      "ge_bucket_id": "ge_elective_2",
+      "department": "GE",
+      "number": "10000",
+      "title": "General Education: Elective II",
+      "short_title": "GE Elective II",
+      "credits": 3,
+      "description": "Secondary General Education elective chosen from any approved course carrying a General Education attribute across departments.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_ELEC_GEN",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "elective_gap",
+      "ge_bucket_id": null,
+      "department": "ELEC",
+      "number": "10000",
+      "title": "General Elective",
+      "short_title": "General Elective",
+      "credits": 3,
+      "description": "General elective credits required to meet the 120-credit minimum threshold for bachelor degree completion.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    },
+    {
+      "code": "REQ_ELEC_UPPER",
+      "type": "placeholder",
+      "system_locked": true,
+      "placeholder_category": "elective_gap",
+      "ge_bucket_id": null,
+      "department": "ELEC",
+      "number": "30000",
+      "title": "Upper-Level Elective (30000+)",
+      "short_title": "Upper-Level Elective (30000+)",
+      "credits": 3,
+      "description": "Upper-division elective course numbered 30000 or higher, required to satisfy the university policy requiring at least 42 upper-level credit hours.",
+      "fee_info": "",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "OnGround"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "flexibility_tier": "sky_blue",
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": []
+    }
+  ],
+  "ge_popularity_stats": [
+    {
+      "ge_bucket_id": "us_hist_gov",
+      "course_code": "HIST 10500",
+      "course_title": "U.S. History to 1877",
+      "completion_count_2yr": 184,
+      "average_grade_points": 3.42
+    },
+    {
+      "ge_bucket_id": "us_hist_gov",
+      "course_code": "PS 15500",
+      "course_title": "American National Government",
+      "completion_count_2yr": 156,
+      "average_grade_points": 3.38
+    },
+    {
+      "ge_bucket_id": "soc_sci",
+      "course_code": "PSY 10000",
+      "course_title": "Principles of Psychology",
+      "completion_count_2yr": 242,
+      "average_grade_points": 3.48
+    },
+    {
+      "ge_bucket_id": "soc_sci",
+      "course_code": "SOC 10200",
+      "course_title": "Basic Concepts of Sociology (/HD)",
+      "completion_count_2yr": 198,
+      "average_grade_points": 3.55
+    },
+    {
+      "ge_bucket_id": "nat_sci_lab",
+      "course_code": "BSC 10000",
+      "course_title": "Concepts in Biology with Lab",
+      "completion_count_2yr": 165,
+      "average_grade_points": 3.25
+    },
+    {
+      "ge_bucket_id": "nat_sci_lab",
+      "course_code": "ESC 10000",
+      "course_title": "Physical Geology with Lab",
+      "completion_count_2yr": 140,
+      "average_grade_points": 3.32
+    },
+    {
+      "ge_bucket_id": "arts",
+      "course_code": "ART 18100",
+      "course_title": "Art Appreciation",
+      "completion_count_2yr": 210,
+      "average_grade_points": 3.65
+    },
+    {
+      "ge_bucket_id": "arts",
+      "course_code": "TA 11700",
+      "course_title": "Introduction to Theatre",
+      "completion_count_2yr": 115,
+      "average_grade_points": 3.5
+    },
+    {
+      "ge_bucket_id": "lit",
+      "course_code": "ENGL 20100",
+      "course_title": "World Literature I",
+      "completion_count_2yr": 130,
+      "average_grade_points": 3.35
+    },
+    {
+      "ge_bucket_id": "lit",
+      "course_code": "ENGL 21600",
+      "course_title": "African American Literature (/HD)",
+      "completion_count_2yr": 145,
+      "average_grade_points": 3.6
+    },
+    {
+      "ge_bucket_id": "human_culture_1",
+      "course_code": "REL 20000",
+      "course_title": "World Religions (/HD)",
+      "completion_count_2yr": 190,
+      "average_grade_points": 3.52
+    },
+    {
+      "ge_bucket_id": "human_culture_1",
+      "course_code": "PHL 10000",
+      "course_title": "Introduction to Philosophy",
+      "completion_count_2yr": 125,
+      "average_grade_points": 3.28
+    },
+    {
+      "ge_bucket_id": "human_culture_1",
+      "course_code": "ANT 11200",
+      "course_title": "Cultural Anthropology (/HD)",
+      "completion_count_2yr": 112,
+      "average_grade_points": 3.45
+    }
+  ],
+  "faculty_profiles": [
+    {
+      "email": "mwood@advisor.edu",
+      "username_prefix": "mwood",
+      "first_name": "Matthias",
+      "last_name": "Wood",
+      "position_title": "Senior Instructor, Mathematics",
+      "department": "College of Science, Technology, and Health",
+      "photo_url": ""
+    }
+  ]
+}
