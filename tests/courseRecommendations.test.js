@@ -7,7 +7,10 @@ import {
   formatPeerPopularity,
   formatTypicalOffering,
   buildHistoricalLookup,
-  matchesBucket
+  matchesBucket,
+  isPlaceholderRequirement,
+  hasValidGeAttribute,
+  isRestrictedCourse
 } from '../src/utils/courseRecommendations.js';
 
 describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
@@ -25,6 +28,34 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
         const recs = getCourseRecommendations(c, 'it_app_dev_bs_2026', masterDb.courses);
         expect(recs).toBeNull();
       });
+    });
+
+    it('strictly returns null for MTH 14100 and ENGL 17000 even when they carry GE attributes', () => {
+      const mth14100 = {
+        code: 'MTH 14100',
+        title: 'Basic Statistics (GE-Math)',
+        department: 'MTH',
+        number: 14100,
+        ge_bucket_id: 'math',
+        geCategory: 'GE-MATH',
+        credits: 3,
+        type: 'concrete'
+      };
+      const engl17000 = {
+        code: 'ENGL 17000',
+        title: 'Composition II (GE-Comm)',
+        department: 'ENGL',
+        number: 17000,
+        ge_bucket_id: 'comp_2',
+        geCategory: 'GE-COMM',
+        credits: 3,
+        type: 'concrete'
+      };
+
+      expect(getCourseRecommendations(mth14100, 'it_app_dev_bs_2026', masterDb.courses)).toBeNull();
+      expect(getCourseRecommendations(engl17000, 'it_app_dev_bs_2026', masterDb.courses)).toBeNull();
+      expect(isPlaceholderRequirement(mth14100)).toBe(false);
+      expect(isPlaceholderRequirement(engl17000)).toBe(false);
     });
 
     it('returns null when selectedCourse is null, undefined, or empty', () => {
@@ -123,7 +154,7 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
       const mth14100 = recs.find((c) => c.code === 'MTH 14100');
       expect(mth14100).toBeDefined();
       expect(mth14100.completionCount).toBeGreaterThan(0);
-      expect(mth14100.gradeBadge).toMatch(/GPA/);
+      expect(mth14100.gradeBadge).toMatch(/Avg/);
 
       // Verify zero-completion qualifying courses (e.g. MTH 15200, MTH 27100) are included at the bottom
       const zeroCompCourses = recs.filter((c) => c.completionCount === 0);
@@ -262,14 +293,14 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
   });
 
   describe('6. Formatting Helpers & Hybrid Data Merging', () => {
-    it('formats GPA and letter grade badges accurately', () => {
-      expect(formatGpaWithLetter(4.0)).toBe('4.00 GPA / A');
-      expect(formatGpaWithLetter(3.65)).toBe('3.65 GPA / A-');
-      expect(formatGpaWithLetter(3.42)).toBe('3.42 GPA / B+');
-      expect(formatGpaWithLetter(3.0)).toBe('3.00 GPA / B');
-      expect(formatGpaWithLetter(2.6)).toBe('2.60 GPA / B-');
-      expect(formatGpaWithLetter(2.2)).toBe('2.20 GPA / C+');
-      expect(formatGpaWithLetter(2.0)).toBe('2.00 GPA / C');
+    it('formats GPA into average letter grade badges accurately', () => {
+      expect(formatGpaWithLetter(4.0)).toBe('A Avg');
+      expect(formatGpaWithLetter(3.65)).toBe('A- Avg');
+      expect(formatGpaWithLetter(3.42)).toBe('B+ Avg');
+      expect(formatGpaWithLetter(3.0)).toBe('B Avg');
+      expect(formatGpaWithLetter(2.6)).toBe('B- Avg');
+      expect(formatGpaWithLetter(2.2)).toBe('C+ Avg');
+      expect(formatGpaWithLetter(2.0)).toBe('C Avg');
       expect(formatGpaWithLetter(null)).toBe('N/A');
       expect(formatGpaWithLetter(0)).toBe('N/A');
     });
@@ -303,6 +334,90 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
       const mth15200 = lookup.get('MTH 15200');
       expect(mth15200).toBeDefined();
       expect(mth15200.completionCount).toBeGreaterThan(0);
+    });
+  });
+
+  describe('7. Restricted Course Blacklist & Non-GE Exclusion', () => {
+    it('strictly excludes EPP 15000, remedial courses (< 10000), and special-enrollment courses from all recommendation pools', () => {
+      const testPlaceholders = [
+        { code: 'REQ_GE_COMP1', title: 'GE: Composition I (3cr)', ge_bucket_id: 'comp_1' },
+        { code: 'REQ_GE_MATH', title: 'GE: Mathematics (3cr)', ge_bucket_id: 'math' },
+        { code: 'REQ_GE_ELEC1', title: 'General Education: Elective I', ge_bucket_id: 'ge_elective_1' },
+        { code: 'REQ_ELEC_GEN', title: 'General Elective' },
+        { code: 'REQ_ELEC_UPPER', title: 'Upper-Level Elective (30000+)' }
+      ];
+
+      testPlaceholders.forEach((ph) => {
+        const recs = getCourseRecommendations(ph, 'it_app_dev_bs_2026', masterDb.courses);
+        expect(recs).not.toBeNull();
+        const codes = recs.map((r) => r.code);
+        expect(codes).not.toContain('EPP 15000');
+        recs.forEach((r) => {
+          expect(r.code).not.toBe('EPP 15000');
+          expect(r.number).toBeGreaterThanOrEqual(10000);
+          expect(/independent study|internship|practicum|thesis/i.test(r.title)).toBe(false);
+        });
+      });
+    });
+
+    it('strictly excludes non-GE departmental courses (such as CSC 35500) from GE elective placeholders', () => {
+      const gePlaceholders = [
+        { code: 'REQ_GE_ELEC1', title: 'General Education: Elective I', ge_bucket_id: 'ge_elective_1' },
+        { code: 'REQ_GE_ELEC2', title: 'General Education: Elective II', ge_bucket_id: 'ge_elective_2' },
+        { code: 'REQ_GE_ART', title: 'General Education: Fine Arts', ge_bucket_id: 'arts' },
+        { code: 'REQ_GE_SOC_SCI', title: 'General Education: Social Science', ge_bucket_id: 'soc_sci' }
+      ];
+
+      gePlaceholders.forEach((ph) => {
+        const recs = getCourseRecommendations(ph, 'it_app_dev_bs_2026', masterDb.courses);
+        expect(recs).not.toBeNull();
+        const codes = recs.map((r) => r.code);
+        expect(codes).not.toContain('CSC 35500');
+        expect(codes).not.toContain('CSC 45500');
+        recs.forEach((r) => {
+          expect(hasValidGeAttribute(r)).toBe(true);
+        });
+      });
+    });
+
+    it('confirms helper isRestrictedCourse flags restricted courses accurately', () => {
+      expect(isRestrictedCourse({ code: 'EPP 15000', title: 'Composition I - ESL' })).toBe(true);
+      expect(isRestrictedCourse({ code: 'MTH 09000', title: 'Basic Math', number: 9000 })).toBe(true);
+      expect(isRestrictedCourse({ code: 'CSC 49000', title: 'Senior Internship' })).toBe(true);
+      expect(isRestrictedCourse({ code: 'ART 49200', title: 'Independent Study' })).toBe(true);
+      expect(isRestrictedCourse({ code: 'ART 18100', title: 'Art Appreciation', number: 18100 })).toBe(false);
+    });
+  });
+
+  describe('8. Recommendation List Capping (Max 30)', () => {
+    it('caps returned recommendations array to a maximum of 30 items', () => {
+      const freeElectivePlaceholder = {
+        code: 'REQ_ELEC_GEN_1',
+        title: 'General Elective (3cr)',
+        type: 'placeholder'
+      };
+
+      const recs = getCourseRecommendations(freeElectivePlaceholder, 'it_app_dev_bs_2026', masterDb.courses);
+      expect(recs).not.toBeNull();
+      expect(recs.length).toBeLessThanOrEqual(30);
+      expect(recs.tier).toBe(3);
+      expect(recs.tierLabel).toBe('General Free Electives');
+    });
+
+    it('retains metadata properties on the capped recommendations array', () => {
+      const artPlaceholder = {
+        code: 'REQ_GE_ART',
+        title: 'General Education: Fine Arts',
+        ge_bucket_id: 'arts'
+      };
+
+      const recs = getCourseRecommendations(artPlaceholder, 'it_app_dev_bs_2026', masterDb.courses);
+      expect(recs).not.toBeNull();
+      expect(recs.length).toBeLessThanOrEqual(30);
+      expect(recs.tier).toBe(1);
+      expect(recs.tierLabel).toBe('Categorized General Education');
+      expect(recs.placeholderCode).toBe('REQ_GE_ART');
+      expect(recs.placeholderTitle).toBe('General Education: Fine Arts');
     });
   });
 });

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { X, Info, ChevronDown, ChevronUp, BookOpen, Layers } from 'lucide-react';
-import { getCourseRecommendations } from '../../utils/courseRecommendations.js';
+import { X, Info, ChevronDown, ChevronUp, BookOpen, Layers, Copy, Check } from 'lucide-react';
+import { isPlaceholderRequirement, getCourseRecommendations } from '../../utils/courseRecommendations.js';
 
 /**
  * CourseDetailModal / Inspector Slide-Over Drawer
@@ -8,8 +8,9 @@ import { getCourseRecommendations } from '../../utils/courseRecommendations.js';
  * Implements Tiered, Institutional-Only Course Recommendations for Screen 3:
  * 1. Concrete Catalog Courses: Renders standard catalog details only. Recommendations return null.
  * 2. Placeholders: Renders placeholder details + "Recommended Institutional Offerings" table.
- * 3. Explanatory Popover Tooltip for peer data explanation.
- * 4. High-Density Recommendations Table with popularity and GPA badges.
+ * 3. Explanatory Popover Tooltip for peer data explanation (non-clipped layout).
+ * 4. High-Density Recommendations Table with popularity and average grade badges.
+ * 5. Expanded View with Full Unclipped Name, Advisor Tip, and One-Click Copy Button.
  */
 export default function CourseDetailModal({
   isOpen,
@@ -22,9 +23,10 @@ export default function CourseDetailModal({
 }) {
   const [showInfoPopover, setShowInfoPopover] = useState(false);
   const [expandedCourseCode, setExpandedCourseCode] = useState(null);
+  const [copiedCode, setCopiedCode] = useState(null);
 
   const recommendations = useMemo(() => {
-    if (!course) return null;
+    if (!course || !isPlaceholderRequirement(course)) return null;
     return getCourseRecommendations(
       course,
       activeProgram,
@@ -40,6 +42,16 @@ export default function CourseDetailModal({
 
   const toggleExpandDescription = (code) => {
     setExpandedCourseCode((prev) => (prev === code ? null : code));
+  };
+
+  const handleCopyCourse = (textToCopy, courseCode) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(textToCopy).catch(() => {});
+    }
+    setCopiedCode(courseCode);
+    setTimeout(() => {
+      setCopiedCode((current) => (current === courseCode ? null : current));
+    }, 2000);
   };
 
   return (
@@ -167,14 +179,14 @@ export default function CourseDetailModal({
           {!isConcrete && recommendations && (
             <div className="pt-4 border-t border-neutral-200 space-y-3">
               {/* Header with Explanatory Popover Tooltip */}
-              <div className="flex items-center justify-between relative">
-                <div className="flex items-center space-x-1.5">
+              <div className="flex items-center justify-between relative overflow-visible">
+                <div className="flex items-center space-x-1.5 relative overflow-visible">
                   <BookOpen className="w-4 h-4 text-[#857542]" />
                   <span className="text-xs font-bold text-neutral-900 tracking-wide">
                     Recommended Institutional Offerings
                   </span>
                   {/* Accessible Info Popover Trigger */}
-                  <div className="relative inline-block">
+                  <div className="relative inline-block overflow-visible">
                     <button
                       type="button"
                       onClick={() => setShowInfoPopover((v) => !v)}
@@ -187,10 +199,10 @@ export default function CourseDetailModal({
                       <Info className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Popover Bubble */}
+                    {/* Popover Bubble: Centered on Button to Prevent Any Horizontal Clipping */}
                     {showInfoPopover && (
                       <div
-                        className="absolute z-30 left-0 sm:left-auto sm:right-0 mt-1 w-72 sm:w-80 p-3 bg-neutral-900 text-neutral-100 text-[11px] rounded-lg shadow-xl border border-neutral-700 leading-relaxed animate-in fade-in zoom-in-95 duration-150"
+                        className="absolute z-50 left-1/2 -translate-x-1/2 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-3rem)] p-3.5 bg-neutral-900 text-neutral-100 text-[11px] rounded-lg shadow-2xl border border-neutral-700 leading-relaxed animate-in fade-in zoom-in-95 duration-150 drop-shadow-md select-none"
                         role="tooltip"
                       >
                         <p className="font-semibold text-[#B5A36A] mb-1">
@@ -251,7 +263,7 @@ export default function CourseDetailModal({
                             </p>
                           </div>
 
-                          {/* Peer Popularity & GPA Badges */}
+                          {/* Peer Popularity & Average Grade Badges */}
                           <div className="flex items-center space-x-1.5 flex-shrink-0">
                             {/* Peer Popularity Badge */}
                             <span
@@ -265,28 +277,70 @@ export default function CourseDetailModal({
                               {rec.popularityBadge}
                             </span>
 
-                            {/* Average Grade Badge */}
+                            {/* Average Grade Badge (e.g. B+ Avg, A Avg, N/A) */}
                             <span
                               className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200 whitespace-nowrap font-medium"
-                              title={`Average GPA: ${rec.averageGpa !== null ? rec.averageGpa : 'N/A'}`}
+                              title={rec.averageGpa !== null ? `Average GPA: ${rec.averageGpa.toFixed(2)} / 4.0 scale` : 'Unrecorded grade metric'}
                             >
                               {rec.gradeBadge}
                             </span>
                           </div>
                         </div>
 
-                        {/* Collapsible Inline Course Description */}
+                        {/* Collapsible Inline Course Description & Advisor Copy Note */}
                         {isExpanded && (
-                          <div className="mt-2 pt-2 border-t border-neutral-100 bg-neutral-50/70 p-2.5 rounded text-[11px] text-neutral-700 space-y-1.5 animate-in fade-in duration-150">
-                            <p className="leading-relaxed">{rec.description}</p>
-                            <div className="grid grid-cols-2 gap-2 pt-1 text-[10.5px]">
+                          <div className="mt-2 pt-2.5 border-t border-neutral-200 bg-neutral-50/90 p-3 rounded-lg text-[11px] text-neutral-700 space-y-2.5 animate-in fade-in duration-150 border border-neutral-200/80">
+                            {/* Unclipped Full Course Code & Title + One-Click Copy Button */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 pb-1.5 border-b border-neutral-200/70">
+                              <div className="flex items-center space-x-2">
+                                <span className="font-mono font-bold text-neutral-900 text-xs sm:text-sm">
+                                  {rec.code}
+                                </span>
+                                <span className="font-bold text-neutral-900 text-xs sm:text-sm">
+                                  {rec.title}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopyCourse(`${rec.code} ${rec.title}`, rec.code);
+                                }}
+                                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white border border-[#B5A36A] hover:bg-[#F7F5EE] text-[10.5px] font-bold text-[#857542] transition shadow-2xs cursor-pointer select-none"
+                                title="Copy course code and title to clipboard"
+                                aria-label={`Copy ${rec.code} ${rec.title}`}
+                              >
+                                {copiedCode === rec.code ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span className="text-emerald-700">Copied!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5 text-[#857542]" />
+                                    <span>Copy Course</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+
+                            {/* Advisor Tip Callout */}
+                            <div className="p-2 rounded bg-[#F7F5EE] border border-[#B5A36A]/50 text-[10.5px] text-neutral-700 leading-relaxed">
+                              <span className="font-bold text-[#857542]">Advisor Tip:</span> Copy this course code and title into the target semester's "+ Note" field for student reference when registering.
+                            </div>
+
+                            {/* Verbatim Catalog Description */}
+                            <p className="leading-relaxed text-neutral-800">{rec.description}</p>
+
+                            {/* Prerequisites & Corequisites */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[10.5px] border-t border-neutral-200/60">
                               <div>
                                 <span className="font-semibold text-neutral-500">Prereqs: </span>
-                                <span className="font-mono text-neutral-800">{rec.prereqDisplay}</span>
+                                <span className="font-mono text-neutral-900 font-medium">{rec.prereqDisplay}</span>
                               </div>
                               <div>
                                 <span className="font-semibold text-neutral-500">Coreqs: </span>
-                                <span className="font-mono text-neutral-800">{rec.coreqDisplay}</span>
+                                <span className="font-mono text-neutral-900 font-medium">{rec.coreqDisplay}</span>
                               </div>
                             </div>
                           </div>

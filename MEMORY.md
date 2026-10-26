@@ -976,3 +976,36 @@
     - Course expansion: inline description and prerequisites expand dynamically.
     - Screenshot artifact captured: `.tmp/course_recommendations_verified.png`.
 
+### 62. Screen 3 Recommendations Refinement, Concrete Course Guards, Restricted Course Filtering, and Popover Layout
+- **Objective:**
+  - Enforce a strict Concrete Course Guard so courses with standard institutional numbers (e.g., `MTH 14100`, `ENGL 17000`, `IIT 21500`) return `null` and do not show recommendations even when satisfying General Education requirements.
+  - Require genuine General Education attribute tags on all candidate courses for GE placeholder slots (`REQ_GE_*`), strictly excluding non-GE departmental courses (e.g., `CSC 35500`).
+  - Implement a restricted course blacklist across all recommendation pools: filter out `EPP 15000` (ESL / Academic Purposes), remedial courses (< 10000), and special-enrollment courses (independent studies, internships, practicums, thesis).
+  - Cap recommendation lists to the top 30 courses (`slice(0, 30)`).
+  - Update the grade badge display to show average letter grades only (`${letter} Avg` or `N/A`), replacing raw GPA scores.
+  - Enhance the expanded recommendation view with full, unclipped course code and title in bold, an Advisor Tip callout, and a one-click copy button with feedback state.
+  - Fix the popover tooltip clipping by centering the popover on the button (`left-1/2 -translate-x-1/2 top-full mt-2`), eliminating overflow past drawer boundaries.
+- **Implementation:**
+  1. *Classification Helpers (`src/utils/courseRecommendations.js`):*
+     - `isPlaceholderRequirement(course)`: Returns `true` only for genuine placeholder tokens (`REQ_*`, `GE-*`, `ELECT-*`, `isPlaceholder: true`, `type: 'placeholder'`, or generic titles). Returns `false` for standard course numbers (`^[A-Z]{2,4}\s*\d{5}$`).
+     - `isRestrictedCourse(course)`: Detects and excludes `EPP 15000`, course number < 10000, and titles with `independent study`, `internship`, `practicum`, etc.
+     - `hasValidGeAttribute(course)`: Checks for `(GE-...)` title tags, `geCategory`, or database `ge_bucket_id`.
+     - `formatGpaWithLetter(gpa)`: Formats numeric GPA into `${letter} Avg` (e.g. `B+ Avg`, `A Avg`) or `N/A`.
+     - Capped recommendation arrays at 30 items while preserving array metadata.
+  2. *Drawer Modal Enhancements (`src/components/modals/CourseDetailModal.jsx`):*
+     - Replaced inline evaluation with `isPlaceholderRequirement(course)`.
+     - Added `handleCopyCourse` copying `${rec.code} ${rec.title}` with temporary "Copied!" feedback state.
+     - Added bold unclipped header and `"Advisor Tip: Copy this course code and title into the target semester's '+ Note' field for student reference when registering."`
+     - Fixed popover positioning to `left-1/2 -translate-x-1/2 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-3rem)]`, with `overflow-visible` on parent containers.
+- **Verification:**
+  - Dedicated Vitest suite `tests/courseRecommendations.test.js`: 19 / 19 tests passing (100%).
+  - Full test suite: 7 test files, 85 / 85 unit tests passing (100%).
+  - Production build: `npm run build` compiled cleanly with 0 errors in 3.92s.
+  - Automated headless Chrome E2E verification (`.tmp/verify_course_recommendations_ui.mjs`):
+    - Concrete course cards (`ICS 42300`, `CINE 11000`): drawer opened with catalog overview; 0 recommendations rendered.
+    - Placeholder card (`REQ_ELEC_GEN_1`): drawer opened with 30 capped recommendations, `B+ Avg` badges, 0 transfer courses, 0 `EPP 15000`.
+    - Popover alignment: `left = 991.5px`, `right = 1311.5px`, completely within drawer boundaries (`864px` to `1440px`), zero clipping on left or right.
+    - Expanded card: rendered full title `PSY 10000 Principles of Psychology (GE-SocSci)`, Advisor Tip callout, and one-click copy button with "Copied!" feedback state.
+    - Screenshot captured: `.tmp/course_recommendations_refined.png`.
+
+

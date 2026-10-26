@@ -37,8 +37,8 @@ const GRADE_POINTS = {
 };
 
 /**
- * Format a numeric GPA into a readable GPA + letter grade badge string.
- * Example: 3.42 -> "3.42 GPA / B+"
+ * Format a numeric GPA into an average letter grade badge string.
+ * Example: 3.42 -> "B+ Avg", 4.0 -> "A Avg"
  */
 export function formatGpaWithLetter(gpa) {
   if (gpa === null || gpa === undefined || isNaN(gpa) || gpa === 0) {
@@ -57,7 +57,7 @@ export function formatGpaWithLetter(gpa) {
   else if (num >= 1.00) letter = 'D';
   else letter = 'F';
 
-  return `${num.toFixed(2)} GPA / ${letter}`;
+  return `${letter} Avg`;
 }
 
 /**
@@ -132,10 +132,121 @@ export function getBucketIdFromCourse(course) {
 }
 
 /**
+ * Determine if a course carries a recognized General Education attribute.
+ */
+export function hasValidGeAttribute(course) {
+  if (!course) return false;
+  const title = String(course.title || course.courseTitle || '');
+  const geCat = String(course.geCategory || '');
+  const geBucket = String(course.ge_bucket_id || course.geBucketId || '');
+
+  // 1. Direct title tag (e.g. (GE-Math), (GE-SocSci), (GE-Comm), (GE-HC), etc.)
+  if (/\(GE-[^)]+\)|GE-|:GE\b|\bGE\b/i.test(title)) return true;
+
+  // 2. Direct database bucket or category
+  if (geBucket && geBucket !== 'elective' && geBucket !== 'free_elective') return true;
+  if (geCat && geCat.toUpperCase().startsWith('GE')) return true;
+
+  return false;
+}
+
+/**
+ * Filter out placement-only, remedial, or special-admit courses from all recommendation pools:
+ * - Exclude EPP 15000 (English for Academic Purposes / ESL Composition).
+ * - Exclude developmental/remedial math or English courses below 10000 level.
+ * - Exclude courses with special-enrollment restrictions (independent studies, internships, practicums, thesis).
+ */
+export function isRestrictedCourse(course) {
+  if (!course) return true;
+  const code = String(course.code || course.courseCode || '').toUpperCase();
+  const title = String(course.title || course.courseTitle || '').toLowerCase();
+  const num = typeof course.number === 'number'
+    ? course.number
+    : parseInt((code.match(/\b\d{3,5}\b/) || [])[0], 10) || 0;
+
+  // 1. Exclude EPP 15000 (English for Academic Purposes / ESL Composition)
+  if (code.includes('EPP 15000') || code.replace(/\s+/g, '') === 'EPP15000') {
+    return true;
+  }
+
+  // 2. Exclude developmental/remedial math or English courses below 10000 level
+  if (num > 0 && num < 10000) {
+    return true;
+  }
+
+  // 3. Exclude courses with special-enrollment restrictions
+  if (
+    /\bindependent study\b|\binternship\b|\bpracticum\b|\bdirected study\b|\bfield experience\b|\bco-op\b|\bcooperative education\b|\bthesis\b|\bspecial topics\b/i.test(title)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Strict Concrete Course Guard:
+ * A course is CONCRETE (returns false) if it has a standard, specific institutional course number
+ * (e.g., MTH 14100, ENGL 17000, IIT 21500, or matches ^[A-Z]{2,4}\s*\d{5}$ with an existing catalog description).
+ * Even if a course satisfies a General Education requirement (e.g., MTH 14100 satisfying GE-Math),
+ * it is a REQUIRED concrete course, NOT a placeholder slot.
+ *
+ * Recommendations must ONLY generate for genuine placeholder requirement tokens:
+ * - course.isPlaceholder === true or course.isCustomPlaceholder === true or course.type === 'placeholder'
+ * - codes matching ^REQ_, ^GE-, ^ELECT-
+ * - titles containing General Education, Free Elective, or Requirement
+ */
+export function isPlaceholderRequirement(course) {
+  if (!course) return false;
+
+  const rawCode = String(course.code || '').trim();
+  const canonCode = String(course.canonicalCode || '').trim();
+  const rawTitle = String(course.title || '').trim();
+
+  // 1. Explicit placeholder signals
+  if (course.isPlaceholder === true || course.isCustomPlaceholder === true || course.type === 'placeholder') {
+    return true;
+  }
+
+  // 2. Placeholder code prefixes
+  if (/^REQ_/i.test(rawCode) || /^REQ_/i.test(canonCode) || /^GE-/i.test(rawCode) || /^ELECT-/i.test(rawCode)) {
+    return true;
+  }
+
+  // 3. Generic department placeholder codes like ELECT 10000 or GE 10000
+  if (/^(?:ELECT|GE)\s*\d{4,5}$/i.test(rawCode)) {
+    return true;
+  }
+
+  // 4. Strict Concrete Course Guard:
+  // If course code matches standard institutional department + course number (e.g., MTH 14100, ENGL 17000, IIT 21500, or matches ^[A-Z]{2,4}\s*\d{5}$)
+  // and is not explicitly marked as a placeholder, it is concrete.
+  const isStandardCoursePattern = /^[A-Z]{2,4}\s*\d{5}$/i.test(rawCode);
+  if (isStandardCoursePattern && course.type !== 'placeholder' && !course.isPlaceholder) {
+    const isGenericTitle = /^(?:General Education|Free Elective|General Elective|Upper-Level Elective|Requirement)\b/i.test(rawTitle);
+    if (!isGenericTitle) {
+      return false;
+    }
+  }
+
+  // 5. Placeholder title indicators (only if not a concrete catalog course)
+  if (
+    /placeholder/i.test(rawTitle) ||
+    /^(?:General Education|Free Elective|General Elective|Upper-Level Elective|Degree Requirement)\b/i.test(rawTitle) ||
+    /\b(?:GE Elective|Elective I\b|Elective II\b|Elective III\b)\b/i.test(rawTitle)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Check if a candidate course matches a specific GE bucket.
  */
 export function matchesBucket(bucketId, course) {
   if (!bucketId || !course) return false;
+  if (isRestrictedCourse(course)) return false;
   const compact = (course.compactCode || course.code || '').replace(/\s+/g, '').toUpperCase();
   const dept = (course.department || (course.code || '').split(/\s+/)[0] || '').toUpperCase();
   const title = (course.title || '').toUpperCase();
@@ -146,7 +257,7 @@ export function matchesBucket(bucketId, course) {
 
   switch (bucketId) {
     case 'comp_1':
-      return compact === 'ENGL15000' || compact === 'EPP15000';
+      return compact === 'ENGL15000';
     case 'comp_2':
       return compact === 'ENGL17000';
     case 'math':
@@ -353,23 +464,9 @@ export function getCourseRecommendations(
 ) {
   if (!selectedCourse) return null;
 
-  // 1. Concrete Catalog Course Guard:
-  // Standard concrete courses (e.g., MTH 27100, CSC 10100, ENG 17000) MUST NOT display recommendations.
-  const isPlaceholder = Boolean(
-    selectedCourse.isPlaceholder ||
-    selectedCourse.isCustomPlaceholder ||
-    selectedCourse.type === 'placeholder' ||
-    selectedCourse.code?.startsWith('GE') ||
-    selectedCourse.code?.startsWith('ELECT') ||
-    selectedCourse.code?.startsWith('REQ_') ||
-    selectedCourse.canonicalCode?.startsWith('REQ_') ||
-    selectedCourse.title?.toLowerCase().includes('placeholder') ||
-    selectedCourse.title?.toLowerCase().includes('elective') ||
-    selectedCourse.ge_bucket_id ||
-    selectedCourse.geBucketId
-  );
-
-  if (!isPlaceholder) {
+  // 1. Strict Concrete Catalog Course Guard:
+  // Standard concrete courses (e.g., MTH 14100, ENGL 17000, MTH 27100, CSC 10100) MUST NOT display recommendations.
+  if (!isPlaceholderRequirement(selectedCourse)) {
     return null;
   }
 
@@ -396,8 +493,8 @@ export function getCourseRecommendations(
     /30000|40000|\b300\b|Upper|Upper-Division/i.test(combinedMetaStr)
   );
 
-  // Filter concrete institutional catalog courses strictly
-  // Drop any course where isTransfer === true, starts with ELECT or GE, or is a placeholder
+  // Filter concrete institutional catalog courses strictly:
+  // Drop transfers, placeholders, departmental dummy courses, and blacklisted/restricted courses
   const institutionalCandidates = catalog.filter((c) => {
     if (c.type === 'placeholder') return false;
     if (c.isPlaceholder || c.isCustomPlaceholder) return false;
@@ -405,51 +502,67 @@ export function getCourseRecommendations(
     if (c.department === 'ELECT' || c.department === 'GE') return false;
     if (/^(?:ELECT|GE)\b/i.test(c.code)) return false;
     if (/^REQ_/i.test(c.code)) return false;
+    if (isRestrictedCourse(c)) return false;
     return true;
   });
 
   const bucketId = getBucketIdFromCourse(selectedCourse);
   const mandatoryCodes = getMandatoryProgramCourseCodes(activeProgram, catalog);
 
+  const isGePlaceholder = Boolean(
+    bucketId ||
+    selectedCourse.ge_bucket_id ||
+    selectedCourse.geBucketId ||
+    selectedCourse.placeholder_category === 'ge_bucket' ||
+    selectedCourse.category === 'GE' ||
+    selectedCourse.category === 'General Education' ||
+    /^REQ_GE/i.test(codeStr) ||
+    /^REQ_GE/i.test(canonStr) ||
+    /General Education|GE Elective|\bGE\b/i.test(titleStr)
+  );
+
   let tier = 1;
   let tierLabel = 'Categorized General Education';
   let matchedCourses = [];
 
   // 3. Three-Tier Placeholder Recommendation Pipeline
-  if (bucketId && bucketId !== 'ge_elective') {
-    // TIER 1: Categorized GE Placeholders (e.g. GE-MATH, GE-LIT, GE-SOCSCI, GE-HUM, REQ_GE_*)
-    tier = 1;
-    tierLabel = 'Categorized General Education';
+  if (isGePlaceholder) {
+    if (bucketId && bucketId !== 'ge_elective') {
+      // TIER 1: Categorized GE Placeholders (e.g. GE-MATH, GE-LIT, GE-SOCSCI, GE-HUM, REQ_GE_*)
+      tier = 1;
+      tierLabel = 'Categorized General Education';
 
-    matchedCourses = institutionalCandidates.filter((cand) => {
-      // Check if candidate matches this bucket
-      if (matchesBucket(bucketId, cand)) return true;
-      // Also support explicit eligible_courses listed on placeholder
-      if (selectedCourse.eligible_courses && Array.isArray(selectedCourse.eligible_courses)) {
-        return selectedCourse.eligible_courses.includes(cand.code);
-      }
-      return false;
-    });
-  } else if (
-    bucketId === 'ge_elective' ||
-    /GE-Any|General Education Breadth|GE Elective|REQ_GE_ELEC/i.test(combinedMetaStr)
-  ) {
-    // TIER 2: Open / Breadth GE Placeholders (e.g. GE-Any, General Education Breadth)
-    tier = 2;
-    tierLabel = 'Open General Education Breadth';
-
-    matchedCourses = institutionalCandidates.filter((cand) => {
-      // Pool all institutional courses carrying any GE attribute
-      const hasGe = matchesBucket('ge_elective', cand);
-      if (!hasGe) return false;
-      // Subtract Mandatory Core: filter out required major/core courses
-      const compact = (cand.compactCode || cand.code || '').replace(/\s+/g, '').toUpperCase();
-      const code = (cand.code || '').toUpperCase();
-      if (mandatoryCodes.has(code) || mandatoryCodes.has(compact)) {
+      matchedCourses = institutionalCandidates.filter((cand) => {
+        // Every candidate course MUST possess a valid General Education attribute tag
+        if (!hasValidGeAttribute(cand)) return false;
+        // Check if candidate matches this bucket
+        if (matchesBucket(bucketId, cand)) return true;
+        // Also support explicit eligible_courses listed on placeholder
+        if (selectedCourse.eligible_courses && Array.isArray(selectedCourse.eligible_courses)) {
+          return selectedCourse.eligible_courses.includes(cand.code);
+        }
         return false;
-      }
-      return true;
-    });
+      });
+    } else {
+      // TIER 2: Open / Breadth GE Placeholders (e.g. GE-Any, General Education Breadth, REQ_GE_ELEC)
+      tier = 2;
+      tierLabel = 'Open General Education Breadth';
+
+      matchedCourses = institutionalCandidates.filter((cand) => {
+        // Every candidate course MUST possess a valid General Education attribute tag
+        // Strictly exclude non-GE departmental courses (e.g., CSC 35500, CSC 45500)
+        if (!hasValidGeAttribute(cand)) return false;
+        const hasGe = matchesBucket('ge_elective', cand);
+        if (!hasGe) return false;
+        // Subtract Mandatory Core: filter out required major/core courses
+        const compact = (cand.compactCode || cand.code || '').replace(/\s+/g, '').toUpperCase();
+        const code = (cand.code || '').toUpperCase();
+        if (mandatoryCodes.has(code) || mandatoryCodes.has(compact)) {
+          return false;
+        }
+        return true;
+      });
+    }
   } else {
     // TIER 3: Free Electives (e.g. Free Elective, General Elective, REQ_ELEC_GEN, REQ_ELEC_UPPER)
     tier = 3;
@@ -489,7 +602,7 @@ export function getCourseRecommendations(
       typicalOffering: formatTypicalOffering(cand.offered_sessions),
       completionCount,
       averageGpa,
-      gradeBadge: formatGpaWithLetter(averageGpa),
+      gradeBadge: completionCount > 0 ? formatGpaWithLetter(averageGpa) : 'N/A',
       popularityBadge: formatPeerPopularity(completionCount),
       description: cand.description || 'Verbatim description pulled from Academic Course Catalog.',
       prereqDisplay: cand.prereq_display || cand.prereqs || 'None',
@@ -510,12 +623,15 @@ export function getCourseRecommendations(
     return a.code.localeCompare(b.code);
   });
 
-  // Attach metadata properties to array for caller convenience
-  formattedRecommendations.tier = tier;
-  formattedRecommendations.tierLabel = tierLabel;
-  formattedRecommendations.isUpperDivision = isUpperDivision;
-  formattedRecommendations.placeholderCode = selectedCourse.code;
-  formattedRecommendations.placeholderTitle = selectedCourse.title;
+  // Cap recommendations at top 30
+  const cappedRecommendations = formattedRecommendations.slice(0, 30);
 
-  return formattedRecommendations;
+  // Attach metadata properties to array for caller convenience
+  cappedRecommendations.tier = tier;
+  cappedRecommendations.tierLabel = tierLabel;
+  cappedRecommendations.isUpperDivision = isUpperDivision;
+  cappedRecommendations.placeholderCode = selectedCourse.code;
+  cappedRecommendations.placeholderTitle = selectedCourse.title;
+
+  return cappedRecommendations;
 }
