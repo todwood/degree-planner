@@ -940,3 +940,39 @@
     - Confirmed real student PDF upload (Brandon Paz, 29 courses / 84 credits).
     - Live console errors: `0`.
     - Screenshot captured: `.tmp/live_github_pages_verification.png`.
+
+### 61. Tiered, Institutional-Only Course Recommendations for Screen 3 Placeholders
+- **Objective:**
+  - Implement intelligent, tiered course recommendations in the Screen 3 Course Inspector slide-over drawer for unfilled degree requirements and elective placeholders (`REQ_GE_*`, `REQ_ELEC_*`), while preserving standard concrete catalog display for concrete courses.
+  - Enforce strict FERPA/privacy compliance (aggregated completion counts and average GPA on a 4.0 scale only; zero student PII or individual grades displayed).
+  - Enforce strict institutional-only integrity: transfer artifacts (`ELECT 10000`, `GE 10000`, `isTransfer: true`, `TR-*`) must NEVER be recommended for future student enrollment.
+- **Architectural Implementation:**
+  1. *Historical Fulfillment Dataset (`src/data/historicalFulfillments.json`):*
+     - Seeded from authentic institutional course completions across 14 student profiles in `realStudentsCatalog.json` and `masterDb.ge_popularity_stats`.
+     - Structures 119 authentic courses with `courseCode`, `courseTitle`, `category`, `completionCount`, `averageGpa`, and `isInstitutional: true`.
+  2. *Recommendation & Classification Engine (`src/utils/courseRecommendations.js`):*
+     - `getCourseRecommendations(selectedCourse, activeProgram, catalogCourses, historicalData, activeStudentCourses)`:
+       - **Concrete Catalog Course Guard:** Returns `null` for concrete courses (`MTH 27100`, `CSC 10100`, `ENG 17000`), ensuring the drawer renders only catalog overview and prerequisites without recommendation clutter.
+       - **Tier 1 (Categorized GE Placeholders):** Matches bucket attributes (e.g. `arts`, `lit`, `math`, `nat_sci_lab`), ranks by completion volume, and appends 0-completion qualifying institutional courses at the bottom with `"0 peers recorded"` and `"N/A"`.
+       - **Tier 2 (Open / Breadth GE Placeholders):** Pools all General Education courses and subtracts active program's mandatory major core and math courses (and their prerequisites).
+       - **Tier 3 (Free Electives):** Pools non-core institutional courses, filters by level (30000+ for upper-division placeholders), and ranks by student selection volume.
+       - **Strict Transfer Exclusion:** Excludes `isTransfer: true`, `ELECT`, `GE`, and `TR-*` records.
+     - Formatting helpers: `formatGpaWithLetter(gpa)`, `formatPeerPopularity(count)`, `formatTypicalOffering(sessions)`.
+     - Dynamic hybrid merging via `buildHistoricalLookup`.
+  3. *Course Detail Drawer Modal (`src/components/modals/CourseDetailModal.jsx`):*
+     - Replaces hardcoded slide-over drawer in Screen 3.
+     - Accessible info icon button `(i)` with hover/click popover: *"Peer Fulfillment Metric Standards: Recommendations are generated from institutional completion data of peers who satisfied this requirement. Excludes transfer and test credits. Average GPA is calculated on a 4.0 scale across graded attempts."*
+     - High-density stacked layout with clickable course code/title expanding inline catalog description and prerequisites, Lindenwood accent popularity badge (`245 students completed`), and neutral GPA badge (`3.37 GPA / B+`).
+  4. *Screen 3 Integration (`Screen3ScheduleBoard.jsx`):*
+     - Passed `propSelectedProgramId || schedule?.programId || 'cybersecurity_bs_2026'` and `rawCompletedCourses` to `<CourseDetailModal />`.
+- **Verification:**
+  - Dedicated Vitest suite `tests/courseRecommendations.test.js` (13 tests) passing 100%.
+  - Full test suite: 7 test files, 79 tests passing 100%.
+  - Production build: `npm run build` compiled cleanly with 0 errors in 3.81s.
+  - Headless Puppeteer verification (`.tmp/verify_course_recommendations_ui.mjs`):
+    - Concrete course `ICS 42300`: drawer opens, zero recommendation table rendered.
+    - Placeholder `REQ_ELEC_GEN_1`: drawer opens with "Recommended Institutional Offerings" (50 options), top option `PSY 10000`, 0 transfer courses.
+    - Info `(i)` button: popover renders verified standard copy without clipping.
+    - Course expansion: inline description and prerequisites expand dynamically.
+    - Screenshot artifact captured: `.tmp/course_recommendations_verified.png`.
+

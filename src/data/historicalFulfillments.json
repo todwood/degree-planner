@@ -1,0 +1,954 @@
+[
+  {
+    "courseCode": "PSY 10000",
+    "courseTitle": "Principles of Psychology (GE-SocSci)",
+    "category": "GE-SOC_SCI",
+    "completionCount": 245,
+    "averageGpa": 3.37,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ART 18100",
+    "courseTitle": "Art Appreciation (GE-Human Culture: Art)",
+    "category": "GE-ARTS",
+    "completionCount": 210,
+    "averageGpa": 3.65,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "SOC 10200",
+    "courseTitle": "Basic Concepts of Sociology (GE-SocSci / HD)",
+    "category": "GE-SOC_SCI",
+    "completionCount": 204,
+    "averageGpa": 3.51,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "REL 20000",
+    "courseTitle": "World Religions (GE-HC / HD)",
+    "category": "GE-HUMAN_CULTURE_1",
+    "completionCount": 190,
+    "averageGpa": 3.52,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HIST 10500",
+    "courseTitle": "U.S. History to 1877 (GE-HC: USHisGov)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 184,
+    "averageGpa": 3.42,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "BSC 10000",
+    "courseTitle": "Concepts in Biology with Lab (GE-NatSciLec/Lab)",
+    "category": "GE-NAT_SCI_LAB",
+    "completionCount": 173,
+    "averageGpa": 2.92,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PS 15500",
+    "courseTitle": "American National Government (GE-HC: USHisGov / GE-Civ)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 159,
+    "averageGpa": 3.34,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 21600",
+    "courseTitle": "African American Literature (GE-Human Culture: Literature / HD)",
+    "category": "GE-LIT",
+    "completionCount": 145,
+    "averageGpa": 3.6,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ESC 10000",
+    "courseTitle": "Physical Geology with Lab (GE-NatSciLec/Lab)",
+    "category": "GE-NAT_SCI_LAB",
+    "completionCount": 141,
+    "averageGpa": 3.16,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 20100",
+    "courseTitle": "World Literature I (GE-Human Culture: Literature)",
+    "category": "GE-LIT",
+    "completionCount": 131,
+    "averageGpa": 3.17,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PHL 10000",
+    "courseTitle": "Introduction to Philosophy (GE-HC)",
+    "category": "GE-HUMAN_CULTURE_1",
+    "completionCount": 125,
+    "averageGpa": 3.28,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "TA 11700",
+    "courseTitle": "Introduction to Theatre (GE-Human Culture: Art)",
+    "category": "GE-ARTS",
+    "completionCount": 115,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ANT 11200",
+    "courseTitle": "Cultural Anthropology (GE-HC / HD)",
+    "category": "GE-HUMAN_CULTURE_1",
+    "completionCount": 112,
+    "averageGpa": 3.45,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 33500",
+    "courseTitle": "Blockchain Technology for Business",
+    "category": "ELECTIVE",
+    "completionCount": 14,
+    "averageGpa": 3.36,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 21300",
+    "courseTitle": "Foundations of Information Technology",
+    "category": "ELECTIVE",
+    "completionCount": 14,
+    "averageGpa": 3.79,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 21400",
+    "courseTitle": "Foundations of Networking",
+    "category": "ELECTIVE",
+    "completionCount": 14,
+    "averageGpa": 3.57,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 22000",
+    "courseTitle": "Hardware and Operating Systems",
+    "category": "ELECTIVE",
+    "completionCount": 13,
+    "averageGpa": 3.54,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 31000",
+    "courseTitle": "Foundations of Cybersecurity",
+    "category": "ELECTIVE",
+    "completionCount": 13,
+    "averageGpa": 3.54,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 21500",
+    "courseTitle": "Programming Logic and Design",
+    "category": "ELECTIVE",
+    "completionCount": 11,
+    "averageGpa": 3.55,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MTH 14100",
+    "courseTitle": "Basic Statistics (GE-Math)",
+    "category": "GE-MATH",
+    "completionCount": 11,
+    "averageGpa": 3.18,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 35100",
+    "courseTitle": "Database Analysis and Design Concepts",
+    "category": "ELECTIVE",
+    "completionCount": 9,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 48100",
+    "courseTitle": "Project Management in Information Technology",
+    "category": "ELECTIVE",
+    "completionCount": 9,
+    "averageGpa": 3.67,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 17000",
+    "courseTitle": "Composition II (GE-Comm)",
+    "category": "GE-COMM",
+    "completionCount": 9,
+    "averageGpa": 3.13,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CCJ 20000",
+    "courseTitle": "Criminology (GE-SocSci)",
+    "category": "GE-SOCSCI",
+    "completionCount": 8,
+    "averageGpa": 3.25,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 15000",
+    "courseTitle": "Composition I (GE-Comm)",
+    "category": "GE-COMM",
+    "completionCount": 8,
+    "averageGpa": 3.14,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32700",
+    "courseTitle": "Network and Cloud Security",
+    "category": "ELECTIVE",
+    "completionCount": 7,
+    "averageGpa": 3.57,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "UNIV 10100",
+    "courseTitle": "First-Year Experience",
+    "category": "ELECTIVE",
+    "completionCount": 7,
+    "averageGpa": 3.83,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32300",
+    "courseTitle": "Cisco I-Introduction to Networks",
+    "category": "ELECTIVE",
+    "completionCount": 6,
+    "averageGpa": 3.67,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32301",
+    "courseTitle": "Introduction to Networks Lab",
+    "category": "ELECTIVE",
+    "completionCount": 6,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 36600",
+    "courseTitle": "Fundamentals of Data Center Virtualization",
+    "category": "ELECTIVE",
+    "completionCount": 6,
+    "averageGpa": 3.83,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 43400",
+    "courseTitle": "Network Management",
+    "category": "ELECTIVE",
+    "completionCount": 6,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 41500",
+    "courseTitle": "Cloud Computing Essentials and Best Practices",
+    "category": "ELECTIVE",
+    "completionCount": 6,
+    "averageGpa": 3.2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 42100",
+    "courseTitle": "Ethical Hacking",
+    "category": "ELECTIVE",
+    "completionCount": 5,
+    "averageGpa": 3.6,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MTH 15100",
+    "courseTitle": "College Algebra (GE-Math)",
+    "category": "GE-MATH",
+    "completionCount": 5,
+    "averageGpa": 2.6,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 33400",
+    "courseTitle": "Ethical Issues in Cybersecurity",
+    "category": "ELECTIVE",
+    "completionCount": 5,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32500",
+    "courseTitle": "Cisco III-Scaling Networks",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32501",
+    "courseTitle": "Scaling Networks Lab",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32800",
+    "courseTitle": "Digital Forensics and Cyber Investigation",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 3.75,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32400",
+    "courseTitle": "Cisco II-Routing and Switching Essentials",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 3.67,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 32401",
+    "courseTitle": "Routing and Switching Lab",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 41700",
+    "courseTitle": "Hybrid Cloud Architecture and Management",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 3.75,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 43200",
+    "courseTitle": "Secure Software Development",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 41200",
+    "courseTitle": "Linux Server Installation & Configuration",
+    "category": "ELECTIVE",
+    "completionCount": 4,
+    "averageGpa": 3.75,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 36700",
+    "courseTitle": "Fundamentals of Cloud Computing",
+    "category": "ELECTIVE",
+    "completionCount": 3,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "AAD 18101",
+    "courseTitle": "Digital Photography I (GE-HC:Arts)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 3,
+    "averageGpa": 3.67,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CSC 10011",
+    "courseTitle": "Introduction to Programming",
+    "category": "ELECTIVE",
+    "completionCount": 3,
+    "averageGpa": 2.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 43300",
+    "courseTitle": "Web Based Application Security",
+    "category": "ELECTIVE",
+    "completionCount": 3,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PS 18000",
+    "courseTitle": "Introduction to International Relations (GE-HC:ForCul/HD)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 3,
+    "averageGpa": 3.67,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "COM 11000",
+    "courseTitle": "Fundamentals of Oral Communication (GE-Elective)(GE-Comm)",
+    "category": "GE-COMM",
+    "completionCount": 3,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PHRL 11600",
+    "courseTitle": "World Religions (GE-HC:Rel/HD)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 3,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HIST 11200",
+    "courseTitle": "US History: New Republic to World Power (GE-HC:USHisGov)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 2,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HIST 11300",
+    "courseTitle": "US History: American Century (GE-HC:USHisGov)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 2,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CAH 20501",
+    "courseTitle": "Fundamentals of Applied AI (GE-Comm)",
+    "category": "GE-COMM",
+    "completionCount": 2,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 28015",
+    "courseTitle": "Topics in Literature: Nature, Art, & Machine in Japanese Lit (GE-HC:Lit/HD)",
+    "category": "GE-LITERATURE",
+    "completionCount": 2,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 47700",
+    "courseTitle": "Fundamentals of User Interface Design",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 47900",
+    "courseTitle": "Applications in Multi-Tiered Web Programming",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 45200",
+    "courseTitle": "Database Application Implementation",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 2.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 34050",
+    "courseTitle": "C# Programming",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MRKT 35010",
+    "courseTitle": "Principles of Marketing",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 20101",
+    "courseTitle": "Modern World Literature (GE-HC:Lit/HD)",
+    "category": "GE-LITERATURE",
+    "completionCount": 2,
+    "averageGpa": 2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 37700",
+    "courseTitle": "Fundamentals of HTML",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 41000",
+    "courseTitle": "Systems Analysis and Design",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "IIT 31400",
+    "courseTitle": "Agile Software Development",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "TA 10500",
+    "courseTitle": "Fundamentals of Acting (GE-HC:Arts)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 2,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MTH 11000",
+    "courseTitle": "Intermediate Algebra",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MGMT 36050",
+    "courseTitle": "Organizational Behavior",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MGMT 26032",
+    "courseTitle": "Principles of Management",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ECON 23020",
+    "courseTitle": "Principles of Microeconomics (GE-SocSci)",
+    "category": "GE-SOCSCI",
+    "completionCount": 2,
+    "averageGpa": 2.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CCJ 11000",
+    "courseTitle": "Criminal Justice Systems",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ICS 48900",
+    "courseTitle": "Cybersecurity Capstone",
+    "category": "ELECTIVE",
+    "completionCount": 2,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PHS 24100",
+    "courseTitle": "Introduction to Global Health (GE-HC:ForCul/HD)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PHRL 11400",
+    "courseTitle": "The Bible (GE-HC:Rel)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CINE 34000",
+    "courseTitle": "History of World Cinema (GE-HC:ForCul/HD)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 33800",
+    "courseTitle": "Medieval Literature (GE-HC:Lit)",
+    "category": "GE-LITERATURE",
+    "completionCount": 1,
+    "averageGpa": 2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CINE 31500",
+    "courseTitle": "MicroCinema",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CINE 14000",
+    "courseTitle": "Introduction to Film (GE-HC:Arts)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "SPMGT 27020",
+    "courseTitle": "Sport Business Orientation",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PHRL 10600",
+    "courseTitle": "Self & Identity (GE-HC:Phl)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PHRL 10200",
+    "courseTitle": "Philosophy of Love (GE-HC:Phl)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PS 15600",
+    "courseTitle": "American Government:The States (GE-HC:USHisGov)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "EPP 10100",
+    "courseTitle": "Advanced English Grammar for Multilingual Students",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "EPP 11000",
+    "courseTitle": "Academic Writing for Multilingual Students",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "EPP 10500",
+    "courseTitle": "Reading and Writing for Multilingual Students",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "EPP 12500",
+    "courseTitle": "Advanced Speaking and Listening for Multilingual Students",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ARTH 22700",
+    "courseTitle": "Global Art History III: From Colonial Vistas to Avant-Garde (GE-HC:Arts/HD)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HIST 11100",
+    "courseTitle": "US History: Colony to New Republic (GE-HC:USHisGov)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MGMT 26014",
+    "courseTitle": "Excel for Professionals",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "EDU 27700",
+    "courseTitle": "Knw Yrslf,Knw Wrld:Educ in the Global Cmnty(GE-HC:ForCul/HD)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENTR 37505",
+    "courseTitle": "Innovation",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "DAN 10100",
+    "courseTitle": "Introduction to Dance (GE-HC:Arts)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 35200",
+    "courseTitle": "Early American Literature (GE-HC:Lit)",
+    "category": "GE-LITERATURE",
+    "completionCount": 1,
+    "averageGpa": 1,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HIST 12000",
+    "courseTitle": "US History: America through Sport (GE-HC:USHisGov)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HS 21000",
+    "courseTitle": "Comparative Health Systems (GE-HC:ForCul/HD)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ACCT 21011",
+    "courseTitle": "Principles of Managerial Accounting",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "COM 32700",
+    "courseTitle": "Media Literacy (GE-Comm)",
+    "category": "GE-COMM",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 25600",
+    "courseTitle": "Greek Myth, Epic, and Tragedy (GE-HC:Lit/HD)(GE-Lit/CrsClt)",
+    "category": "GE-LIT",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "GAM 10000",
+    "courseTitle": "Introduction to Game Design",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "COM 30210",
+    "courseTitle": "Career and Portfolio Seminar",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "AAD 24100",
+    "courseTitle": "Ceramics I (GE-HC:Arts)(GE-FineArt)",
+    "category": "GE-GE_ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ACCT 21010",
+    "courseTitle": "Principles of Financial Accounting",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CSC 14400",
+    "courseTitle": "Computer Science I",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "CSC 10022",
+    "courseTitle": "Introduction to Computer Science: Javascript",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ECON 23010",
+    "courseTitle": "Survey of Economics (GE-SocSci)",
+    "category": "GE-SOCSCI",
+    "completionCount": 1,
+    "averageGpa": 2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MUS 15000",
+    "courseTitle": "Music in America (GE-HC:Arts)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HIST 12100",
+    "courseTitle": "US History: The 1960s (GE-HC:USHisGov)",
+    "category": "GE-US_HIST_GOV",
+    "completionCount": 1,
+    "averageGpa": 2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PHRL 21000",
+    "courseTitle": "Practical Logic for Daily Life (GE-HC:Phl)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "UNIV 10000",
+    "courseTitle": "Academic Commitment to Excellence",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MGMT 36081",
+    "courseTitle": "Career Development",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "MUS 15500",
+    "courseTitle": "Jazz History (GE-HC:Arts/HD)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 1,
+    "averageGpa": 2,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "TA 33600",
+    "courseTitle": "Survey of Dramatic Literature (GE-HC:Lit/HD)",
+    "category": "GE-LITERATURE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "AAD 10050",
+    "courseTitle": "Web Design I",
+    "category": "ELECTIVE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "HIST 10100",
+    "courseTitle": "World History: Empires and Exchanges since 1500 (GE-HC:WHis/HD)",
+    "category": "GE-HUMAN_CULTURE_ELECTIVE__NON_LIT_NON_ARTS_",
+    "completionCount": 1,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "PSY 18100",
+    "courseTitle": "Cultural Psychology (GE-SocSci/HD)",
+    "category": "GE-SOCSCI",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 25900",
+    "courseTitle": "Existentialism: Absurdity, Angst, and the Meaning of Life (GE-HC:Lit)",
+    "category": "GE-LITERATURE",
+    "completionCount": 1,
+    "averageGpa": 3.5,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "EXS 24000",
+    "courseTitle": "Nutrition Throughout the Lifecycle (GE-NatSciLec)",
+    "category": "GE-NATURAL_SCIENCE_WITH_LAB",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ENGL 20104",
+    "courseTitle": "World Lit: Rebels & Robots, Tech & Freedom (GE-HC:Lit/HD)",
+    "category": "GE-LITERATURE",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ECON 23030",
+    "courseTitle": "Principles of Macroeconomics (GE-SocSci)",
+    "category": "GE-SOCSCI",
+    "completionCount": 1,
+    "averageGpa": 3,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ARTH 11000",
+    "courseTitle": "Concepts in the Visual Arts (GE-HC:Arts)",
+    "category": "GE-FINE_ARTS",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  },
+  {
+    "courseCode": "ESC 13200",
+    "courseTitle": "Introductory Astronomy (GE-NatSciLec/Lab)",
+    "category": "GE-NATURAL_SCIENCE_WITH_LAB",
+    "completionCount": 1,
+    "averageGpa": 4,
+    "isInstitutional": true
+  }
+]

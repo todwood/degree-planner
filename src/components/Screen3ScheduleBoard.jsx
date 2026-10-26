@@ -16,6 +16,7 @@ import { exportDegreePlanPdf } from '../engine/pdfExporter.js';
 import { validateScheduleMove } from '../engine/scheduler.js';
 import { isTransferPlaceholder } from '../engine/transcriptParser.js';
 import dbAdapter from '../data/dbAdapter.js';
+import CourseDetailModal from './modals/CourseDetailModal.jsx';
 
 /**
  * Helper to compute concise offering availability text and status from the database.
@@ -1666,128 +1667,16 @@ export default function Screen3ScheduleBoard({
       )}
 
       {/* =========================================================================
-          CLICKABLE COURSE INSPECTOR SLIDE-OVER DRAWER
+          COURSE INSPECTOR MODAL / SLIDE-OVER DRAWER
       ========================================================================= */}
-      {drawerCourse && (
-        <div
-          className="fixed inset-0 bg-black/40 z-50 flex justify-end backdrop-blur-2xs"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setSelectedCourseForDrawer(null);
-          }}
-        >
-          <div className="bg-white w-full max-w-md h-full shadow-2xl p-6 overflow-y-auto animate-in slide-in-from-right duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
-              <span className="text-xs font-bold text-[#857542] uppercase tracking-wide">
-                Course Inspector Drawer
-              </span>
-              <button
-                onClick={() => setSelectedCourseForDrawer(null)}
-                className="p-1 rounded hover:bg-neutral-100 text-neutral-500"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="py-4 space-y-3">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono text-[#857542]">
-                    {drawerCourse.code}
-                  </span>
-                  <span className="text-[10px] font-bold bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded uppercase">
-                    Dept: {drawerCourse.department}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-neutral-900 mt-0.5">
-                  {drawerCourse.title}
-                </h3>
-              </div>
-
-              <div className="h-0.5 bg-neutral-200 w-full" />
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-neutral-500 block">Credit Hours</span>
-                  <span className="font-bold font-mono">{drawerCourse.credits} cr</span>
-                </div>
-                <div>
-                  <span className="text-neutral-500 block">Course Fee</span>
-                  <span className="font-bold text-neutral-800">{drawerCourse.fee_info}</span>
-                </div>
-              </div>
-
-              <div className="text-xs">
-                <span className="text-neutral-500 block mb-1">Catalog Description</span>
-                <p className="text-neutral-800 leading-relaxed bg-neutral-50 p-3 rounded border border-neutral-200">
-                  {drawerCourse.description}
-                </p>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div>
-                  <span className="text-neutral-500 block font-semibold">Prerequisites:</span>
-                  <span className="font-mono text-neutral-800">
-                    {drawerCourse.prereq_display}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-neutral-500 block font-semibold">Corequisites:</span>
-                  <span className="font-mono text-neutral-800">
-                    {(drawerCourse.coreq_codes || []).join(', ') || 'None'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-neutral-500 block font-semibold">Official Session Availability:</span>
-                  <span className="font-bold text-neutral-800">
-                    {(drawerCourse.offered_sessions || []).join(', ') || 'All Sessions'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-neutral-500 block font-semibold">Currently Scheduled In:</span>
-                  <span className="font-bold text-[#857542]">
-                    {selectedCourseForDrawer.assignedSlot || 'Session I'} (
-                    {selectedCourseForDrawer.assignedSlot?.includes('16wk')
-                      ? '16-Week Full Term Format'
-                      : '8-Week Accelerated Session Format'}
-                    )
-                  </span>
-                </div>
-              </div>
-
-              {/* Popular GE Course Recommendations filtered by ge_bucket_id */}
-              {drawerPopularityStats.length > 0 && (
-                <div className="pt-3 border-t border-neutral-200">
-                  <span className="text-xs font-bold text-neutral-900 block mb-2">
-                    {drawerCourse.ge_bucket_id
-                      ? 'Popular Course Options for this Requirement (2-Year Average Grade Stats):'
-                      : 'Popular GE Recommendations (2-Year Average Grade Stats):'}
-                  </span>
-                  <div className="space-y-1.5 text-xs">
-                    {drawerPopularityStats.map((st, i) => (
-                      <div
-                        key={i}
-                        className="flex justify-between items-center p-2 bg-[#F7F5EE] rounded border border-[#B5A36A]"
-                      >
-                        <div className="truncate mr-2">
-                          <span className="font-bold text-neutral-900 font-mono text-[11px]">
-                            {st.course_code}
-                          </span>
-                          <span className="text-neutral-700 ml-1.5 text-[11px]">
-                            {st.course_title}
-                          </span>
-                        </div>
-                        <span className="font-mono text-[11px] text-[#857542] font-bold flex-shrink-0">
-                          Avg GPA: {st.average_grade_points}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <CourseDetailModal
+        isOpen={Boolean(drawerCourse)}
+        course={drawerCourse}
+        onClose={() => setSelectedCourseForDrawer(null)}
+        activeProgram={propSelectedProgramId || schedule?.programId || 'cybersecurity_bs_2026'}
+        masterDb={masterDb}
+        activeStudentCourses={rawCompletedCourses}
+      />
     </div>
   );
 }
