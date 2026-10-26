@@ -913,3 +913,30 @@
   - `npx.cmd vitest run tests/jalenSmithIntake.test.js` passed with 100% success (6 / 6 tests).
   - Repository-wide test suite: 6 test suites, 66 / 66 unit tests passing.
   - Production build `npm.cmd run build` compiled cleanly with 0 errors (1,797 modules transformed in 3.80s).
+
+### 60. Git Repository Initialization, Source Code Tracking, & Live GitHub Pages Release
+- **Objective:**
+  - Initialize local Git repository on branch `source`, configure remote origin to `todwood/degree-planner`, stage all production and test source code (excluding `.tmp/`, `.env`, `node_modules/`, `dist/`), commit transfer placeholder deduplication fixes, and push to GitHub.
+  - Build production static bundle and deploy live update to GitHub Pages via `execution/deploy_to_github_pages.js --live`.
+- **Implementation & Authentication Resolution:**
+  - *Git CLI & Credential Resolution:*
+    - Located local Git CLI binary at `C:\Users\todwood\AppData\Local\AMD\AI_Bundle\ComfyUI\Git\cmd\git.exe` (`git version 2.51.2.windows.1`).
+    - Configured local git repository: `git init -b source`, `user.name: "todwood"`, `user.email: "todwood@users.noreply.github.com"`.
+    - Resolved cached fine-grained GitHub PAT (`github_pat_...`) from `.env`.
+    - Fixed background hang caused by Git Credential Manager GUI prompt by setting `git config credential.helper ""` and configuring authenticated remote URL `https://todwood:${token}@github.com/todwood/degree-planner.git`.
+  - *Commit & Push (`source` branch):*
+    - Staged 83 source, engine, test, and documentation files with zero sensitive files or transient `.tmp/` caches (`.gitignore` verified).
+    - Committed with conventional commit: `fix(audit): exempt ELECT and GE transfer placeholders from repeat deduplication` (`commit 4356c963b3d123f7068a393d82c577048d968ed0`).
+    - Pushed branch `source` to GitHub: `git -c credential.helper= push -u origin source` (exit code 0, tracking `origin/source`).
+  - *Production Build & Live Deployment:*
+    - Recompiled production bundle with `npm run build` (1,797 modules transformed into `dist/assets/index-Dxd2MNbP.js`).
+    - Executed `execution/deploy_to_github_pages.js --live`: updated `assets/index-Dxd2MNbP.js` and `index.html` on GitHub Pages (`main` branch) with 0 sensitive files.
+- **Live Verification:**
+  - Automated headless Chrome verification against `https://todwood.github.io/degree-planner/` (`execution/verify_live_pages.js`):
+    - Confirmed live page title: `"Degree Planner — Academic Advising System"`.
+    - Confirmed live header navigation and Screen 1 advising workspace.
+    - Confirmed Quick-Add enrolled courses tray functionality.
+    - Confirmed zero-upload confirmation modal flow to Screen 3 schedule board.
+    - Confirmed real student PDF upload (Brandon Paz, 29 courses / 84 credits).
+    - Live console errors: `0`.
+    - Screenshot captured: `.tmp/live_github_pages_verification.png`.
