@@ -6,6 +6,10 @@
 # Local scratch and sample files (FERPA / local calibration)
 .tmp/
 *.tmp
+src/data/realStudentsCatalog.json
+*.private.json
+*.transcript.pdf
+*.audit.html
 
 # Dependencies and virtual environments
 node_modules/
