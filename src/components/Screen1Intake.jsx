@@ -36,7 +36,6 @@ import {
   getCurrentAcademicSemester
 } from '../engine/transcriptParser.js';
 import { calculateStartingSemester } from '../engine/scheduler.js';
-import DegreeChecklistModal from './DegreeChecklistModal.jsx';
 import dbAdapter from '../data/dbAdapter.js';
 
 export const ANTHOLOGY_SOP_GUIDE_URL =
@@ -322,9 +321,6 @@ export default function Screen1Intake({
   useEffect(() => {
     if (propAdditionalPrograms) setAdditionalProgramsState(propAdditionalPrograms);
   }, [propAdditionalPrograms]);
-
-  // UI state for modal & progressive disclosure
-  const [degreeModalOpen, setDegreeModalOpen] = useState(false);
 
   // Scheduling Constraints
   const [modalityPreference, setModalityPreferenceState] = useState(
@@ -1872,15 +1868,9 @@ export default function Screen1Intake({
                     <BookOpen className="w-3.5 h-3.5 text-[#857542] flex-shrink-0" />
                     <span>Degree Curriculum &amp; Catalog</span>
                   </h3>
-                  <button
-                    type="button"
-                    id="optionB-add-program-btn"
-                    onClick={() => setDegreeModalOpen(true)}
-                    className="text-[10px] font-bold text-[#857542] hover:text-[#6E6035] bg-[#F7F5EE] hover:bg-[#EFEBD9] border border-[#B5A36A]/40 px-2.5 py-1 rounded transition flex items-center space-x-1 flex-shrink-0"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>[+ Add Major / Minor / Certificate]</span>
-                  </button>
+                  <span className="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
+                    Verified Degree Programs
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1938,13 +1928,7 @@ export default function Screen1Intake({
                       <select
                         id="optionB-program-select"
                         value={selectedProgramId}
-                        onChange={(e) => {
-                          if (e.target.value === '__add_new__') {
-                            setDegreeModalOpen(true);
-                            return;
-                          }
-                          setSelectedProgramId(e.target.value);
-                        }}
+                        onChange={(e) => setSelectedProgramId(e.target.value)}
                         className="w-full appearance-none pl-3.5 pr-9 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs truncate cursor-pointer"
                       >
                         <optgroup label="Official Undergraduate Degree Programs">
@@ -1955,11 +1939,6 @@ export default function Screen1Intake({
                                 {p.name}
                               </option>
                             ))}
-                        </optgroup>
-                        <optgroup label="Custom Degree Actions">
-                          <option value="__add_new__" className="text-[#857542] font-extrabold bg-[#F7F5EE]">
-                            ➕ + Add New / Import Degree Checklist...
-                          </option>
                         </optgroup>
                       </select>
                       <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -2579,18 +2558,6 @@ export default function Screen1Intake({
         </div>
       </dialog>
 
-      {/* Degree Checklist Modal */}
-      <DegreeChecklistModal
-        isOpen={degreeModalOpen}
-        onClose={() => setDegreeModalOpen(false)}
-        masterDb={masterDb}
-        facultyProfile={facultyProfile}
-        onProgramSaved={(newProgId) => {
-          setSelectedProgramId(newProgId);
-          const prog = masterDb.programs?.find((p) => p.id === newProgId);
-          if (prog?.catalog_year_id) setCatalogYear(prog.catalog_year_id);
-        }}
-      />
 
       {/* Student Record Wrong Document Notification & SOP Export Instructions Popup Modal */}
       <dialog

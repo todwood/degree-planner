@@ -1099,6 +1099,17 @@
   5. Re-established authenticated remote `origin` and executed `git push origin source --force --tags`.
   6. Verified all 112 unit tests pass (100%) and production Vite build compiles cleanly with 0 errors.
 
+### 68. Read-Only Deterministic Architecture & Mutation Surface Remediation
+- **Objective:** Convert the advising platform into an immutable, read-only advising system: eliminate client-side mutations, prune unused database write methods, decommission degree checklist imports, and isolate peer recommendation metrics.
+- **Execution:**
+  1. *Master Curriculum Inspector:* Converted `SharedDatabaseModal.jsx` into a 100% read-only catalog inspector. Replaced all editable form inputs and save/add/peer-verification triggers with high-density read-only attribute ledgers, official session availability badges, and verbatim catalog descriptions.
+  2. *Decommission Degree Imports:* Removed `DegreeChecklistModal.jsx` and unverified preset catalog `csthProgramCatalog.js`. In `Screen1Intake.jsx`, pruned the `[+ Add Major / Minor / Certificate]` button and `__add_new__` dropdown option, ensuring program selection is strictly locked to verified degrees in `masterDatabase.json`.
+  3. *Eliminate Storage Hydration & Mutation Methods:* Rewrote `dbAdapter.js` to read directly from static `masterDatabase.json` without hydration from `IndexedDB` or `localStorage`. Pruned dead mutation functions (`saveCourse`, `deleteCourse`, `addPolicyException`, `incrementGEStat`, `saveFacultyProfile`, `saveProgram`) and deleted `applyHarvesterToDatabase` in `transcriptParser.js`.
+  4. *Fix Recommendation Self-Contamination:* Updated `courseRecommendations.js` so that peer completion counts and mean GPAs are strictly computed from baseline institutional records without incorporating active student grades. Unranked courses with zero peer completions display as `New / Unranked` with `N/A` grade badges.
+  5. *Test Suite Continuity:* All 112 Vitest unit tests pass with 100% success across 9 test files. Production Vite bundle compiles cleanly with 0 errors in 4.17s.
+  6. *Headless Verification:* `.tmp/verify_readonly_architecture.mjs` validated Screen 1 program selector, read-only database inspector, and Screen 3 recommendation drawer with clean process teardown (exit code 0).
+
+
 
 
 

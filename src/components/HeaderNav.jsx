@@ -280,7 +280,7 @@ export default function HeaderNav({
                   className="w-full text-left px-4 py-2 text-xs hover:bg-[#F7F5EE] flex items-center space-x-2 text-neutral-700 hover:text-neutral-900"
                 >
                   <Database className="w-4 h-4 text-[#857542]" />
-                  <span>View / Edit Shared Master Database</span>
+                  <span>Inspect Master Curriculum Catalog</span>
                 </button>
 
                 <div className="border-t border-neutral-100 my-1"></div>

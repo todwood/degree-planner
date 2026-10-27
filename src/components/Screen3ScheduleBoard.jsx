@@ -2222,7 +2222,6 @@ export default function Screen3ScheduleBoard({
         onClose={() => setSelectedCourseForDrawer(null)}
         activeProgram={propSelectedProgramId || schedule?.programId || 'cybersecurity_bs_2026'}
         masterDb={masterDb}
-        activeStudentCourses={rawCompletedCourses}
       />
 
       {/* Toast Feedback for Course Moves */}

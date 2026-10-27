@@ -67,7 +67,7 @@ export function formatGpaWithLetter(gpa) {
 export function formatPeerPopularity(count) {
   const c = parseInt(count, 10) || 0;
   if (c <= 0) {
-    return '0 peers recorded';
+    return 'New / Unranked';
   }
   if (c === 1) {
     return '1 student completed';
@@ -335,54 +335,26 @@ export function matchesBucket(bucketId, course) {
 }
 
 /**
- * Merge baseline historical fulfillments with loaded active student records.
+ * Build historical lookup strictly from baseline institutional peer fulfillments.
+ * Excludes active student records from peer counts and GPA metrics to prevent self-contamination.
  */
-export function buildHistoricalLookup(baseline = baseHistoricalFulfillments, activeStudentCourses = null) {
+export function buildHistoricalLookup(baseline = baseHistoricalFulfillments, _activeStudentCourses = null) {
   const map = new Map();
 
-  // Load baseline
+  // Load baseline institutional fulfillments only
   (baseline || []).forEach((item) => {
     const compact = (item.courseCode || '').replace(/\s+/g, '').toUpperCase();
-    map.set(item.courseCode, { ...item });
-    map.set(compact, { ...item });
+    const entry = {
+      courseCode: item.courseCode,
+      courseTitle: item.courseTitle,
+      category: item.category,
+      completionCount: item.completionCount || 0,
+      averageGpa: item.averageGpa !== undefined ? item.averageGpa : null,
+      isInstitutional: true
+    };
+    map.set(item.courseCode, entry);
+    map.set(compact, entry);
   });
-
-  // Dynamically incorporate valid institutional completions from active student records
-  if (activeStudentCourses && Array.isArray(activeStudentCourses)) {
-    activeStudentCourses.forEach((c) => {
-      // Exclude transfers and placeholders
-      if (c.isTransfer || c.fromTranscriptPdf || c.isTransferPlaceholder || /^(?:ELECT|GE)\b/i.test(c.code)) {
-        return;
-      }
-      if (c.state !== 'Completed' && c.state !== 'Complete') {
-        return;
-      }
-      const code = c.code;
-      const compact = (c.compactCode || c.code || '').replace(/\s+/g, '').toUpperCase();
-      const existing = map.get(code) || map.get(compact);
-
-      if (existing) {
-        existing.completionCount = (existing.completionCount || 0) + 1;
-        if (GRADE_POINTS[c.grade] !== undefined) {
-          const prevGpa = existing.averageGpa || 3.5;
-          const newGpa = Number(((prevGpa * (existing.completionCount - 1) + GRADE_POINTS[c.grade]) / existing.completionCount).toFixed(2));
-          existing.averageGpa = newGpa;
-        }
-      } else {
-        const gradeVal = GRADE_POINTS[c.grade] !== undefined ? GRADE_POINTS[c.grade] : 3.5;
-        const entry = {
-          courseCode: c.code,
-          courseTitle: c.title,
-          category: c.geCategory || 'ELECTIVE',
-          completionCount: 1,
-          averageGpa: gradeVal,
-          isInstitutional: true
-        };
-        map.set(c.code, entry);
-        map.set(compact, entry);
-      }
-    });
-  }
 
   return map;
 }
@@ -475,9 +447,9 @@ export function getCourseRecommendations(
     ? catalogCourses
     : masterDb.courses || [];
 
+  // Exclude active student courses from peer metrics to guarantee zero self-contamination
   const historicalMap = buildHistoricalLookup(
-    historicalData && Array.isArray(historicalData) ? historicalData : baseHistoricalFulfillments,
-    activeStudentCourses
+    historicalData && Array.isArray(historicalData) ? historicalData : baseHistoricalFulfillments
   );
 
   // 2. Placeholder Level Detection:
@@ -602,7 +574,7 @@ export function getCourseRecommendations(
       typicalOffering: formatTypicalOffering(cand.offered_sessions),
       completionCount,
       averageGpa,
-      gradeBadge: completionCount > 0 ? formatGpaWithLetter(averageGpa) : 'N/A',
+      gradeBadge: completionCount > 0 && averageGpa !== null ? formatGpaWithLetter(averageGpa) : 'N/A',
       popularityBadge: formatPeerPopularity(completionCount),
       description: cand.description || 'Verbatim description pulled from Academic Course Catalog.',
       prereqDisplay: cand.prereq_display || cand.prereqs || 'None',

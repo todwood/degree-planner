@@ -194,25 +194,25 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       expect(course.verification_status).toBe('Verified');
     });
 
-    it('applies Two-Key Peer Verification rule on course edits', async () => {
-      const testCourse = {
-        code: 'TEST 10100',
-        title: 'Experimental Testing Course',
-        credits: 3,
-        FA_I_8wk: true,
-        FA_II_8wk: false,
-        verification_status: 'Blank_Unverified'
-      };
+    it('strictly exposes read-only methods and rejects client-side database mutation', () => {
+      // dbAdapter must NOT expose client-side mutation methods
+      expect(dbAdapter.saveCourse).toBeUndefined();
+      expect(dbAdapter.deleteCourse).toBeUndefined();
+      expect(dbAdapter.addPolicyException).toBeUndefined();
+      expect(dbAdapter.incrementGEStat).toBeUndefined();
+      expect(dbAdapter.saveFacultyProfile).toBeUndefined();
+      expect(dbAdapter.saveProgram).toBeUndefined();
 
-      // Advisor 1 submits -> tagged 'Tentative (*)'
-      const saved1 = await dbAdapter.saveCourse(testCourse, 'advisor1@lindenwood.edu');
-      expect(saved1.verification_status).toBe('Tentative');
-      expect(saved1.submitted_by).toBe('advisor1@lindenwood.edu');
-
-      // Advisor 2 confirms -> promoted to 'Verified'
-      const saved2 = await dbAdapter.saveCourse(saved1, 'advisor2@lindenwood.edu');
-      expect(saved2.verification_status).toBe('Verified');
-      expect(saved2.verified_by).toBe('advisor2@lindenwood.edu');
+      // Read-only APIs are fully defined and callable
+      expect(typeof dbAdapter.getCatalogYears).toBe('function');
+      expect(typeof dbAdapter.getPrograms).toBe('function');
+      expect(typeof dbAdapter.getProgramById).toBe('function');
+      expect(typeof dbAdapter.getCourses).toBe('function');
+      expect(typeof dbAdapter.getCourse).toBe('function');
+      expect(typeof dbAdapter.getCourseSync).toBe('function');
+      expect(typeof dbAdapter.isPlaceholder).toBe('function');
+      expect(typeof dbAdapter.getPlaceholders).toBe('function');
+      expect(typeof dbAdapter.getConcreteCourses).toBe('function');
     });
 
     it('manages canonical placeholders, legacy aliases, and protects system-locked tokens', async () => {
@@ -298,21 +298,9 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       const epp15 = await dbAdapter.getCourse('EPP 15000');
       expect(epp15.title).toBe('Composition I - English for Academic Purposes (GE-Comm)');
 
-      // 6. Protect system-locked requirement placeholders from mutation/deletion by non-system
-      await expect(
-        dbAdapter.saveCourse({ code: 'REQ_GE_ART', title: 'Hacked Title' }, 'advisor@lindenwood.edu')
-      ).rejects.toThrow(/Cannot modify system-locked/);
-
-      await expect(
-        dbAdapter.deleteCourse('REQ_GE_ART', 'advisor@lindenwood.edu')
-      ).rejects.toThrow(/Cannot delete system-locked/);
-
-      // System can update if needed
-      const systemUpdated = await dbAdapter.saveCourse(
-        { ...art, description: 'Updated by system' },
-        'system'
-      );
-      expect(systemUpdated.description).toBe('Updated by system');
+      // 6. System requirement placeholders are immutable static records in masterDatabase
+      expect(art.system_locked).toBe(true);
+      expect(art.type).toBe('placeholder');
     });
 
     it('7. Phase C: Compound Science Lab matching (Paths A, B, C)', () => {

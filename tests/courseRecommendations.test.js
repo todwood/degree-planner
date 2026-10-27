@@ -160,7 +160,7 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
       const zeroCompCourses = recs.filter((c) => c.completionCount === 0);
       expect(zeroCompCourses.length).toBeGreaterThan(0);
       zeroCompCourses.forEach((zc) => {
-        expect(zc.popularityBadge).toBe('0 peers recorded');
+        expect(zc.popularityBadge).toBe('New / Unranked');
         expect(zc.gradeBadge).toBe('N/A');
         expect(zc.averageGpa).toBeNull();
       });
@@ -306,7 +306,7 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
     });
 
     it('formats peer popularity badges accurately', () => {
-      expect(formatPeerPopularity(0)).toBe('0 peers recorded');
+      expect(formatPeerPopularity(0)).toBe('New / Unranked');
       expect(formatPeerPopularity(1)).toBe('1 student completed');
       expect(formatPeerPopularity(15)).toBe('15 students completed');
     });
@@ -319,7 +319,7 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
       expect(formatTypicalOffering([])).toBe('Fall, Spring');
     });
 
-    it('dynamically incorporates active session completions in buildHistoricalLookup', () => {
+    it('excludes active student record from buildHistoricalLookup to prevent self-contamination', () => {
       const activeStudentCourses = [
         {
           code: 'MTH 15200',
@@ -330,10 +330,25 @@ describe('Tiered, Institutional-Only Course Recommendations Engine', () => {
         }
       ];
 
+      // MTH 15200 has no baseline peer fulfillments in historicalFulfillments.json
       const lookup = buildHistoricalLookup(baseHistoricalFulfillments, activeStudentCourses);
       const mth15200 = lookup.get('MTH 15200');
-      expect(mth15200).toBeDefined();
-      expect(mth15200.completionCount).toBeGreaterThan(0);
+      // Active student completion MUST NOT create synthetic peer row
+      expect(mth15200).toBeUndefined();
+
+      // In recommendations, MTH 15200 must display as New / Unranked with N/A grade badge
+      const recs = getCourseRecommendations(
+        { code: 'REQ_GE_MATH', title: 'GE: Mathematics', ge_bucket_id: 'math' },
+        'it_app_dev_bs_2026',
+        masterDb.courses,
+        baseHistoricalFulfillments,
+        activeStudentCourses
+      );
+      const unranked = recs.find((c) => c.code === 'MTH 15200');
+      expect(unranked).toBeDefined();
+      expect(unranked.completionCount).toBe(0);
+      expect(unranked.popularityBadge).toBe('New / Unranked');
+      expect(unranked.gradeBadge).toBe('N/A');
     });
   });
 
