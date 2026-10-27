@@ -1034,5 +1034,62 @@
   - Full Vitest suite: 8 test files, 95 / 95 unit tests passing (100%).
   - Production build: `npm run build` compiled cleanly with 0 errors in 3.90s.
 
+### 64. Screen 3 Drag-and-Drop Movement, Active Workload Metrics, and Retake Workflow
+- **Objective:**
+  - Resolve DND course movements and Move modal execution by fixing variable reference bugs (`allPastCourses`), defaulting modal target semester to the immediate chronological next semester (`getDefaultNextSemesterAndSlot`), and relabeling "Target Session Band" to "Target Session".
+  - Implement refined credit metrics distinguishing Active vs. Future semesters: future semesters display `## Pending Credits`, active semester with 0 complete sub-session credits displays `## Pending Credits`, and active semester with complete sub-session credits displays `## Pending • ## Complete Credits (## Total)`.
+  - Ingest sub-session completed courses (e.g. Session I) into the Active Semester card under a dedicated `1st 8-Week Session • Completed` divider while retaining their listing in the Past Coursework drawer.
+  - Enforce strict blanking and locking of past terms within the academic triad: preceding terms render only term identifier and `Term Concluded • Recorded in Past Coursework History`, with zero drag targets, zero buttons, and zero completed cards.
+  - Implement "Plan Retake" context action on active in-progress courses, adding a scheduled retake into the next chronological semester with non-amber informational badges (`Retake Planned` on active card, `Retake` on future card), strictly preserving the Tactile Flexibility Scale.
+- **Implementation:**
+  - `src/components/Screen3ScheduleBoard.jsx`: Exported pure helpers `formatSemesterCreditMetric`, `getTermChronologicalRank`, `isTermInPast`, `executePlanRetake`, and `executeCancelRetake`. Added `renderPastConcludedSemesterCard` and wired retake plan/cancel handlers with auto-clearing feedback toasts.
+  - `tests/scheduleBoard.test.js`: Added 9 new unit test specs covering credit metric formatting, chronological term ranking, past term boundary detection, and retake planning/cancellation. Total test suite expanded to 112 passing unit tests.
+
+### 65. Headless Verification Process Teardown Invariant
+- **Decision:** Any headless verification script (`.tmp/*.mjs` or `scripts/*.mjs`) that spawns an HTTP or Vite preview server or browser instance MUST implement deterministic teardown inside a `finally` block.
+- **Why:** On Windows environments, calling `childProcess.kill()` on processes spawned with `shell: true` terminates only `cmd.exe`, leaving orphaned `node.exe` processes holding preview ports (4173–4185) and keeping the event loop alive.
+- **Pattern:**
+  ```javascript
+  } finally {
+    if (browser) {
+      try { await browser.close(); } catch {}
+    }
+    if (preview && preview.pid) {
+      try {
+        if (process.platform === 'win32') {
+          spawn('taskkill', ['/pid', preview.pid.toString(), '/f', '/t'], { stdio: 'ignore' });
+        } else {
+          preview.kill('SIGTERM');
+        }
+      } catch {}
+    }
+    setTimeout(() => process.exit(process.exitCode || 0), 500);
+  }
+  ```
+- **Verification:** Cleaned all lingering preview port listeners on 4173–4185, verified script termination with exit code 0, 0 dangling listeners, and 100% green test suite.
+
+### 66. Master Database Pruning to 3 Verified Degrees & Multi-Program Intake Validation
+- **Objective:**
+  - Prune `src/data/masterDatabase.json` so the `programs` array strictly contains only the 3 verified Lindenwood degree programs across all supported catalog years (`2024-2025`, `2025-2026`, `2026-2027`):
+    1. `Cybersecurity, BS` (`cybersecurity_bs_2026`, `cybersecurity_bs_2025`, `cybersecurity_bs_2024`)
+    2. `Information Technology, BS - Applications Development Emphasis` (`it_app_dev_bs_2026`, `it_app_dev_bs_2025`, `it_app_dev_bs_2024`)
+    3. `Information Technology, BS - Networking Emphasis` (`it_networking_bs_2026`, `it_networking_bs_2025`, `it_networking_bs_2024`)
+  - Purged unverified drafts (`cs_bs_2026` "Computer Science, BS" and `math_bs_2026` "Mathematics, BS"), reducing total program entries from 11 to 9.
+  - Retained all catalog year mappings and concrete/placeholder course definitions.
+  - Zero UI/layout mutation on Screens 1, 2, or 3.
+  - Updated `tests/masterDatabase.test.js` to assert Upper-Level Elective placeholder generation via an in-test deficit mock rather than coupling tests to unverified catalog entries.
+- **Verification:**
+  - Vitest Unit Tests: 112 / 112 passing (100%) across 9 test files.
+  - Production Build: `npm run build` compiled cleanly in 4.71s with zero errors.
+  - Headless E2E Verification (`.tmp/verify_mock_students_intake.mjs`):
+    - Confirmed Screen 1 program dropdown strictly contains only the 3 verified degrees and zero unverified drafts.
+    - Verified intake and progression from Screen 1 through Screen 2 (Audit) and Screen 3 (Schedule Board) for all 3 programs:
+      - Program 1: Cybersecurity, BS (via Brandon Paz transcript).
+      - Program 2: Information Technology, BS - Networking Emphasis.
+      - Program 3: Information Technology, BS - Applications Development Emphasis.
+    - Clean process teardown conforming to Section 65 invariant; exit code 0.
+
+
+
 
 

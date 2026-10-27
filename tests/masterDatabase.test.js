@@ -427,8 +427,24 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       expect(genLookup).toBeDefined();
       expect(genLookup.code).toBe('REQ_ELEC_GEN');
 
-      // Verify Upper-Level Elective placeholder emissions in CS BS (which has an upper-level deficit)
-      const auditCS = runWaterfallAudit(parsedEmpty, 'cs_bs_2026', masterDb);
+      // Verify Upper-Level Elective placeholder emissions (using a program with an upper-level deficit)
+      const mockAuditDb = {
+        ...masterDb,
+        programs: [
+          ...masterDb.programs,
+          {
+            id: 'mock_bs_deficit',
+            catalog_year_id: '2026-2027',
+            name: 'Mock Deficit, BS',
+            total_program_credits: 30,
+            requirements: {
+              major_core_credits: 30,
+              major_core_courses: ['CSC 10100']
+            }
+          }
+        ]
+      };
+      const auditCS = runWaterfallAudit(parsedEmpty, 'mock_bs_deficit', mockAuditDb);
       const ulItems = auditCS.remainingCourseItems.filter((c) => c.code.startsWith('REQ_ELEC_UPPER_'));
       expect(ulItems.length).toBeGreaterThan(0);
       expect(ulItems[0].type).toBe('placeholder');

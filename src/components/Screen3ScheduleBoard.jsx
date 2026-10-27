@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Lock,
   Unlock,
@@ -122,6 +122,367 @@ function getHistoricalSessionTitle(c, season) {
   return '16-Week Full Term';
 }
 
+/**
+ * Determine the chronologically next semester and appropriate session band for course moves.
+ */
+export function getDefaultNextSemesterAndSlot(semesters, sourceSemId, sourceSlotKey) {
+  if (!Array.isArray(semesters) || semesters.length === 0) {
+    return { targetSemId: sourceSemId, targetSlotKey: sourceSlotKey };
+  }
+
+  const sourceIdx = semesters.findIndex((s) => s.id === sourceSemId);
+  const nextSem =
+    sourceIdx >= 0 && sourceIdx + 1 < semesters.length
+      ? semesters[sourceIdx + 1]
+      : semesters.find((s) => s.id !== sourceSemId) || semesters[0];
+
+  let defaultSlot = 'FA-I';
+  if (nextSem?.season === 'Summer') {
+    defaultSlot = 'SU';
+  } else if (nextSem?.season === 'Spring') {
+    defaultSlot = sourceSlotKey?.includes('16wk')
+      ? 'Spring-16wk'
+      : sourceSlotKey?.endsWith('-II')
+      ? 'SP-II'
+      : 'SP-I';
+  } else {
+    defaultSlot = sourceSlotKey?.includes('16wk')
+      ? 'Fall-16wk'
+      : sourceSlotKey?.endsWith('-II')
+      ? 'FA-II'
+      : 'FA-I';
+  }
+
+  return {
+    targetSemId: nextSem?.id || sourceSemId,
+    targetSlotKey: defaultSlot
+  };
+}
+
+/**
+ * Pure deterministic executor for course moves across semesters and session lanes.
+ */
+export function executeCourseMove(
+  schedule,
+  courseCode,
+  sourceSemId,
+  sourceSlotKey,
+  targetSemId,
+  targetSlotKey,
+  allPastCourses = [],
+  auditResultFlags = {}
+) {
+  if (!schedule || !Array.isArray(schedule.semesters)) {
+    return { success: false, reason: 'INVALID_SCHEDULE', schedule };
+  }
+
+  const normSourceSlot = (sourceSlotKey || '').trim();
+  const normTargetSlot = (targetSlotKey || '').trim();
+
+  if (sourceSemId === targetSemId && normSourceSlot === normTargetSlot) {
+    return { success: false, reason: 'SAME_SLOT', schedule };
+  }
+
+  const sourceSem = schedule.semesters.find((s) => s.id === sourceSemId);
+  if (!sourceSem) {
+    return { success: false, reason: 'SOURCE_SEMESTER_NOT_FOUND', schedule };
+  }
+
+  const course = (sourceSem.lanes[normSourceSlot] || []).find(
+    (c) => c.code === courseCode || c.compactCode === courseCode
+  );
+  if (!course) {
+    return { success: false, reason: 'COURSE_NOT_FOUND', schedule };
+  }
+
+  if (course.locked) {
+    return { success: false, reason: 'COURSE_LOCKED', schedule };
+  }
+
+  const targetSem = schedule.semesters.find((s) => s.id === targetSemId);
+  if (!targetSem) {
+    return { success: false, reason: 'TARGET_SEMESTER_NOT_FOUND', schedule };
+  }
+
+  // Validate move against deterministic rules using completed courses set
+  const completedSet = new Set(
+    allPastCourses.map((c) => c.compactCode || (c.code || '').replace(/\s+/g, ''))
+  );
+
+  const validation = validateScheduleMove(
+    course,
+    targetSem,
+    normTargetSlot,
+    schedule.semesters,
+    completedSet,
+    auditResultFlags
+  );
+
+  let conflictDot = null;
+  if (validation.hasConflict) {
+    conflictDot = {
+      message: validation.conflicts.map((c) => c.message).join(' | '),
+      conflicts: validation.conflicts
+    };
+  }
+
+  const is16 = normTargetSlot.includes('16wk');
+  const isTargetEnrolled = Boolean(targetSem.isEnrolledSemester);
+  const updatedCourse = {
+    ...course,
+    assignedSemesterId: targetSem.id,
+    assignedSlot: normTargetSlot,
+    sessionFormat: is16 ? '16-Week Full Term' : '8-Week Accelerated Session',
+    conflict: conflictDot,
+    isCurrentEnrolled: isTargetEnrolled,
+    isEnrolled: isTargetEnrolled,
+    state: isTargetEnrolled ? (course.state || 'Current') : 'Planned'
+  };
+
+  const nextSemesters = schedule.semesters.map((sem) => {
+    // Case 1: Intra-semester move
+    if (sem.id === sourceSemId && sem.id === targetSemId) {
+      const filteredSource = (sem.lanes[normSourceSlot] || []).filter(
+        (c) => c.code !== course.code && c.compactCode !== course.compactCode
+      );
+      const filteredTarget = (sem.lanes[normTargetSlot] || []).filter(
+        (c) => c.code !== course.code && c.compactCode !== course.compactCode
+      );
+      const nextTargetLane = [...filteredTarget, updatedCourse];
+      const newLanes = {
+        ...sem.lanes,
+        [normSourceSlot]: filteredSource,
+        [normTargetSlot]: nextTargetLane
+      };
+      const newTotal = Object.values(newLanes).reduce(
+        (sum, lane) => sum + (lane || []).reduce((s, c) => s + (c.credits || 0), 0),
+        0
+      );
+      return { ...sem, totalCredits: newTotal, lanes: newLanes };
+    }
+
+    // Case 2: Source semester (remove course)
+    if (sem.id === sourceSemId) {
+      const filtered = (sem.lanes[normSourceSlot] || []).filter(
+        (c) => c.code !== course.code && c.compactCode !== course.compactCode
+      );
+      const newLanes = { ...sem.lanes, [normSourceSlot]: filtered };
+      const newTotal = Object.values(newLanes).reduce(
+        (sum, lane) => sum + (lane || []).reduce((s, c) => s + (c.credits || 0), 0),
+        0
+      );
+      return { ...sem, totalCredits: newTotal, lanes: newLanes };
+    }
+
+    // Case 3: Target semester (add course)
+    if (sem.id === targetSemId) {
+      const currentLane = (sem.lanes[normTargetSlot] || []).filter(
+        (c) => c.code !== course.code && c.compactCode !== course.compactCode
+      );
+      const nextTargetLane = [...currentLane, updatedCourse];
+      const newLanes = { ...sem.lanes, [normTargetSlot]: nextTargetLane };
+      const newTotal = Object.values(newLanes).reduce(
+        (sum, lane) => sum + (lane || []).reduce((s, c) => s + (c.credits || 0), 0),
+        0
+      );
+      return { ...sem, totalCredits: newTotal, lanes: newLanes };
+    }
+
+    return sem;
+  });
+
+  return {
+    success: true,
+    validation,
+    conflictDot,
+    updatedCourse,
+    nextSchedule: { ...schedule, semesters: nextSemesters }
+  };
+}
+
+/**
+ * Format credit counter in semester header based on active vs. future term state.
+ * - Future/Inactive or Active with 0 complete: "## Pending Credits"
+ * - Active with complete sub-session credits: "## Pending • ## Complete Credits (## Total)"
+ */
+export function formatSemesterCreditMetric(sem, activeCompletedCredits = 0) {
+  const isEnrolledSem = Boolean(sem?.isEnrolledSemester || sem?.hasEnrolledCourses);
+  const pendingCredits = sem?.lanes
+    ? Object.values(sem.lanes).flat().reduce((sum, c) => sum + (Number(c.credits) || 0), 0)
+    : Number(sem?.totalCredits) || 0;
+
+  const compCredits = Number(activeCompletedCredits) || 0;
+
+  if (!isEnrolledSem || compCredits === 0) {
+    return `${pendingCredits} Pending Credits`;
+  }
+
+  const totalCredits = pendingCredits + compCredits;
+  return `${pendingCredits} Pending • ${compCredits} Complete Credits (${totalCredits} Total)`;
+}
+
+/**
+ * Compute the chronological rank of an academic season/year.
+ * Academic year begins with Fall (rank 0), followed by Spring (rank 1), and Summer (rank 2).
+ */
+export function getTermChronologicalRank(season, year) {
+  const numYear = Number(year) || 2026;
+  const startYr = season === 'Fall' ? numYear : numYear - 1;
+  const seasonRank = season === 'Fall' ? 0 : season === 'Spring' ? 1 : 2;
+  return startYr * 3 + seasonRank;
+}
+
+/**
+ * Check if a term is chronologically strictly in the past relative to the active semester.
+ */
+export function isTermInPast(season, year, activeSemesterOrRank) {
+  const targetRank = getTermChronologicalRank(season, year);
+  const refRank =
+    typeof activeSemesterOrRank === 'number'
+      ? activeSemesterOrRank
+      : activeSemesterOrRank
+      ? getTermChronologicalRank(activeSemesterOrRank.season, activeSemesterOrRank.year)
+      : getTermChronologicalRank('Fall', 2026);
+  return targetRank < refRank;
+}
+
+/**
+ * Pure deterministic executor for planning a retake of an active in-progress course.
+ */
+export function executePlanRetake(schedule, courseCode, sourceSemId, sourceSlotKey) {
+  if (!schedule || !Array.isArray(schedule.semesters)) {
+    return { success: false, reason: 'INVALID_SCHEDULE', schedule };
+  }
+
+  const sourceSem = schedule.semesters.find((s) => s.id === sourceSemId);
+  if (!sourceSem) {
+    return { success: false, reason: 'SOURCE_SEMESTER_NOT_FOUND', schedule };
+  }
+
+  const sourceLane = sourceSem.lanes[sourceSlotKey] || [];
+  const course = sourceLane.find((c) => c.code === courseCode || c.compactCode === courseCode);
+  if (!course) {
+    return { success: false, reason: 'COURSE_NOT_FOUND', schedule };
+  }
+
+  const { targetSemId, targetSlotKey } = getDefaultNextSemesterAndSlot(
+    schedule.semesters,
+    sourceSemId,
+    sourceSlotKey
+  );
+
+  const targetSem = schedule.semesters.find((s) => s.id === targetSemId);
+  if (!targetSem) {
+    return { success: false, reason: 'TARGET_SEMESTER_NOT_FOUND', schedule };
+  }
+
+  const is16 = targetSlotKey.includes('16wk');
+  const retakeCourse = {
+    ...course,
+    assignedSemesterId: targetSem.id,
+    assignedSlot: targetSlotKey,
+    sessionFormat: is16 ? '16-Week Full Term' : '8-Week Accelerated Session',
+    locked: false,
+    isEnrolled: false,
+    isCurrentEnrolled: false,
+    state: 'Scheduled',
+    isPlannedRetake: true,
+    retakeOfTerm: sourceSemId,
+    credits: Number(course.credits) || 3
+  };
+
+  const nextSemesters = schedule.semesters.map((sem) => {
+    // 1. Mark active course in source semester
+    if (sem.id === sourceSemId) {
+      const nextLane = (sem.lanes[sourceSlotKey] || []).map((c) =>
+        c.code === courseCode || c.compactCode === courseCode
+          ? { ...c, hasPlannedRetake: true, retakeTargetSemId: targetSemId }
+          : c
+      );
+      return {
+        ...sem,
+        lanes: { ...sem.lanes, [sourceSlotKey]: nextLane }
+      };
+    }
+
+    // 2. Add planned retake course into target semester
+    if (sem.id === targetSemId) {
+      const targetLane = sem.lanes[targetSlotKey] || [];
+      if (targetLane.some((c) => (c.code === courseCode || c.compactCode === courseCode) && c.isPlannedRetake)) {
+        return sem;
+      }
+      const newLane = [...targetLane, retakeCourse];
+      const updatedLanes = { ...sem.lanes, [targetSlotKey]: newLane };
+      const newTotal = Object.values(updatedLanes).flat().reduce((s, c) => s + (Number(c.credits) || 0), 0);
+      return {
+        ...sem,
+        lanes: updatedLanes,
+        totalCredits: newTotal
+      };
+    }
+
+    return sem;
+  });
+
+  return {
+    success: true,
+    targetSemId,
+    targetSlotKey,
+    schedule: { ...schedule, semesters: nextSemesters }
+  };
+}
+
+/**
+ * Pure deterministic executor for cancelling a planned retake of an active in-progress course.
+ */
+export function executeCancelRetake(schedule, courseCode, sourceSemId, sourceSlotKey) {
+  if (!schedule || !Array.isArray(schedule.semesters)) {
+    return { success: false, reason: 'INVALID_SCHEDULE', schedule };
+  }
+
+  const nextSemesters = schedule.semesters.map((sem) => {
+    // 1. Unmark active course in source semester
+    if (sem.id === sourceSemId) {
+      const nextLane = (sem.lanes[sourceSlotKey] || []).map((c) =>
+        c.code === courseCode || c.compactCode === courseCode
+          ? { ...c, hasPlannedRetake: false, retakeTargetSemId: null }
+          : c
+      );
+      return {
+        ...sem,
+        lanes: { ...sem.lanes, [sourceSlotKey]: nextLane }
+      };
+    }
+
+    // 2. Remove planned retake instance from any semester
+    const updatedLanes = {};
+    let modified = false;
+    for (const [slot, courses] of Object.entries(sem.lanes || {})) {
+      const filtered = courses.filter(
+        (c) => !((c.code === courseCode || c.compactCode === courseCode) && c.isPlannedRetake)
+      );
+      if (filtered.length !== courses.length) modified = true;
+      updatedLanes[slot] = filtered;
+    }
+
+    if (modified) {
+      const newTotal = Object.values(updatedLanes).flat().reduce((s, c) => s + (Number(c.credits) || 0), 0);
+      return {
+        ...sem,
+        lanes: updatedLanes,
+        totalCredits: newTotal
+      };
+    }
+
+    return sem;
+  });
+
+  return {
+    success: true,
+    schedule: { ...schedule, semesters: nextSemesters }
+  };
+}
+
 export default function Screen3ScheduleBoard({
   schedule,
   setSchedule,
@@ -144,6 +505,16 @@ export default function Screen3ScheduleBoard({
   const [newNoteText, setNewNoteText] = useState('');
   const [editingNoteInfo, setEditingNoteInfo] = useState(null); // { semId, noteId, text }
   const [movingCourseInfo, setMovingCourseInfo] = useState(null); // { course, sourceSemId, sourceSlotKey, targetSemId, targetSlotKey }
+  const [moveFeedback, setMoveFeedback] = useState(null); // { message, type: 'success' | 'warning' }
+  const moveFeedbackTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (moveFeedbackTimeoutRef.current) {
+        clearTimeout(moveFeedbackTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const planCreationDate = React.useMemo(() => {
     const d = new Date();
@@ -389,6 +760,44 @@ export default function Screen3ScheduleBoard({
     (parsedTranscript?.validCourses || []).filter((c) => c.isIncomingPlaceholder)
   );
 
+  // Identify the active semester (enrolled) or reference start rank
+  const activeSem = useMemo(() => {
+    return schedule?.semesters?.find((s) => s.isEnrolledSemester || s.hasEnrolledCourses) || null;
+  }, [schedule?.semesters]);
+
+  // Identify completed institutional courses belonging to the active semester
+  const activeSemCompletedCourses = useMemo(() => {
+    if (!activeSem) return [];
+    return pastInstitutionalCourses.filter((c) => {
+      const tInfo = c.termInfo || {};
+      const season = tInfo.season || '';
+      const year = Number(tInfo.year);
+      if (season.toLowerCase() === activeSem.season?.toLowerCase() && year === Number(activeSem.year)) {
+        return true;
+      }
+      const termStr = String(c.term || '').toLowerCase();
+      return (
+        termStr.includes(activeSem.season?.toLowerCase()) &&
+        termStr.includes(String(activeSem.year))
+      );
+    });
+  }, [activeSem, pastInstitutionalCourses]);
+
+  const activeCompletedCredits = useMemo(() => {
+    return activeSemCompletedCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
+  }, [activeSemCompletedCourses]);
+
+  const activeOrStartRank = useMemo(() => {
+    if (activeSem) {
+      return getTermChronologicalRank(activeSem.season, activeSem.year);
+    }
+    if (schedule?.semesters?.length > 0) {
+      const firstSem = schedule.semesters[0];
+      return getTermChronologicalRank(firstSem.season, firstSem.year);
+    }
+    return getTermChronologicalRank('Fall', 2026);
+  }, [activeSem, schedule?.semesters]);
+
   // Group semesters by Academic Year: Fall Y, Spring Y+1, Summer Y+1
   const academicYearsMap = new Map();
   for (const sem of schedule?.semesters || []) {
@@ -553,99 +962,130 @@ export default function Screen3ScheduleBoard({
 
   // Deterministic Course Move handler across semesters and session bands
   const moveCourse = (courseCode, sourceSemId, sourceSlotKey, targetSemId, targetSlotKey) => {
-    if (sourceSemId === targetSemId && sourceSlotKey === targetSlotKey) return;
-
-    const sourceSem = schedule.semesters.find((s) => s.id === sourceSemId);
-    if (!sourceSem) return;
-    const course = (sourceSem.lanes[sourceSlotKey] || []).find((c) => c.code === courseCode);
-    if (!course) return;
-
-    if (course.locked) {
-      return;
-    }
-
-    const targetSem = schedule.semesters.find((s) => s.id === targetSemId);
-    if (!targetSem) return;
-
-    // Validate move against deterministic rules
-    const validation = validateScheduleMove(
-      course,
-      targetSem,
-      targetSlotKey.trim(),
-      schedule.semesters,
-      new Set(pastCourses.map((c) => c.compactCode)),
+    const result = executeCourseMove(
+      schedule,
+      courseCode,
+      sourceSemId,
+      sourceSlotKey,
+      targetSemId,
+      targetSlotKey,
+      allPastCourses,
       auditResult?.flags
     );
 
-    let conflictDot = null;
-    if (validation.hasConflict) {
-      conflictDot = {
-        message: validation.conflicts.map((c) => c.message).join(' | '),
-        conflicts: validation.conflicts
-      };
+    if (!result.success) {
+      return;
     }
 
-    setSchedule((prev) => {
-      // 1. Remove from source
-      const semList = prev.semesters.map((sem) => {
-        if (sem.id === sourceSemId) {
-          const filtered = (sem.lanes[sourceSlotKey] || []).filter((c) => c.code !== courseCode);
-          return {
-            ...sem,
-            totalCredits: Math.max(0, sem.totalCredits - course.credits),
-            lanes: { ...sem.lanes, [sourceSlotKey]: filtered }
-          };
-        }
-        return sem;
-      });
+    setSchedule(result.nextSchedule);
 
-      // 2. Add to target
-      const updated = semList.map((sem) => {
-        if (sem.id === targetSemId) {
-          const currentLane = sem.lanes[targetSlotKey] || [];
-          const is16 = targetSlotKey.includes('16wk');
-          const isTargetEnrolled = Boolean(sem.isEnrolledSemester);
-          const updatedCourse = {
-            ...course,
-            assignedSemesterId: sem.id,
-            assignedSlot: targetSlotKey,
-            sessionFormat: is16 ? '16-Week Full Term' : '8-Week Accelerated Session',
-            conflict: conflictDot,
-            isCurrentEnrolled: isTargetEnrolled,
-            isEnrolled: isTargetEnrolled,
-            state: isTargetEnrolled ? (course.state || 'Current') : 'Planned'
-          };
-          return {
-            ...sem,
-            totalCredits: sem.totalCredits + course.credits,
-            lanes: { ...sem.lanes, [targetSlotKey]: [...currentLane, updatedCourse] }
-          };
-        }
-        return sem;
-      });
-
-      return { ...prev, semesters: updated };
+    const targetSem = schedule.semesters.find((s) => s.id === targetSemId);
+    const normTargetSlot = (targetSlotKey || '').trim();
+    const conflictMsg = result.validation?.hasConflict
+      ? ` (Note: ${result.validation.conflicts[0]?.message || 'Prerequisite conflict'})`
+      : '';
+    setMoveFeedback({
+      message: `Moved ${courseCode} to ${targetSem?.title || targetSemId} (${normTargetSlot})${conflictMsg}`,
+      type: result.validation?.hasConflict ? 'warning' : 'success'
     });
+    if (moveFeedbackTimeoutRef.current) {
+      clearTimeout(moveFeedbackTimeoutRef.current);
+    }
+    moveFeedbackTimeoutRef.current = setTimeout(() => {
+      setMoveFeedback(null);
+    }, 4000);
   };
 
   // Open non-blocking inline modal to move a course card
   const handleMoveCoursePrompt = (course, sourceSemId, sourceSlotKey) => {
     if (course.locked) return;
-    const defaultTargetSem =
-      schedule.semesters.find((s) => s.id !== sourceSemId) || schedule.semesters[0];
-    const defaultSlot =
-      defaultTargetSem?.season === 'Summer'
-        ? 'SU'
-        : defaultTargetSem?.season === 'Spring'
-        ? 'SP-I'
-        : 'FA-I';
+    const { targetSemId, targetSlotKey } = getDefaultNextSemesterAndSlot(
+      schedule.semesters,
+      sourceSemId,
+      sourceSlotKey
+    );
     setMovingCourseInfo({
       course,
       sourceSemId,
       sourceSlotKey,
-      targetSemId: defaultTargetSem?.id || sourceSemId,
-      targetSlotKey: defaultSlot
+      targetSemId,
+      targetSlotKey
     });
+  };
+
+  // Plan a retake for an active in-progress course
+  const handlePlanRetake = (course, sourceSemId, sourceSlotKey) => {
+    const res = executePlanRetake(schedule, course.code, sourceSemId, sourceSlotKey);
+    if (!res.success) {
+      console.warn('Plan retake warning:', res.reason);
+      return;
+    }
+    setSchedule(res.schedule);
+    const targetSem = res.schedule.semesters.find((s) => s.id === res.targetSemId);
+    setMoveFeedback({
+      courseCode: course.code,
+      message: `Retake planned for ${course.code} in ${targetSem?.title || res.targetSemId}.`,
+      type: 'success'
+    });
+    if (moveFeedbackTimeoutRef.current) clearTimeout(moveFeedbackTimeoutRef.current);
+    moveFeedbackTimeoutRef.current = setTimeout(() => {
+      setMoveFeedback(null);
+    }, 4000);
+  };
+
+  // Cancel a planned retake for an active in-progress course
+  const handleCancelRetake = (course, sourceSemId, sourceSlotKey) => {
+    const res = executeCancelRetake(schedule, course.code, sourceSemId, sourceSlotKey);
+    if (!res.success) {
+      console.warn('Cancel retake warning:', res.reason);
+      return;
+    }
+    setSchedule(res.schedule);
+    setMoveFeedback({
+      courseCode: course.code,
+      message: `Planned retake for ${course.code} cancelled.`,
+      type: 'success'
+    });
+    if (moveFeedbackTimeoutRef.current) clearTimeout(moveFeedbackTimeoutRef.current);
+    moveFeedbackTimeoutRef.current = setTimeout(() => {
+      setMoveFeedback(null);
+    }, 4000);
+  };
+
+  const handleSemesterCardDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleSemesterCardDrop = (e, sem) => {
+    e.preventDefault();
+    try {
+      const raw = e.dataTransfer.getData('application/json');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data.courseCode || !data.sourceSemId || !data.sourceSlotKey) return;
+
+      let targetSlot = 'FA-I';
+      if (sem.season === 'Summer') {
+        targetSlot = 'SU';
+      } else if (sem.season === 'Spring') {
+        targetSlot = data.sourceSlotKey?.includes('16wk')
+          ? 'Spring-16wk'
+          : data.sourceSlotKey?.endsWith('-II')
+          ? 'SP-II'
+          : 'SP-I';
+      } else {
+        targetSlot = data.sourceSlotKey?.includes('16wk')
+          ? 'Fall-16wk'
+          : data.sourceSlotKey?.endsWith('-II')
+          ? 'FA-II'
+          : 'FA-I';
+      }
+
+      moveCourse(data.courseCode, data.sourceSemId, data.sourceSlotKey, sem.id, targetSlot);
+    } catch (err) {
+      console.warn('Semester drop error:', err);
+    }
   };
 
   // Export Stateful PDF
@@ -676,16 +1116,49 @@ export default function Screen3ScheduleBoard({
     }
   };
 
+  // Render a concluded past semester card (Blank body, registration closed)
+  const renderPastConcludedSemesterCard = (termTitle) => {
+    return (
+      <div
+        key={`past-concluded-${termTitle}`}
+        data-testid={`concluded-past-semester-${termTitle.replace(/\s+/g, '-')}`}
+        className="w-full bg-neutral-50/70 rounded-xl border border-neutral-200 p-3.5 shadow-2xs space-y-3"
+      >
+        {/* Semester Header: Term identifier only, no + Note button */}
+        <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
+          <div className="flex items-center space-x-1.5 truncate">
+            <h3 className="text-sm font-bold text-neutral-600 truncate">{termTitle}</h3>
+            <span className="text-[10px] font-mono font-semibold text-neutral-500 bg-neutral-200/60 px-1.5 py-0.5 rounded border border-neutral-300">
+              Concluded
+            </span>
+          </div>
+        </div>
+
+        {/* Card Body: Blank body with subtle muted placeholder label, no drag targets */}
+        <div className="min-h-[140px] flex flex-col items-center justify-center p-4 text-center">
+          <span className="text-xs text-neutral-500 font-medium select-none">
+            Term Concluded • Recorded in Past Coursework History
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   // Render a full semester column card (Fall, Spring, or Summer)
   const renderSemesterCard = (sem) => {
     const isSummer = sem.season === 'Summer';
     const isCollapsed = sem.isCollapsed && !expandedSummerIds.has(sem.id);
     const hasEnrolled = Boolean(sem.isEnrolledSemester || sem.hasEnrolledCourses);
+    const isThisSemActive = hasEnrolled;
+    const semCompletedCredits = isThisSemActive ? activeCompletedCredits : 0;
+    const semCreditLabel = formatSemesterCreditMetric(sem, semCompletedCredits);
 
     if (isSummer) {
       return (
         <div
           key={sem.id}
+          onDragOver={handleSemesterCardDragOver}
+          onDrop={(e) => handleSemesterCardDrop(e, sem)}
           className={`w-full bg-white rounded-xl border p-3.5 shadow-xs space-y-3 ${
             hasEnrolled ? 'border-neutral-400 bg-neutral-50/40' : 'border-neutral-300'
           }`}
@@ -719,7 +1192,7 @@ export default function Screen3ScheduleBoard({
                     </span>
                   )}
                   <span className="text-[10px] font-mono font-bold text-[#857542] bg-[#F7F5EE] px-1.5 py-0.5 rounded border border-[#B5A36A]">
-                    {sem.totalCredits} cr
+                    {semCreditLabel}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -765,6 +1238,8 @@ export default function Screen3ScheduleBoard({
                 onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
                 onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
                 onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
+                onPlanRetake={(c, sId, sKey) => handlePlanRetake(c, sId, sKey)}
+                onCancelRetake={(c, sId, sKey) => handleCancelRetake(c, sId, sKey)}
                 onDropCourse={moveCourse}
                 onResolveConflict={handleResolveConflict}
                 masterDb={masterDb}
@@ -801,6 +1276,8 @@ export default function Screen3ScheduleBoard({
     return (
       <div
         key={sem.id}
+        onDragOver={handleSemesterCardDragOver}
+        onDrop={(e) => handleSemesterCardDrop(e, sem)}
         className={`w-full bg-white rounded-xl border p-3.5 shadow-xs space-y-3 ${
           hasEnrolled ? 'border-neutral-400 bg-neutral-50/30' : 'border-neutral-300'
         }`}
@@ -815,7 +1292,7 @@ export default function Screen3ScheduleBoard({
               </span>
             )}
             <span className="text-[10px] font-mono font-bold text-[#857542] bg-[#F7F5EE] px-1.5 py-0.5 rounded border border-[#B5A36A]">
-              {sem.totalCredits} cr Total
+              {semCreditLabel}
             </span>
           </div>
           <button
@@ -829,6 +1306,49 @@ export default function Screen3ScheduleBoard({
 
         {/* 3 Stacked Horizontal Bands: 16-Week, Session I, Session II */}
         <div className="space-y-2.5">
+          {/* Sub-Session Active Course Ingestion (Completed 1st 8-Week Session) */}
+          {isThisSemActive && activeSemCompletedCourses.length > 0 && (
+            <div
+              data-testid="active-semester-completed-subsession"
+              className="rounded-lg border border-neutral-200/90 bg-neutral-50/70 p-2 space-y-1.5"
+            >
+              <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-600 px-0.5">
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold border bg-neutral-200/80 text-neutral-800 border-neutral-300">
+                  1st 8-Week Session • Completed
+                </span>
+                <span className="font-mono text-[10px] text-neutral-600 font-bold">
+                  {activeCompletedCredits} cr Complete
+                </span>
+              </div>
+              <div className="space-y-1">
+                {activeSemCompletedCourses.map((c, i) => (
+                  <div
+                    key={`${c.code || c.rawCourseCode}_completed_${i}`}
+                    data-testid={`active-completed-course-${c.code || c.rawCourseCode}`}
+                    className="flex items-center justify-between gap-2 py-1 px-2 rounded bg-white border border-neutral-200 text-xs shadow-2xs"
+                  >
+                    <div className="flex items-center space-x-1.5 min-w-0 truncate">
+                      <span className="font-mono font-bold text-neutral-800 flex-shrink-0 text-[11px]">
+                        {c.code || c.rawCourseCode}
+                      </span>
+                      <span className="text-[11px] text-neutral-600 truncate" title={c.title || c.name || ''}>
+                        {c.title || c.name || ''}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 flex-shrink-0 text-[11px]">
+                      <span className="font-mono font-bold text-neutral-800 bg-neutral-100 px-1.5 py-0.5 rounded text-[10px] border border-neutral-200">
+                        {c.grade || 'A'}
+                      </span>
+                      <span className="font-mono text-neutral-500 text-[10px]">
+                        {Math.round(c.credits || 3)}cr
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Band 1: 16-Week Full Term */}
           <SemesterBand
             semId={sem.id}
@@ -839,6 +1359,8 @@ export default function Screen3ScheduleBoard({
             onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
             onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
             onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
+            onPlanRetake={(c, sId, sKey) => handlePlanRetake(c, sId, sKey)}
+            onCancelRetake={(c, sId, sKey) => handleCancelRetake(c, sId, sKey)}
             onDropCourse={moveCourse}
             onResolveConflict={handleResolveConflict}
             masterDb={masterDb}
@@ -854,6 +1376,8 @@ export default function Screen3ScheduleBoard({
             onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
             onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
             onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
+            onPlanRetake={(c, sId, sKey) => handlePlanRetake(c, sId, sKey)}
+            onCancelRetake={(c, sId, sKey) => handleCancelRetake(c, sId, sKey)}
             onDropCourse={moveCourse}
             onResolveConflict={handleResolveConflict}
             masterDb={masterDb}
@@ -869,6 +1393,8 @@ export default function Screen3ScheduleBoard({
             onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
             onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
             onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
+            onPlanRetake={(c, sId, sKey) => handlePlanRetake(c, sId, sKey)}
+            onCancelRetake={(c, sId, sKey) => handleCancelRetake(c, sId, sKey)}
             onDropCourse={moveCourse}
             onResolveConflict={handleResolveConflict}
             masterDb={masterDb}
@@ -1455,7 +1981,9 @@ export default function Screen3ScheduleBoard({
                 {/* Top 2-Column Grid: Left Column = Fall, Right Column = Spring */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
                   {/* Left Column: Fall */}
-                  {ay.fall ? (
+                  {isTermInPast('Fall', ay.startYear, activeOrStartRank) ? (
+                    renderPastConcludedSemesterCard(`Fall ${ay.startYear}`)
+                  ) : ay.fall ? (
                     renderSemesterCard(ay.fall)
                   ) : (
                     <div className="bg-white/50 rounded-xl border border-dashed border-neutral-300 p-4 min-h-[160px] flex flex-col items-center justify-center text-center text-xs text-neutral-400">
@@ -1465,7 +1993,9 @@ export default function Screen3ScheduleBoard({
                   )}
 
                   {/* Right Column: Spring */}
-                  {ay.spring ? (
+                  {isTermInPast('Spring', ay.startYear + 1, activeOrStartRank) ? (
+                    renderPastConcludedSemesterCard(`Spring ${ay.startYear + 1}`)
+                  ) : ay.spring ? (
                     renderSemesterCard(ay.spring)
                   ) : (
                     <div className="bg-white/50 rounded-xl border border-dashed border-neutral-300 p-4 min-h-[160px] flex flex-col items-center justify-center text-center text-xs text-neutral-400">
@@ -1477,7 +2007,9 @@ export default function Screen3ScheduleBoard({
 
                 {/* Below & Centered: Summer */}
                 <div className="w-full lg:w-3/5 mx-auto pt-1">
-                  {ay.summer ? (
+                  {isTermInPast('Summer', ay.startYear + 1, activeOrStartRank) ? (
+                    renderPastConcludedSemesterCard(`Summer ${ay.startYear + 1}`)
+                  ) : ay.summer ? (
                     renderSemesterCard(ay.summer)
                   ) : (
                     <div className="bg-white/50 rounded-xl border border-dashed border-neutral-300 p-3 flex items-center justify-center text-center text-xs text-neutral-400">
@@ -1561,7 +2093,10 @@ export default function Screen3ScheduleBoard({
           NON-BLOCKING MOVE COURSE MODAL (Triggered by ⇄ button on card)
       ========================================================================= */}
       {movingCourseInfo && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-2xs">
+        <div
+          data-testid="move-course-modal"
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-2xs"
+        >
           <div className="bg-white rounded-xl shadow-2xl border border-neutral-200 max-w-md w-full p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-neutral-200 pb-2.5">
               <h3 className="text-sm font-bold text-neutral-900">
@@ -1581,20 +2116,31 @@ export default function Screen3ScheduleBoard({
                 <select
                   value={movingCourseInfo.targetSemId}
                   onChange={(e) => {
-                    const nextSem = schedule.semesters.find((s) => s.id === e.target.value);
-                    const nextSlot =
-                      nextSem?.season === 'Summer'
-                        ? 'SU'
-                        : nextSem?.season === 'Spring'
-                        ? 'SP-I'
+                    const newTargetSemId = e.target.value;
+                    const nextSem = schedule.semesters.find((s) => s.id === newTargetSemId);
+                    let nextSlot = 'FA-I';
+                    if (nextSem?.season === 'Summer') {
+                      nextSlot = 'SU';
+                    } else if (nextSem?.season === 'Spring') {
+                      nextSlot = movingCourseInfo.sourceSlotKey?.includes('16wk')
+                        ? 'Spring-16wk'
+                        : movingCourseInfo.sourceSlotKey?.endsWith('-II')
+                        ? 'SP-II'
+                        : 'SP-I';
+                    } else {
+                      nextSlot = movingCourseInfo.sourceSlotKey?.includes('16wk')
+                        ? 'Fall-16wk'
+                        : movingCourseInfo.sourceSlotKey?.endsWith('-II')
+                        ? 'FA-II'
                         : 'FA-I';
+                    }
                     setMovingCourseInfo({
                       ...movingCourseInfo,
-                      targetSemId: e.target.value,
+                      targetSemId: newTargetSemId,
                       targetSlotKey: nextSlot
                     });
                   }}
-                  className="w-full px-2.5 py-1.5 border border-neutral-300 rounded bg-white font-semibold"
+                  className="w-full px-2.5 py-1.5 border border-neutral-300 rounded bg-white font-semibold cursor-pointer"
                 >
                   {schedule.semesters.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -1604,13 +2150,13 @@ export default function Screen3ScheduleBoard({
                 </select>
               </div>
               <div>
-                <label className="block font-bold text-neutral-700 mb-1">Target Session Band</label>
+                <label className="block font-bold text-neutral-700 mb-1">Target Session</label>
                 <select
                   value={movingCourseInfo.targetSlotKey}
                   onChange={(e) =>
                     setMovingCourseInfo({ ...movingCourseInfo, targetSlotKey: e.target.value })
                   }
-                  className="w-full px-2.5 py-1.5 border border-neutral-300 rounded bg-white font-semibold"
+                  className="w-full px-2.5 py-1.5 border border-neutral-300 rounded bg-white font-semibold cursor-pointer"
                 >
                   {(() => {
                     const sem = schedule.semesters.find((s) => s.id === movingCourseInfo.targetSemId);
@@ -1641,23 +2187,24 @@ export default function Screen3ScheduleBoard({
               <button
                 type="button"
                 onClick={() => setMovingCourseInfo(null)}
-                className="px-3 py-1.5 text-xs font-bold border border-neutral-300 rounded text-neutral-700"
+                className="px-3 py-1.5 text-xs font-bold border border-neutral-300 rounded text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  moveCourse(
-                    movingCourseInfo.course.code,
-                    movingCourseInfo.sourceSemId,
-                    movingCourseInfo.sourceSlotKey,
-                    movingCourseInfo.targetSemId,
-                    movingCourseInfo.targetSlotKey
-                  );
+                  const { course, sourceSemId, sourceSlotKey, targetSemId, targetSlotKey } = movingCourseInfo;
                   setMovingCourseInfo(null);
+                  moveCourse(
+                    course.code,
+                    sourceSemId,
+                    sourceSlotKey,
+                    targetSemId,
+                    targetSlotKey
+                  );
                 }}
-                className="px-4 py-1.5 text-xs font-bold bg-[#857542] text-white rounded shadow"
+                className="px-4 py-1.5 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded shadow transition cursor-pointer"
               >
                 Confirm Move
               </button>
@@ -1677,6 +2224,32 @@ export default function Screen3ScheduleBoard({
         masterDb={masterDb}
         activeStudentCourses={rawCompletedCourses}
       />
+
+      {/* Toast Feedback for Course Moves */}
+      {moveFeedback && (
+        <div
+          data-testid="move-feedback-toast"
+          className={`fixed bottom-6 right-6 z-50 flex items-center space-x-2 px-4 py-2.5 rounded-lg shadow-lg border text-xs font-semibold backdrop-blur-md transition-all ${
+            moveFeedback.type === 'warning'
+              ? 'bg-amber-50 text-amber-900 border-amber-300 ring-1 ring-amber-300/50'
+              : 'bg-emerald-50 text-emerald-900 border-emerald-300 ring-1 ring-emerald-300/50'
+          }`}
+        >
+          {moveFeedback.type === 'warning' ? (
+            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          )}
+          <span>{moveFeedback.message}</span>
+          <button
+            type="button"
+            onClick={() => setMoveFeedback(null)}
+            className="ml-2 text-neutral-400 hover:text-neutral-700"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1691,6 +2264,8 @@ function SemesterBand({
   onOpenDrawer,
   onToggleLock,
   onMoveCourse,
+  onPlanRetake,
+  onCancelRetake,
   onDropCourse,
   onResolveConflict,
   masterDb
@@ -1703,12 +2278,21 @@ function SemesterBand({
     if (!isDragOver) setIsDragOver(true);
   };
 
-  const handleDragLeave = () => {
-    setIsDragOver(false);
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOver(false);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
     try {
       const raw = e.dataTransfer.getData('application/json');
@@ -1731,12 +2315,13 @@ function SemesterBand({
   return (
     <div
       onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       data-testid={`semester-band-${semId}-${slotKey}`}
       className={`rounded-lg border p-2 transition space-y-1.5 ${
         isDragOver
-          ? 'bg-amber-50/80 border-[#857542] ring-2 ring-[#857542]/40'
+          ? 'bg-amber-50/80 border-[var(--lu-gold-standard,#B5A36A)] ring-2 ring-[var(--lu-gold-standard,#B5A36A)]/40 shadow-xs'
           : 'bg-neutral-50/60 border-neutral-200 hover:border-neutral-300'
       }`}
     >
@@ -1754,7 +2339,7 @@ function SemesterBand({
       <div className="space-y-1.5">
         {courses.map((course) => (
           <CourseCard
-            key={course.code}
+            key={course.code + (course.isPlannedRetake ? '_retake' : '')}
             course={course}
             semId={semId}
             slotKey={slotKey}
@@ -1762,6 +2347,8 @@ function SemesterBand({
             onOpenDrawer={() => onOpenDrawer(course)}
             onToggleLock={() => onToggleLock(semId, slotKey, course.code)}
             onMoveCourse={() => onMoveCourse(course, semId, slotKey)}
+            onPlanRetake={() => onPlanRetake && onPlanRetake(course, semId, slotKey)}
+            onCancelRetake={() => onCancelRetake && onCancelRetake(course, semId, slotKey)}
             onResolveConflict={(actionType) =>
               onResolveConflict && onResolveConflict(semId, slotKey, course.code, actionType)
             }
@@ -1794,9 +2381,12 @@ function CourseCard({
   onOpenDrawer,
   onToggleLock,
   onMoveCourse,
+  onPlanRetake,
+  onCancelRetake,
   onResolveConflict
 }) {
   const [conflictMenuOpen, setConflictMenuOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const isEnrolled = Boolean(course.isCurrentEnrolled || course.state === 'Current' || course.state === 'Scheduled');
   const isPlaceholder = Boolean(
     course.type === 'placeholder' ||
@@ -1835,6 +2425,8 @@ function CourseCard({
       e.preventDefault();
       return;
     }
+    setIsDragging(true);
+    e.dataTransfer.setData('text/plain', course.code);
     e.dataTransfer.setData(
       'application/json',
       JSON.stringify({
@@ -1846,14 +2438,19 @@ function CourseCard({
     e.dataTransfer.effectAllowed = 'move';
   };
 
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div
       draggable={!course.locked}
       onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       data-testid={`course-card-${course.code}`}
       className={`p-2 rounded-md border border-neutral-200 ${bgStyle} shadow-2xs relative select-none group transition ${
         course.locked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing hover:shadow-xs'
-      }`}
+      } ${isDragging ? 'opacity-50 ring-2 ring-[var(--lu-gold-standard,#B5A36A)]/50 scale-[0.98]' : 'opacity-100'}`}
     >
       {/* Row 1: Category badge + Code + Credits + Lock Toggle + Move */}
       <div className="flex items-center justify-between text-xs font-bold leading-tight">
@@ -1869,6 +2466,15 @@ function CourseCard({
           >
             [{categoryBadge}]
           </span>
+          {course.isPlannedRetake && (
+            <span
+              data-testid={`retake-badge-${course.code}`}
+              className="px-1 py-0.2 rounded text-[8.5px] font-bold bg-slate-200 text-slate-800 border border-slate-300 tracking-tight select-none"
+              title={`Planned retake of active course from ${course.retakeOfTerm || 'previous term'}`}
+            >
+              Retake
+            </span>
+          )}
           <span className="font-mono text-[11px] font-bold tracking-tight truncate">
             {course.code}
           </span>
@@ -1876,6 +2482,47 @@ function CourseCard({
 
         <div className="flex items-center space-x-1.5 flex-shrink-0">
           <span className="font-mono text-[10px]">{course.credits}cr</span>
+
+          {/* Plan Retake Context Action for Active In-Progress Courses */}
+          {isEnrolled && (
+            course.hasPlannedRetake ? (
+              <div className="flex items-center space-x-1">
+                <span
+                  data-testid={`retake-planned-badge-${course.code}`}
+                  className="px-1 py-0.5 rounded text-[8.5px] font-bold bg-neutral-200 text-neutral-800 border border-neutral-300 select-none"
+                  title={`Planned retake in ${course.retakeTargetSemId || 'future term'}`}
+                >
+                  Retake Planned
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onCancelRetake) onCancelRetake();
+                  }}
+                  data-testid={`cancel-retake-btn-${course.code}`}
+                  className="text-[9px] font-bold text-neutral-400 hover:text-red-600 px-0.5 rounded hover:bg-black/5 transition cursor-pointer"
+                  title="Cancel planned retake"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onPlanRetake) onPlanRetake();
+                }}
+                data-testid={`plan-retake-btn-${course.code}`}
+                className="px-1.5 py-0.5 rounded text-[8.5px] font-bold text-neutral-700 bg-neutral-200/90 hover:bg-neutral-300 border border-neutral-300 transition cursor-pointer"
+                title="Plan a retake of this in-progress course in a future term"
+              >
+                Plan Retake
+              </button>
+            )
+          )}
+
           <button
             type="button"
             onClick={onToggleLock}
