@@ -37,6 +37,8 @@ import {
 } from '../engine/transcriptParser.js';
 import { calculateStartingSemester } from '../engine/scheduler.js';
 import dbAdapter from '../data/dbAdapter.js';
+import ProgramCombobox from './ProgramCombobox.jsx';
+import CatalogYearCombobox from './CatalogYearCombobox.jsx';
 
 export const ANTHOLOGY_SOP_GUIDE_URL =
   'https://scribehow.com/shared/Export_Student_Course_Schedules_All_Results_from_Anthology';
@@ -1873,76 +1875,50 @@ export default function Screen1Intake({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                   {/* Dropdown 1: Catalog Year (Forward-only selection) */}
-                  <div>
+                  <div className="md:col-span-5">
                     <label className="block text-xs font-bold text-neutral-800 mb-1.5">
                       <span>Catalog Year (Forward-Only)</span>
                       <span className="text-red-600 ml-0.5">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        id="optionB-catalog-year"
-                        value={catalogYear}
-                        onChange={(e) => {
-                          const newYear = e.target.value;
-                          setCatalogYear(newYear);
-                          const currentProg = (masterDb.programs || []).find(
-                            (p) => p.id === selectedProgramId
-                          );
-                          const matching = (masterDb.programs || []).filter(
-                            (p) => p.catalog_year_id === newYear
-                          );
-                          if (matching.length > 0) {
-                            const sameName = currentProg
-                              ? matching.find((p) => p.name === currentProg.name)
-                              : null;
-                            setSelectedProgramId(sameName ? sameName.id : matching[0].id);
-                          }
-                        }}
-                        className="w-full appearance-none pl-3.5 pr-9 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
-                      >
-                        <option value="2026-2027">2026–2027 (Active Catalog)</option>
-                        <option value="2025-2026" disabled={minCatalogYearStart > 2025}>
-                          2025–2026
-                        </option>
-                        <option value="2024-2025" disabled={minCatalogYearStart > 2024}>
-                          2024–2025
-                        </option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
+                    <CatalogYearCombobox
+                      catalogYear={catalogYear}
+                      minCatalogYearStart={minCatalogYearStart}
+                      onChange={(newYear) => {
+                        setCatalogYear(newYear);
+                        const currentProg = (masterDb.programs || []).find(
+                          (p) => p.id === selectedProgramId
+                        );
+                        const matching = (masterDb.programs || []).filter(
+                          (p) => p.catalog_year_id === newYear
+                        );
+                        if (matching.length > 0) {
+                          const sameName = currentProg
+                            ? matching.find((p) => p.name === currentProg.name)
+                            : null;
+                          setSelectedProgramId(sameName ? sameName.id : matching[0].id);
+                        }
+                      }}
+                    />
                     <p className="text-[10px] text-neutral-500 mt-1">
                       Forward-only catalog switching from matriculation year
                     </p>
                   </div>
 
                   {/* Dropdown 2: Primary Degree / Emphasis Seeking */}
-                  <div>
+                  <div className="md:col-span-7">
                     <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
                       <span>Primary Degree / Emphasis</span>
                       <span className="text-red-600 ml-0.5">*</span>
                     </label>
-
-                    <div className="relative">
-                      <select
-                        id="optionB-program-select"
-                        value={selectedProgramId}
-                        onChange={(e) => setSelectedProgramId(e.target.value)}
-                        className="w-full appearance-none pl-3.5 pr-9 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs truncate cursor-pointer"
-                      >
-                        <optgroup label="Official Undergraduate Degree Programs">
-                          {(masterDb.programs || [])
-                            .filter((p) => p.catalog_year_id === catalogYear)
-                            .map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.name}
-                              </option>
-                            ))}
-                        </optgroup>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
+                    <ProgramCombobox
+                      programs={(masterDb.programs || []).filter(
+                        (p) => p.catalog_year_id === catalogYear
+                      )}
+                      selectedProgramId={selectedProgramId}
+                      onSelectProgramId={(newId) => setSelectedProgramId(newId)}
+                    />
                     <p className="text-[10px] text-neutral-500 mt-1">
                       Auto-selected from parsed student record
                     </p>
