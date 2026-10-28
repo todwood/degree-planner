@@ -1250,3 +1250,32 @@
   - *Unit Tests:* Added `tests/programStack.test.js` covering categorization, dynamic header pluralization, overlap calculation, catalog remapping, and stack mutation invariants. Full Vitest suite: 151 / 151 passing (100%) across 12 test files (`npm run test`).
   - *Production Build:* Vite production build compiled cleanly in 5.20s with zero errors (`dist/assets/index-CDsiGmKS.js`).
   - *Headless E2E Verification:* `.tmp/verify_program_stack_ui.mjs` confirmed adding Computer Science BS + Math Minor renders both cards, displays `DECLARED CREDENTIALS STACK (1 Major, 1 Minor)`, shows Combined 97cr, Shared Overlap -10cr, Net 87cr, toggles CORE 42 checkbox, and logs 0 browser console errors. Captured screenshot to `.tmp/program_stack_verified.png`.
+
+### 75. Multi-Major & Multi-Minor Stacking Architecture & 20 Synthetic Stress-Test Verification
+- **Objective:** Fully unblock the Screen 1 Declared Credentials Stack Builder to support arbitrary multi-program combinations (Double Majors, Multi-Minor stacks, Multi-Certificate stacks, and Double Major + Multi-Minor stacks); establish primary vs. secondary major flagging with seamless `[Make Primary]` degree anchor swapping; implement the strict duplicate program ID guardrail; and verify through 20 synthetic stress-test student intake profiles.
+- **Key Architectural Decisions & Implementations:**
+  1. *Removal of Credential-Type Lockouts:*
+     - Eliminated legacy major/minor restrictions in `Screen1Intake.jsx` and `ProgramCombobox.jsx`. Selecting a credential in `ProgramCombobox` stages `stagedComboboxProgramId` without overwriting active declared programs.
+     - The `[+ Add to Student Stack]` button is universally enabled for all credential types and only disabled if the exact program ID is already declared in the student's stack (`declaredProgramIds.includes(stagedComboboxProgramId)`).
+  2. *Primary vs. Secondary Major Assignment & Swapping:*
+     - The first declared Major in the stack is flagged `isPrimary: true` (`🎓 Primary Major`).
+     - Any subsequent Major declared is flagged `isPrimary: false` and rendered with the header badge `🎓 SECONDARY MAJOR (Double Major)` and a subtle `[Make Primary]` button.
+     - Clicking `[Make Primary]` cleanly interchanges `primaryProgramId` and `isPrimary` flags across the declared majors without DOM or state disruption.
+     - If a Primary Major is removed and a Secondary Major exists, the system automatically promotes the Secondary Major to `isPrimary: true`.
+  3. *Header Pluralization & N-Way Overlap Calculation:*
+     - Updated `formatDeclaredStackHeader(declaredPrograms)` in `src/utils/programStackUtils.js` to accurately format arbitrary multi-program stacks:
+       - 2 Majors -> `DECLARED CREDENTIALS STACK (2 Majors — Double Major)`
+       - 1 Major + 2 Minors -> `DECLARED CREDENTIALS STACK (1 Major, 2 Minors)`
+       - 2 Majors + 1 Minor -> `DECLARED CREDENTIALS STACK (2 Majors, 1 Minor)`
+       - 2 Majors + 2 Minors + 1 Cert -> `DECLARED CREDENTIALS STACK (2 Majors, 2 Minors, 1 Certificate)`
+     - Implemented N-way course deduplication in `calculateStackOverlap` computing `(occurrences - 1) * credits` saved across arbitrary 2, 3, 4, or 5-credential stacks.
+  4. *Synthetic Multi-Program Student Generator (`src/data/mockMultiProgramStudents.js`):*
+     - Exported 20 diverse, FERPA-compliant synthetic student intake profiles:
+       - Students 01–05: Double Majors (CS + Data Science, Biology + Psychology, Business + Comms, Cyber + IT Net, English + Comms)
+       - Students 06–10: Major + 2 Minors (CS + Math + Cyber Minors, Data Science + Math + Cyber Minors, Business + Math + Project Mgmt, etc.)
+       - Students 11–15: Major + 3 Minors / Mixed Triple Stacks (CS + Math + Cyber + Data Analysis Cert, etc.)
+       - Students 16–20: Double Major + Minor / Edge Cases (CS + Data Science + Cyber Minor, Nursing + Psychology + Data Analysis Cert, etc.)
+  5. *Autonomous Verification Suite:*
+     - *Vitest Unit Tests (`tests/multiProgramIntake.test.js`):* Added 7 comprehensive tests verifying primary/secondary flags, primary swapping, secondary promotion on removal, duplicate program ID rejection, 3-credential N-way overlap, and 100% schema validation across all 20 synthetic student records. Full suite: 158 / 158 passing (100%) across 13 test files.
+     - *Headless UI Verification (`.tmp/verify_multiprogram_intake.mjs`):* Verified live interactive stacking (CS BS + Data Science BS + Math Minor + Cyber Minor + Data Analysis Cert), asserted dynamic header `DECLARED CREDENTIALS STACK (2 Majors, 2 Minors, 1 Certificate)`, executed `[Make Primary]` swapping, executed minor removal, simulated rapid stack loading across 5 random synthetic students with 0 console errors and 0 DOM crashes, and captured screenshot to `.tmp/multiprogram_intake_verified.png`.
+     - *Process Teardown Invariant:* Strictly terminated child Vite preview processes via PowerShell `Stop-Process` and local port teardown in a `finally` block before calling `process.exit(0)`.

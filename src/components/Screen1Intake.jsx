@@ -296,17 +296,22 @@ export default function Screen1Intake({
   const [catalogYear, setCatalogYearState] = useState(propCatalogYear || '2026-2027');
   const [minCatalogYearStart, setMinCatalogYearStart] = useState(2024);
   const [selectedProgramId, setSelectedProgramIdState] = useState(propProgramId || 'cybersecurity_bs_2026');
+  const [primaryProgramId, setPrimaryProgramId] = useState(propProgramId || 'cybersecurity_bs_2026');
   const [additionalPrograms, setAdditionalProgramsState] = useState(propAdditionalPrograms || []);
   const [core42TransferBlock, setCore42TransferBlock] = useState(false);
   const [stagedComboboxProgramId, setStagedComboboxProgramId] = useState(propProgramId || 'cybersecurity_bs_2026');
   const [declaredProgramIds, setDeclaredProgramIds] = useState(() => {
-    const initial = [propProgramId || 'cybersecurity_bs_2026'];
-    if (Array.isArray(propAdditionalPrograms)) {
+    if (Array.isArray(propAdditionalPrograms) && propAdditionalPrograms.length > 0) {
+      const initial = propProgramId ? [propProgramId] : [];
       for (const p of propAdditionalPrograms) {
         if (p && !initial.includes(p)) initial.push(p);
       }
+      return initial;
     }
-    return initial;
+    if (parsedTranscript && propProgramId) {
+      return [propProgramId];
+    }
+    return [];
   });
 
   const setCatalogYear = (cy) => {
@@ -315,21 +320,12 @@ export default function Screen1Intake({
   };
   const setSelectedProgramId = (pId) => {
     setSelectedProgramIdState(pId);
+    setPrimaryProgramId(pId);
     setStagedComboboxProgramId(pId);
     onSelectProgramId?.(pId);
     setDeclaredProgramIds((prev) => {
-      const p = (masterDb?.programs || []).find((x) => x.id === pId);
-      const isMajor = p && getProgramCategory(p).startsWith('Major');
-      if (isMajor) {
-        const nonMajors = prev.filter((id) => {
-          const item = (masterDb?.programs || []).find((x) => x.id === id);
-          return item && !getProgramCategory(item).startsWith('Major');
-        });
-        return [pId, ...nonMajors];
-      } else {
-        if (!prev.includes(pId)) return [...prev, pId];
-        return prev;
-      }
+      if (!prev.includes(pId)) return [...prev, pId];
+      return prev;
     });
   };
   const setAdditionalPrograms = (progsOrFn) => {
@@ -346,17 +342,18 @@ export default function Screen1Intake({
   };
 
   useEffect(() => {
-    if (propProgramId) {
+    if (propProgramId && parsedTranscript) {
       setSelectedProgramIdState(propProgramId);
+      setPrimaryProgramId(propProgramId);
       setStagedComboboxProgramId(propProgramId);
       setDeclaredProgramIds((prev) => {
         if (!prev.includes(propProgramId)) {
-          return [propProgramId, ...prev.filter((id) => id !== propProgramId)];
+          return [propProgramId, ...prev];
         }
         return prev;
       });
     }
-  }, [propProgramId]);
+  }, [propProgramId, parsedTranscript]);
 
   useEffect(() => {
     if (propCatalogYear) setCatalogYearState(propCatalogYear);
@@ -373,15 +370,42 @@ export default function Screen1Intake({
       .filter(Boolean);
   }, [declaredProgramIds, masterDb]);
 
+  const effectivePrimaryMajorId = useMemo(() => {
+    const declaredMajors = declaredPrograms.filter((p) => {
+      const cat = getProgramCategory(p);
+      return cat === 'Major' || cat === 'Major - Track';
+    });
+    if (declaredMajors.length === 0) return null;
+    const match = declaredMajors.find((m) => m.id === primaryProgramId);
+    return match ? match.id : declaredMajors[0].id;
+  }, [declaredPrograms, primaryProgramId]);
+
   const stackOverlap = useMemo(() => {
     return calculateStackOverlap(declaredPrograms, masterDb);
   }, [declaredPrograms, masterDb]);
+
+  const handleMakePrimary = (progId) => {
+    setPrimaryProgramId(progId);
+    setSelectedProgramIdState(progId);
+    onSelectProgramId?.(progId);
+  };
 
   const handleAddProgramToStack = (progId) => {
     if (!progId || declaredProgramIds.includes(progId)) return;
     setDeclaredProgramIds((prev) => [...prev, progId]);
     const addedProg = (masterDb?.programs || []).find((p) => p.id === progId);
     if (addedProg) {
+      const cat = getProgramCategory(addedProg);
+      const isMajor = cat === 'Major' || cat === 'Major - Track';
+      const hasExistingMajor = declaredProgramIds.some((id) => {
+        const p = (masterDb?.programs || []).find((x) => x.id === id);
+        return p && (getProgramCategory(p) === 'Major' || getProgramCategory(p) === 'Major - Track');
+      });
+      if (isMajor && !hasExistingMajor) {
+        setPrimaryProgramId(progId);
+        setSelectedProgramIdState(progId);
+        onSelectProgramId?.(progId);
+      }
       setAdditionalProgramsState((prev) => [...prev, addedProg.name]);
     }
   };
@@ -389,8 +413,20 @@ export default function Screen1Intake({
   const handleRemoveProgramFromStack = (progId) => {
     setDeclaredProgramIds((prev) => {
       const next = prev.filter((id) => id !== progId);
-      if (next.length === 0) {
-        return [selectedProgramId];
+      if (progId === effectivePrimaryMajorId) {
+        const nextMajor = next.find((id) => {
+          const p = (masterDb?.programs || []).find((x) => x.id === id);
+          return p && (getProgramCategory(p) === 'Major' || getProgramCategory(p) === 'Major - Track');
+        });
+        if (nextMajor) {
+          setPrimaryProgramId(nextMajor);
+          setSelectedProgramIdState(nextMajor);
+          onSelectProgramId?.(nextMajor);
+        } else if (next.length > 0) {
+          setPrimaryProgramId(next[0]);
+          setSelectedProgramIdState(next[0]);
+          onSelectProgramId?.(next[0]);
+        }
       }
       return next;
     });
@@ -410,6 +446,7 @@ export default function Screen1Intake({
         return p && getProgramCategory(p).startsWith('Major');
       }) || remapped[0];
     if (remappedPrimary) {
+      setPrimaryProgramId(remappedPrimary);
       setSelectedProgramId(remappedPrimary);
       setStagedComboboxProgramId(remappedPrimary);
     }
@@ -2030,10 +2067,6 @@ export default function Screen1Intake({
                         selectedProgramId={stagedComboboxProgramId}
                         onSelectProgramId={(newId) => {
                           setStagedComboboxProgramId(newId);
-                          const p = (masterDb?.programs || []).find((x) => x.id === newId);
-                          if (p && getProgramCategory(p).startsWith('Major')) {
-                            setSelectedProgramId(newId);
-                          }
                         }}
                       />
                     </div>
@@ -2068,71 +2101,94 @@ export default function Screen1Intake({
 
                   {/* Cards Stack */}
                   <div className="space-y-2" id="declared-credentials-stack">
-                    {declaredPrograms.map((prog, index) => {
-                      const category = getProgramCategory(prog);
-                      const isPrimary = index === 0 && (category === 'Major' || category === 'Major - Track');
-                      const credits = prog.total_program_credits || prog.total_major_credits || 0;
-                      const details = parseProgramDetails(prog.name);
+                    {declaredPrograms.length === 0 ? (
+                      <div className="p-3 text-center text-xs text-neutral-500 border border-dashed border-neutral-300 rounded-lg bg-neutral-50/50">
+                        No degree programs declared. Select a major, minor, or certificate above and click <span className="font-semibold text-neutral-700">+ Add to Student Stack</span>.
+                      </div>
+                    ) : (
+                      declaredPrograms.map((prog) => {
+                        const category = getProgramCategory(prog);
+                        const isMajor = category === 'Major' || category === 'Major - Track';
+                        const isPrimary = isMajor && prog.id === effectivePrimaryMajorId;
+                        const isSecondaryMajor = isMajor && !isPrimary;
+                        const credits = prog.total_program_credits || prog.total_major_credits || 0;
+                        const details = parseProgramDetails(prog.name);
 
-                      let borderClass = 'border-l-4 border-l-[#1E293B]';
-                      let badgeText = category;
-                      let badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
-                      let iconText = '🎓';
+                        let borderClass = 'border-l-4 border-l-[#1E293B]';
+                        let badgeText = category;
+                        let badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
+                        let iconText = '🎓';
 
-                      if (category === 'Minor') {
-                        borderClass = 'border-l-4 border-l-slate-400';
-                        badgeText = 'Minor';
-                        badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
-                        iconText = '📘';
-                      } else if (category === 'Certificate') {
-                        borderClass = 'border-l-4 border-l-neutral-300';
-                        badgeText = 'Certificate';
-                        badgeClass = 'bg-neutral-100 text-neutral-700 border-neutral-300';
-                        iconText = '📜';
-                      } else if (category === 'Major - Track') {
-                        borderClass = 'border-l-4 border-l-[#1E293B]';
-                        badgeText = 'Major - Track';
-                        badgeClass = 'bg-[#857542]/15 text-[#857542] border-[#857542]/30';
-                        iconText = '🎓';
-                      }
+                        if (category === 'Minor') {
+                          borderClass = 'border-l-4 border-l-slate-400';
+                          badgeText = 'Minor';
+                          badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+                          iconText = '📘';
+                        } else if (category === 'Certificate') {
+                          borderClass = 'border-l-4 border-l-neutral-300';
+                          badgeText = 'Certificate';
+                          badgeClass = 'bg-neutral-100 text-neutral-700 border-neutral-300';
+                          iconText = '📜';
+                        } else if (isSecondaryMajor) {
+                          borderClass = 'border-l-4 border-l-[#857542]';
+                          badgeText = 'Secondary Major (Double Major)';
+                          badgeClass = 'bg-[#857542]/15 text-[#857542] border-[#857542]/30';
+                          iconText = '🎓';
+                        } else if (isPrimary) {
+                          borderClass = 'border-l-4 border-l-[#1E293B]';
+                          badgeText = 'Primary Major';
+                          badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
+                          iconText = '🎓';
+                        }
 
-                      return (
-                        <div
-                          key={prog.id}
-                          id={`declared-card-${prog.id}`}
-                          data-testid={`declared-card-${prog.id}`}
-                          className={`p-3 bg-neutral-50/70 hover:bg-neutral-50 rounded-lg border border-neutral-200 ${borderClass} transition flex items-center justify-between gap-3 shadow-2xs`}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm select-none">{iconText}</span>
-                              <span className="text-xs font-bold text-neutral-900 leading-tight">
-                                {details.discipline}
-                              </span>
-                              <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${badgeClass}`}>
-                                {badgeText}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-neutral-600 flex-wrap">
-                              {details.emphasis && (
-                                <span className="font-semibold text-[#857542] bg-[#F7F5EE] border border-[#B5A36A]/40 px-1 rounded">
-                                  {details.emphasis}
+                        return (
+                          <div
+                            key={prog.id}
+                            id={`declared-card-${prog.id}`}
+                            data-testid={`declared-card-${prog.id}`}
+                            className={`p-3 bg-neutral-50/70 hover:bg-neutral-50 rounded-lg border border-neutral-200 ${borderClass} transition flex items-center justify-between gap-3 shadow-2xs`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm select-none">{iconText}</span>
+                                <span className="text-xs font-bold text-neutral-900 leading-tight">
+                                  {details.discipline}
                                 </span>
+                                <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${badgeClass}`}>
+                                  {isSecondaryMajor ? '🎓 SECONDARY MAJOR (Double Major)' : badgeText}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-neutral-600 flex-wrap">
+                                {details.emphasis && (
+                                  <span className="font-semibold text-[#857542] bg-[#F7F5EE] border border-[#B5A36A]/40 px-1 rounded">
+                                    {details.emphasis}
+                                  </span>
+                                )}
+                                <span className="font-mono font-medium">
+                                  {credits} credits
+                                </span>
+                                {isPrimary && declaredPrograms.filter((p) => getProgramCategory(p).startsWith('Major')).length === 1 && (
+                                  <span className="inline-flex items-center gap-1 font-bold text-[#857542] bg-[#857542]/10 border border-[#857542]/30 px-1.5 py-0.5 rounded">
+                                    <Lock className="w-2.5 h-2.5" />
+                                    <span>Primary Degree (Locked)</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {isSecondaryMajor && (
+                                <button
+                                  type="button"
+                                  id={`make-primary-${prog.id}`}
+                                  data-testid={`make-primary-${prog.id}`}
+                                  onClick={() => handleMakePrimary(prog.id)}
+                                  className="px-2 py-1 text-[10px] font-bold text-[#857542] hover:text-[#5C512E] bg-[#F7F5EE] hover:bg-[#EFEBD9] border border-[#B5A36A]/50 rounded transition cursor-pointer"
+                                  title={`Make ${prog.name} the Primary Degree Anchor`}
+                                >
+                                  Make Primary
+                                </button>
                               )}
-                              <span className="font-mono font-medium">
-                                {credits} credits
-                              </span>
-                              {isPrimary ? (
-                                <span className="inline-flex items-center gap-1 font-bold text-[#857542] bg-[#857542]/10 border border-[#857542]/30 px-1.5 py-0.5 rounded">
-                                  <Lock className="w-2.5 h-2.5" />
-                                  <span>Primary Degree (Locked)</span>
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {!isPrimary ? (
                               <button
                                 type="button"
                                 id={`remove-program-${prog.id}`}
@@ -2144,15 +2200,11 @@ export default function Screen1Intake({
                               >
                                 <X className="w-4 h-4" />
                               </button>
-                            ) : (
-                              <span className="text-neutral-400 p-1" title="Primary Degree (Locked)">
-                                <Lock className="w-4 h-4 text-neutral-400" />
-                              </span>
-                            )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
 
                   {/* Live Overlap Footer */}

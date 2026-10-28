@@ -60,7 +60,11 @@ export function formatDeclaredStackHeader(programs = []) {
   if (majorsCount === 1) {
     parts.push('1 Major');
   } else if (majorsCount === 2) {
-    parts.push('2 Majors — Double Major');
+    if (minorsCount === 0 && certsCount === 0) {
+      parts.push('2 Majors — Double Major');
+    } else {
+      parts.push('2 Majors');
+    }
   } else if (majorsCount > 2) {
     parts.push(`${majorsCount} Majors`);
   }
