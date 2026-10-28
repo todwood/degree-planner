@@ -1162,3 +1162,26 @@
 
 
 
+
+### 71. Full Institutional Course Inventory Merge & Production Release
+- **Objective:** Ingest the full 2026–2027 institutional course inventory dataset (`.tmp/courses_staging_all_2026.json`) into `src/data/masterDatabase.json`, preserve degree program integrity across all 3 verified degrees (`cybersecurity_bs_*`, `it_networking_bs_*`, `it_app_dev_bs_*`), maintain 100% test pass rate across all 139 unit tests, verify zero UI regressions, and deploy the production release to live GitHub Pages.
+- **Architectural Implementation & Calibrations:**
+  1. *Deterministic Full Merge Execution (`execution/merge_staged_courses.js`):*
+     - Ingested `.tmp/courses_staging_all_2026.json` (1,881 courses, 2.78 MB).
+     - Master database course count expanded from 127 courses to 1,904 courses (104 updated, 1,777 newly added).
+     - Formatted `src/data/masterDatabase.json` cleanly with standard 2-space indentation.
+  2. *Corequisite & Prerequisite Preservation Guard:*
+     - Staged crawler records occasionally emit unparsed or empty `coreqs: []` or `prereq_logic`.
+     - Added defensive guards in `merge_staged_courses.js` to ensure existing verified `coreq_codes` (such as `ICS 32301` on `ICS 32300`), `prereqs`, and `prereq_logic` are not overwritten with empty arrays.
+  3. *Zero-Credit Seminar & Practicum Support:*
+     - University attendance courses and practicums (e.g., `MUS 10200`, `CINE 10000`, `COM 10800`, `AAD 10200`) legitimately carry `0` credits. Calibrated credit assertions in unit tests to assert `credits >= 0` rather than `>= 1`.
+  4. *Program Integrity Validation:*
+     - Verified that all required and elective courses across all 9 verified program definitions (Cybersecurity BS, IT Networking BS, IT Applications Development BS for 2024-2025, 2025-2026, and 2026-2027) remain 100% resolvable in `masterDatabase.json`.
+- **Verification & Deployment:**
+  - *Unit Tests:* 139 / 139 passing (100%) across 11 test files (`npm run test`).
+  - *Production Build:* `npm run build` compiled cleanly in 5.64s (`dist/assets/index-DZhv_2FB.js`, 4.2 MB raw, 850 KB gzip).
+  - *Headless E2E Verification:*
+    - `.tmp/verify_searchable_selectors.mjs` confirmed Screen 1 program comboboxes, full title rendering without truncation, responsive Master Database Inspector search (`All (1904)` courses), and transition to Screen 2 and 3 with clean process teardown (exit code 0).
+    - `.tmp/verify_mock_students_intake.mjs` confirmed all 3 verified degrees intake and schedule properly end-to-end.
+  - *Git Commit & Push:* Committed changes (`2d3c440 feat(catalog): merge 2026-2027 institutional course inventory and schedule telemetry`) and pushed to `origin/source`.
+  - *Live Deployment:* Deployed to GitHub Pages via `execution/deploy_to_github_pages.js --live` and verified live site at `https://todwood.github.io/degree-planner/` via `execution/verify_live_pages.js` with 0 console errors.
