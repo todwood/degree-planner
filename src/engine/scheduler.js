@@ -80,7 +80,12 @@ export function resolveCourseAvailability(course) {
     Boolean(course.SP_16wk) ||
     Boolean(course.SU_8wk);
 
-  const sessionsArr = Array.isArray(course.offered_sessions) ? course.offered_sessions : [];
+  const sessionsArr =
+    Array.isArray(course.offered_sessions) && course.offered_sessions.length > 0
+      ? course.offered_sessions
+      : Array.isArray(course.offerings) && course.offerings.length > 0
+      ? course.offerings
+      : [];
   const hasOddEvenFlags = sessionsArr.some((s) =>
     ['FA-Odd', 'FA-Even', 'SP-Odd', 'SP-Even'].includes(s)
   );
@@ -101,13 +106,47 @@ export function resolveCourseAvailability(course) {
     };
   }
 
-  const FA_I_8wk = Boolean(course.FA_I_8wk || sessionsArr.includes('FA-I'));
-  const FA_II_8wk = Boolean(course.FA_II_8wk || sessionsArr.includes('FA-II'));
-  const FA_16wk = Boolean(course.FA_16wk || sessionsArr.includes('Fall-16wk'));
-  const SP_I_8wk = Boolean(course.SP_I_8wk || sessionsArr.includes('SP-I'));
-  const SP_II_8wk = Boolean(course.SP_II_8wk || sessionsArr.includes('SP-II'));
-  const SP_16wk = Boolean(course.SP_16wk || sessionsArr.includes('Spring-16wk'));
-  const SU_8wk = Boolean(course.SU_8wk || sessionsArr.includes('SU'));
+  const FA_I_8wk = Boolean(
+    course.FA_I_8wk ||
+      sessionsArr.includes('FA-I') ||
+      sessionsArr.includes('FA_I') ||
+      sessionsArr.includes('FA-I-8wk')
+  );
+  const FA_II_8wk = Boolean(
+    course.FA_II_8wk ||
+      sessionsArr.includes('FA-II') ||
+      sessionsArr.includes('FA_II') ||
+      sessionsArr.includes('FA-II-8wk')
+  );
+  const FA_16wk = Boolean(
+    course.FA_16wk ||
+      sessionsArr.includes('Fall-16wk') ||
+      sessionsArr.includes('FA-16wk') ||
+      sessionsArr.includes('16wk')
+  );
+  const SP_I_8wk = Boolean(
+    course.SP_I_8wk ||
+      sessionsArr.includes('SP-I') ||
+      sessionsArr.includes('SP_I') ||
+      sessionsArr.includes('SP-I-8wk')
+  );
+  const SP_II_8wk = Boolean(
+    course.SP_II_8wk ||
+      sessionsArr.includes('SP-II') ||
+      sessionsArr.includes('SP_II') ||
+      sessionsArr.includes('SP-II-8wk')
+  );
+  const SP_16wk = Boolean(
+    course.SP_16wk ||
+      sessionsArr.includes('Spring-16wk') ||
+      sessionsArr.includes('SP-16wk')
+  );
+  const SU_8wk = Boolean(
+    course.SU_8wk ||
+      sessionsArr.includes('SU') ||
+      sessionsArr.includes('SU_8wk') ||
+      sessionsArr.some((s) => typeof s === 'string' && s.startsWith('SU'))
+  );
 
   const annualSessionCount =
     [FA_I_8wk, FA_II_8wk, FA_16wk, SP_I_8wk, SP_II_8wk, SP_16wk, SU_8wk].filter(Boolean).length ||

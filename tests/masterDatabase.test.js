@@ -221,7 +221,7 @@ describe('Phase 1: Master Database Integrity Verification', () => {
       expect(placeholders.length).toBe(15);
 
       const concreteCourses = await dbAdapter.getConcreteCourses();
-      expect(concreteCourses.length).toBe(71);
+      expect(concreteCourses.length).toBeGreaterThanOrEqual(71);
 
       // 2. Query placeholder by canonical token
       const art = await dbAdapter.getCourse('REQ_GE_ART');

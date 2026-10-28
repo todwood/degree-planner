@@ -2511,23 +2511,26 @@
       "number": "11000",
       "title": "Intermediate Algebra",
       "credits": 3,
-      "description": "Linear and quadratic equations, inequalities, graphs, polynomials, and rational expressions.",
+      "description": "MTH 11000 is designed to prepare students for MTH 14800 , MTH 14900 , and MTH 15100 . The topics include: operations with real numbers, first degree equations and inequalities, functions and graphs, operations with polynomials, factoring polynomials, rational expressions, and quadratic equations. This course counts for elective credit but will not satisfy any general education requirements.",
       "fee_info": "$0",
       "offered_sessions": [
         "Fall-16wk",
         "Spring-16wk",
-        "SU"
+        "SU",
+        "FA-II",
+        "SP-I",
+        "SP-II"
       ],
       "FA_I_8wk": false,
-      "FA_II_8wk": false,
+      "FA_II_8wk": true,
       "FA_16wk": true,
-      "SP_I_8wk": false,
-      "SP_II_8wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
       "SP_16wk": true,
       "SU_8wk": true,
       "modalities": [
-        "Online",
-        "OnGround"
+        "On-Ground",
+        "Online"
       ],
       "prereq_logic": null,
       "prereq_display": "None",
@@ -2537,7 +2540,89 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "prereqs": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "offerings": [
+        "FA-16wk",
+        "FA-II",
+        "SP-16wk",
+        "SP-I",
+        "SP-II",
+        "SU-6wk1"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall, Spring, & Summer (On-Ground & Online)",
+        "modalities": [
+          "On-Ground",
+          "Online"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 15,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 6,
+            "modalities": {
+              "OG": 4,
+              "OL": 2,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk",
+              "FA-II"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG",
+              "26FA-16wk_OL",
+              "26FA-II_OL"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 7,
+            "modalities": {
+              "OG": 2,
+              "OL": 5,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-I",
+              "SP-II",
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-I_OL",
+              "27SP-II_OL",
+              "27SP-16wk_OG",
+              "27SP-16wk_OL"
+            ]
+          },
+          {
+            "term": "2027 Summer",
+            "total_sections": 2,
+            "modalities": {
+              "OG": 0,
+              "OL": 2,
+              "HY": 0
+            },
+            "session_bands": [
+              "6wk1"
+            ],
+            "section_tags": [
+              "27SU-6wk1_OL"
+            ]
+          }
+        ]
+      }
     },
     {
       "code": "MTH 14100",
@@ -2545,7 +2630,7 @@
       "number": "14100",
       "title": "Basic Statistics (GE-Math)",
       "credits": 3,
-      "description": "Descriptive statistics, elementary probability, normal distribution, sampling distributions, hypothesis testing, and confidence intervals.",
+      "description": "This course is an introduction to the theory and applications of statistics, including probability, descriptive statistics, random variables, expected values, distribution functions, and hypothesis testing.",
       "fee_info": "$0",
       "offered_sessions": [
         "FA-I",
@@ -2564,8 +2649,8 @@
       "SP_16wk": true,
       "SU_8wk": true,
       "modalities": [
-        "Online",
-        "OnGround"
+        "On-Ground",
+        "Online"
       ],
       "prereq_logic": null,
       "prereq_display": "MTH 11000 or Math Placement",
@@ -2577,7 +2662,121 @@
       "pe_notes": [
         "Dual-satisfies GE-Math and Major Math requirements"
       ],
-      "type": "concrete"
+      "type": "concrete",
+      "prereqs": [
+        "MTH 05100",
+        "MTH 11000",
+        "MTH 15100",
+        "MTH 15200",
+        "MTH 27100",
+        "MTH 27200"
+      ],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 05100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15200",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "offerings": [
+        "FA-16wk",
+        "FA-II",
+        "SP-16wk",
+        "SP-I",
+        "SP-II",
+        "SU-6wk1"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall, Spring, & Summer (On-Ground & Online)",
+        "modalities": [
+          "On-Ground",
+          "Online"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 28,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 13,
+            "modalities": {
+              "OG": 9,
+              "OL": 4,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-II",
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-II_OL",
+              "26FA-16wk_OL",
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 12,
+            "modalities": {
+              "OG": 6,
+              "OL": 6,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-I",
+              "16wk",
+              "SP-II"
+            ],
+            "section_tags": [
+              "27SP-I_OL",
+              "27SP-16wk_OG",
+              "27SP-16wk_OL",
+              "27SP-II_OL"
+            ]
+          },
+          {
+            "term": "2027 Summer",
+            "total_sections": 3,
+            "modalities": {
+              "OG": 0,
+              "OL": 3,
+              "HY": 0
+            },
+            "session_bands": [
+              "6wk1"
+            ],
+            "section_tags": [
+              "27SU-6wk1_OL"
+            ]
+          }
+        ]
+      }
     },
     {
       "code": "MTH 15100",
@@ -2585,23 +2784,26 @@
       "number": "15100",
       "title": "College Algebra (GE-Math)",
       "credits": 3,
-      "description": "Functions and graphs, polynomial and rational functions, exponential and logarithmic functions, systems of equations.",
+      "description": "Topics covered: functions and graphs, polynomial and rational functions, exponentials and logarithms, systems of equations and inequalities, sequences and the binomial theorem. The course is designed primarily for science and related majors and students seeking middle school mathematics certification.",
       "fee_info": "$0",
       "offered_sessions": [
         "Fall-16wk",
         "Spring-16wk",
-        "SU"
+        "SU",
+        "FA-II",
+        "SP-I",
+        "SP-II"
       ],
       "FA_I_8wk": false,
-      "FA_II_8wk": false,
+      "FA_II_8wk": true,
       "FA_16wk": true,
-      "SP_I_8wk": false,
-      "SP_II_8wk": false,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
       "SP_16wk": true,
       "SU_8wk": true,
       "modalities": [
-        "Online",
-        "OnGround"
+        "On-Ground",
+        "Online"
       ],
       "prereq_logic": null,
       "prereq_display": "MTH 11000 or Math Placement",
@@ -2611,7 +2813,96 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "prereqs": [
+        "MTH 11000"
+      ],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "offerings": [
+        "FA-16wk",
+        "FA-II",
+        "SP-16wk",
+        "SP-I",
+        "SP-II",
+        "SU-6wk1"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall, Spring, & Summer (On-Ground & Online)",
+        "modalities": [
+          "On-Ground",
+          "Online"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 19,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 10,
+            "modalities": {
+              "OG": 6,
+              "OL": 4,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk",
+              "FA-II"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG",
+              "26FA-II_OL",
+              "26FA-16wk_OL"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 7,
+            "modalities": {
+              "OG": 3,
+              "OL": 4,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk",
+              "SP-II",
+              "SP-I"
+            ],
+            "section_tags": [
+              "27SP-16wk_OL",
+              "27SP-II_OL",
+              "27SP-I_OL",
+              "27SP-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Summer",
+            "total_sections": 2,
+            "modalities": {
+              "OG": 0,
+              "OL": 2,
+              "HY": 0
+            },
+            "session_bands": [
+              "6wk1"
+            ],
+            "section_tags": [
+              "27SU-6wk1_OL"
+            ]
+          }
+        ]
+      }
     },
     {
       "code": "MTH 15200",
@@ -2619,7 +2910,7 @@
       "number": "15200",
       "title": "Precalculus: Elementary Functions (GE-Math)",
       "credits": 3,
-      "description": "Trigonometric functions, identities, inverse trigonometric functions, and analytic trigonometry.",
+      "description": "This course serves as preparation for calculus covering polynomial and rational functions, exponential and logarithmic functions, trigonometric functions, applications and systems of linear equations. A graphing calculator is required.",
       "fee_info": "$0",
       "offered_sessions": [
         "Fall-16wk",
@@ -2633,8 +2924,7 @@
       "SP_16wk": true,
       "SU_8wk": false,
       "modalities": [
-        "Online",
-        "OnGround"
+        "On-Ground"
       ],
       "prereq_logic": {
         "op": "COURSE",
@@ -2647,7 +2937,68 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "prereqs": [
+        "MTH 15100"
+      ],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
     },
     {
       "code": "MTH 27100",
@@ -2655,7 +3006,7 @@
       "number": "27100",
       "title": "Calculus I (GE-Math)",
       "credits": 5,
-      "description": "Limits, derivatives, applications of differentiation, antiderivatives, and definite integrals.",
+      "description": "This course is the first study of real functions and some of their applications. Topics include limits, continuity, differentiation and integration. A graphing calculator is required.",
       "fee_info": "$0",
       "offered_sessions": [
         "Fall-16wk",
@@ -2669,7 +3020,7 @@
       "SP_16wk": true,
       "SU_8wk": false,
       "modalities": [
-        "OnGround"
+        "On-Ground"
       ],
       "prereq_logic": {
         "op": "COURSE",
@@ -2682,7 +3033,68 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "prereqs": [
+        "MTH 15200"
+      ],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 15200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
     },
     {
       "code": "MTH 27200",
@@ -2690,7 +3102,7 @@
       "number": "27200",
       "title": "Calculus II",
       "credits": 5,
-      "description": "Integration techniques, applications of definite integrals, infinite sequences and series, parametric equations, and polar coordinates.",
+      "description": "This course is a continuation of the study of real functions of one variable. Topics include integration, applications of integration, and methods of integration, infinite series, and vectors. A graphing calculator is required.",
       "fee_info": "$0",
       "offered_sessions": [
         "Fall-16wk",
@@ -2704,7 +3116,7 @@
       "SP_16wk": true,
       "SU_8wk": false,
       "modalities": [
-        "OnGround"
+        "On-Ground"
       ],
       "prereq_logic": {
         "op": "COURSE",
@@ -2717,7 +3129,68 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "prereqs": [
+        "MTH 27100"
+      ],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
     },
     {
       "code": "CSC 10011",
@@ -4139,6 +4612,2985 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": []
+    },
+    {
+      "code": "MTH 05100",
+      "department": "MTH",
+      "number": "05100",
+      "title": "Basic Mathematics",
+      "credits": 2,
+      "level": 5100,
+      "description": "MTH 05100 is a computer-based course designed to prepare students for MTH 12100 , MTH 14100 , and MTH 14200 . Topics include: order of algebraic operations, simplifying algebraic expressions, fractions and proportions, first degree equations and inequalities, functions and graphs, systems of linear equations, exponents, scientific notation, and quadratic equations. This course will not satisfy any general education requirements, nor will it earn elective credit (thus, does not count toward the 120 hours required for graduation).",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 10101",
+      "department": "MTH",
+      "number": "10101",
+      "title": "Mathematics Support Lab",
+      "credits": 1,
+      "level": 10000,
+      "description": "This course is intended to provide co-remediation support to students enrolled in MTH 11000 , MTH 14100 , MTH 14200 , or MTH 15100 . This course will not satisfy any general education requirements.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 12100",
+      "department": "MTH",
+      "number": "12100",
+      "title": "Introduction to Contemporary Mathematics",
+      "credits": 3,
+      "level": 10000,
+      "description": "This course is an introductory course on how mathematics is used today. Students will study consumer mathematics plus additional topics selected from apportionment, fair divisions, geometry, growth and decay, numbers systems for encoding information, probability and counting techniques, routes and network, scheduling, statistics, voting systems.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 05100, MTH 11000",
+      "prereqs": [
+        "MTH 05100",
+        "MTH 11000"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 05100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 13600",
+      "department": "MTH",
+      "number": "13600",
+      "title": "Think Like da Vinci: Mathematics in the Art and Science of the Renaissance",
+      "credits": 3,
+      "level": 10000,
+      "description": "Mathematics lies at the heart of the “rebirth” of art and science that later became known as the Renaissance. Mathematicians, artists, architects, and inventors of the time believed in the humanist ideals of observation, critical analysis, and creativity. This course will use the humanist model of inquiry to pose and answer questions relating to mathematics in the art and science of the Renaissance. Topics include ratios and proportions; abstract mathematical thinking through patterns and sequences; linear and quadratic equations, functions, and graphs; affine, Euclidean, projective, and relevant non-Euclidean geometry; and mathematical exploration of the notion of infinity. The motivation for and exploration of these mathematical topics will be drawn from the art, architecture, and engineering of the Renaissance. This course is intended for non-majors; it does not count toward either the major or minor in mathematics.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 05100, MTH 11000",
+      "prereqs": [
+        "MTH 05100",
+        "MTH 11000"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 05100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (Online)",
+        "modalities": [
+          "Online"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 0,
+              "OL": 1,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OL"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 0,
+              "OL": 1,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OL"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 14200",
+      "department": "MTH",
+      "number": "14200",
+      "title": "Quantitative Methods for Business",
+      "credits": 3,
+      "level": 10000,
+      "description": "This course is designed to introduce business students to the use of quantitative methods. Topics covered will include solving and graphing linear functions and inequalities; writing mathematical models; solving systems of equations; linear regression; and an introduction to linear programming. Tools used will include calculators and computers. A graphing calculator is required.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 05100, MTH 11000",
+      "prereqs": [
+        "MTH 05100",
+        "MTH 11000"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 05100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 14800",
+      "department": "MTH",
+      "number": "14800",
+      "title": "Mathematical Structures for Teachers I",
+      "credits": 4,
+      "level": 10000,
+      "description": "This course focuses on problem solving using the real number system and algebra. Topics include: different numeration systems (Roman Numerals and other bases), techniques for calculations, percents and ratios with applications, exponents and roots, the properties of real numbers, arithmetic with irrational and complex numbers, linear functions and piecewise linear functions with applications, systems of linear equations, quadratic functions with applications, polynomial and rational functions with applications.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 11000, MTH 15100",
+      "prereqs": [
+        "MTH 11000",
+        "MTH 15100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 14900",
+      "department": "MTH",
+      "number": "14900",
+      "title": "Mathematical Structures for Teachers II",
+      "credits": 3,
+      "level": 10000,
+      "description": "This course provides an introduction to the basic concepts of probability (including counting techniques), statistics, and geometry. The basic geometry concepts to be covered include the fundamentals of planar and 3-dimensional geometry; congruence and similarity, proofs of congruent or similar triangles; concepts of measure; and motion geometry and tessellations.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 11000, MTH 15100",
+      "prereqs": [
+        "MTH 11000",
+        "MTH 15100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 15110",
+      "department": "MTH",
+      "number": "15110",
+      "title": "College Algebra with Support",
+      "credits": 5,
+      "level": 10000,
+      "description": "Topics covered: functions and graphs, polynomial and rational functions, exponentials and logarithms, systems of equations and inequalities, sequences and the binomial theorem. The course is designed primarily for science and related majors and students seeking middle school mathematics certification. The College Algebra with Support section is designed for students who do not have the",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 15300",
+      "department": "MTH",
+      "number": "15300",
+      "title": "Algebra and Trigonometry",
+      "credits": 5,
+      "level": 10000,
+      "description": "This combined course serves as a review of college algebra as well as preparation for the calculus sequence. Topics include polynomial and rational functions and inequalities, systems of equations, exponential and logarithmic functions, trigonometric functions, inverse trigonometric functions, as well as their applications.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 11000",
+      "prereqs": [
+        "MTH 11000"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 11000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 17300",
+      "department": "MTH",
+      "number": "17300",
+      "title": "Survey of Calculus",
+      "credits": 4,
+      "level": 10000,
+      "description": "Topics include a brief review of trigonometry; limits and continuity; derivatives and integrals of polynomials, rational, exponential, logarithmic and trigonometric functions; relative extrema and points of inflection; graphs of functions, derivatives, and integrals; implicit differentiation and related rates; the extreme value theorem; definite and indefinite integrals; and the Fundamental Theorem of Calculus. A graphing calculator is required.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 15100, MTH 15200",
+      "prereqs": [
+        "MTH 15100",
+        "MTH 15200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 17500",
+      "department": "MTH",
+      "number": "17500",
+      "title": "Business Calculus and Applications",
+      "credits": 4,
+      "level": 10000,
+      "description": "This course is an introductory course in calculus, with an emphasis in business applications. Topics include a review of exponential and logarithmic functions, interest, linear programming, limits, continuity, differentiation and integration. A graphing calculator is required. A TI-83 is recommended.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II",
+        "SP-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": true,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-II",
+        "SP-II"
+      ],
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 14200, MTH 15100",
+      "prereqs": [
+        "MTH 14200",
+        "MTH 15100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 14200",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (Online)",
+        "modalities": [
+          "Online"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 0,
+              "OL": 1,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-II"
+            ],
+            "section_tags": [
+              "26FA-II_OL"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 0,
+              "OL": 1,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-II"
+            ],
+            "section_tags": [
+              "27SP-II_OL"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 22100",
+      "department": "MTH",
+      "number": "22100",
+      "title": "Discrete Structures",
+      "credits": 3,
+      "level": 20000,
+      "description": "This course will briefly review logic, sets, functions and relations, and methods of proof before using these concepts to study discrete (rather than continuous) mathematics. Topics covered may include combinatorics, graph theory, algorithms and their analysis, Boolean algebra, finite state machines, finite difference equations, and applications of these topics.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 15100, CSC 14400",
+      "prereqs": [
+        "MTH 15100",
+        "CSC 14400"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        },
+        {
+          "course": "CSC 14400",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 23000",
+      "department": "MTH",
+      "number": "23000",
+      "title": "Geometry with Geometric Software",
+      "credits": 1,
+      "level": 20000,
+      "description": "In this course, elements of geometry will be explored using the computer software. Topics that will be explored are polygons, the various centers of a triangle, circles, areas, and volumes.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 15200",
+      "prereqs": [
+        "MTH 15200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 15200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 24000",
+      "department": "MTH",
+      "number": "24000",
+      "title": "Bridge Course: Statistics for Natural Science",
+      "credits": 1,
+      "level": 20000,
+      "description": "This course supplements content from MTH 14100 - Basic Statistics to satisfy requirements for Statistics for MTH 24100 - Statistics for Natural Science . This course covers two parameter confidence intervals and hypothesis testing, ANOVA, prediction intervals, and multiple regression models relating two or more independent variables. Students cannot earn credit for both MTH 24000 and MTH 24100 .",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-II"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": true,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-II"
+      ],
+      "modalities": [
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 14100, MTH 15100, MTH 15200, MTH 27100, MTH 27200",
+      "prereqs": [
+        "MTH 14100",
+        "MTH 15100",
+        "MTH 15200",
+        "MTH 27100",
+        "MTH 27200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 14100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15200",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (Online)",
+        "modalities": [
+          "Online"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 0,
+              "OL": 1,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-II"
+            ],
+            "section_tags": [
+              "26FA-II_OL"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 24100",
+      "department": "MTH",
+      "number": "24100",
+      "title": "Statistics for Natural Science",
+      "credits": 3,
+      "level": 20000,
+      "description": "Topics covered in this course include counting rules and probability, normal and binomial distributions, Chi-square, t-tests and F-tests, ANOVA, linear regression, precision, accuracy, absolute and relative error, random error, means, medians, standard deviation (population and sample), standard error of the mean, variance, relative standard deviation, coefficient of variation, confidence levels and intervals, Q-tests, and definitions and sources of error (methodological, sampling, procedural and instrument).",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 15100, MTH 15200, MTH 27100, MTH 27200",
+      "prereqs": [
+        "MTH 15100",
+        "MTH 15200",
+        "MTH 27100",
+        "MTH 27200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 15100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 15200",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 4,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 2,
+            "modalities": {
+              "OG": 2,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 2,
+            "modalities": {
+              "OG": 2,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 28500",
+      "department": "MTH",
+      "number": "28500",
+      "title": "Introduction to Mathematical Proof Writing",
+      "credits": 3,
+      "level": 20000,
+      "description": "This course is a transition course from elementary to advanced mathematics. Topics include logic, proof techniques, set theory, discrete math, the natural numbers, induction, functions, relations, and the foundations of number systems.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 27100",
+      "prereqs": [
+        "MTH 27100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [
+        "CSC 28500"
+      ],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 30300",
+      "department": "MTH",
+      "number": "30300",
+      "title": "Calculus III",
+      "credits": 5,
+      "level": 30000,
+      "description": "This course is the study of real functions of more than one variable. Topics include partial derivatives, gradient, potential functions, line integral, multiple integration, and Taylor’s formula. A graphing calculator is required.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 27200",
+      "prereqs": [
+        "MTH 27200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 31100",
+      "department": "MTH",
+      "number": "31100",
+      "title": "Differential Equations",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course examines ordinary differential equations and some applications, including first order equations, linear differential equations, Laplace Transform, and series solutions.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 27200",
+      "prereqs": [
+        "MTH 27200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 31300",
+      "department": "MTH",
+      "number": "31300",
+      "title": "History of Mathematics",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course looks at the history of Mathematics, including the Classical, Medieval, Renaissance, Early Modern, and Modern periods, spanning the time from 3000 BC to the present.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 15200",
+      "prereqs": [
+        "MTH 15200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 15200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 31500",
+      "department": "MTH",
+      "number": "31500",
+      "title": "Linear Algebra I",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course is the study of the finite dimensional vector spaces, linear mappings between them and applications to differential equations and geometry. Topics include solution of linear equations, matrices, determinants, eigenvalue problems, bilinear mappings and forms, diagonalization.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 27100",
+      "prereqs": [
+        "MTH 27100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 31600",
+      "department": "MTH",
+      "number": "31600",
+      "title": "Linear Algebra II",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course is the study of the finite dimensional vector spaces, linear mappings between them and applications to differential equations and geometry. Topics include solution of linear equations, matrices, determinants, eigenvalue problems, bilinear mappings and forms, diagonalization.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 31500",
+      "prereqs": [
+        "MTH 31500"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 31500",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 32000",
+      "department": "MTH",
+      "number": "32000",
+      "title": "Abstract Algebra",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course examines the main structures of abstract algebra. Groups, rings and fields will be studied together with applications to geometry, and number theory.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "ENGL 17000, MTH 28500",
+      "prereqs": [
+        "ENGL 17000",
+        "MTH 28500"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "ENGL 17000",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 28500",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 32200",
+      "department": "MTH",
+      "number": "32200",
+      "title": "Abstract Algebra II",
+      "credits": 3,
+      "level": 30000,
+      "description": "This proof-based course introduces the theory of rings and fields, together with their applications to number theory.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 28500",
+      "prereqs": [
+        "MTH 28500"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 28500",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 32300",
+      "department": "MTH",
+      "number": "32300",
+      "title": "Theory of Financial Mathematics",
+      "credits": 4,
+      "level": 30000,
+      "description": "This course is a differential calculus-based introduction to interest theory and the time value of money. Students will learn about simple and compound interest, nominal and effective rates of interest and discount, standard and nonstandard annuities, amortization schedules, sinking funds, bond valuation, duration, convexity, and immunization. This course covers all the topics needed for Exam FM/2 by the Society of Actuaries and the Casualty Actuarial Society.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 17500, MTH 27100",
+      "prereqs": [
+        "MTH 17500",
+        "MTH 27100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 17500",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 32400",
+      "department": "MTH",
+      "number": "32400",
+      "title": "Theory of Financial Mathematics I",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course is a differential calculus based introduction to interest theory and the time value of money. Students will learn about simple and compound interest, nominal and effective rates of interest and discount, standard and nonstandard annuities, amortization schedules, sinking funds, and bond valuation. This course, together with MTH 32500 , covers topics needed to be successful on Exam FM/2 by the Society of Actuaries and the Casualty Actuarial Society.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 17500, MTH 27100",
+      "prereqs": [
+        "MTH 17500",
+        "MTH 27100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 17500",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 32500",
+      "department": "MTH",
+      "number": "32500",
+      "title": "Theory of Financial Mathematics II",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course provides a calculus based coverage of topics in financial mathematics including bond valuation, stock valuation, inflation, duration, immunization, and financial derivatives such as forwards, futures, options, and swaps. This course, together with MTH 32400 , covers topics needed to be successful on Exam FM/2 by the Society of Actuaries and the Casualty Actuarial Society.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 32400",
+      "prereqs": [
+        "MTH 32400"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 32400",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 32600",
+      "department": "MTH",
+      "number": "32600",
+      "title": "Models for Financial Economics",
+      "credits": 3,
+      "level": 30000,
+      "description": "This primary focus of this course is to use stock models for the purpose of option valuation. Stock models discussed include the binomial tree model and the Black-Scholes framework. Students will use the models to price standard options as well as a variety of exotic options. The course will also discuss interest rate models used for pricing bonds. This course covers material included on the MFE/3F actuarial exam.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 14100, MTH 24100, MTH 32500, MTH 17500, FIN 42020",
+      "prereqs": [
+        "MTH 14100",
+        "MTH 24100",
+        "MTH 32500",
+        "MTH 17500",
+        "FIN 42020"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 14100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 24100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 32500",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 17500",
+          "min_grade": "C"
+        },
+        {
+          "course": "FIN 42020",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 33000",
+      "department": "MTH",
+      "number": "33000",
+      "title": "Geometry",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course is a careful review of Euclidean geometry of the plane and space, and an introduction to non-Euclidean geometry.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "ENGL 17000",
+      "prereqs": [
+        "ENGL 17000"
+      ],
+      "coreq_codes": [
+        "MTH 28500"
+      ],
+      "grade_prereq_rules": [
+        {
+          "course": "ENGL 17000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 34100",
+      "department": "MTH",
+      "number": "34100",
+      "title": "Probability and Mathematical Statistics I",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course is the first part of a calculus-based sequence. Topics include combinatorics, probability spaces, discrete and continuous distributions, variable transformation, multivariate distributions.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 27200",
+      "prereqs": [
+        "MTH 27200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 34200",
+      "department": "MTH",
+      "number": "34200",
+      "title": "Probability and Mathematical Statistics II",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course is the second part of a calculus-based sequence. Topics covered include estimation using confidence intervals, maximum likelihood, bayesian methods, hypothesis testing regression analysis, and theory of statistical interference.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 34100",
+      "prereqs": [
+        "MTH 34100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 34100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 34500",
+      "department": "MTH",
+      "number": "34500",
+      "title": "Regression Analysis",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course will cover topics in regression and time series. Specific topics covered will include: Single linear regression, multiple linear regression, model diagnostic techniques, transformations, generalized linear models, ARIMA models, and forecasting. The course will require the use of Excel and statistical software, such as R.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 24100, MTH 34100, PSY 30600, MTH 14100, MTH 24000",
+      "prereqs": [
+        "MTH 24100",
+        "MTH 34100",
+        "PSY 30600",
+        "MTH 14100",
+        "MTH 24000"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 24100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 34100",
+          "min_grade": "C"
+        },
+        {
+          "course": "PSY 30600",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 14100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 24000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 35100",
+      "department": "MTH",
+      "number": "35100",
+      "title": "Numerical Methods",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course is the first course in numerical methods, including solution of linear and non-linear equations, numerical integration and differentiation, the theory of approximation, and solution of differential equations.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "CSC 14400, MTH 27200",
+      "prereqs": [
+        "CSC 14400",
+        "MTH 27200"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "CSC 14400",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 35300",
+      "department": "MTH",
+      "number": "35300",
+      "title": "Time Series",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course offers an introduction to time series and their applications. Topics include stationarity, autocorrelation functions, autoregressive (integrated) moving average models, partial autocorrelation functions, forecasting, seasonal models, frequency domain results, discrete Fourier transform, and more.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": false,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 31100, MTH 31500, MTH 34100",
+      "prereqs": [
+        "MTH 31100",
+        "MTH 31500",
+        "MTH 34100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 31100",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 31500",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 34100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 36100",
+      "department": "MTH",
+      "number": "36100",
+      "title": "Partial Differential Equations",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course provides an overview of partial differential equations of mathematical physics. The overview covers elliptic, parabolic, and hyperbolic PDEs. The methods of solutions include the eigenfunction expansions, the Laplace and Fourier transforms, and numerical methods.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 30300, MTH 31100",
+      "prereqs": [
+        "MTH 30300",
+        "MTH 31100"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 30300",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 31100",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 36500",
+      "department": "MTH",
+      "number": "36500",
+      "title": "Complex Variables",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course offers an introduction to the theory of complex variables and their applications. Topics include the algebra and geometry of complex numbers, Cartesian and polar representation, differentiability of complex functions, analytic functions, the elementary functions, contour integrals, the Cauchy integral formula, power series expansions, residue theorem and more.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 30300",
+      "prereqs": [
+        "MTH 30300"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 30300",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 37000",
+      "department": "MTH",
+      "number": "37000",
+      "title": "Advanced Calculus",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course provides a systematic and rigorous development of the multivariable calculus of functions on Euclidean space. Topics covered include limits, continuity and differentiability of functions, the Riemann integral, vector calculus, and sequences and series.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": false,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "MTH 27200, MTH 28500",
+      "prereqs": [
+        "MTH 27200",
+        "MTH 28500"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 27200",
+          "min_grade": "C"
+        },
+        {
+          "course": "MTH 28500",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 1,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 37100",
+      "department": "MTH",
+      "number": "37100",
+      "title": "Advanced Calculus II",
+      "credits": 3,
+      "level": 30000,
+      "description": "This proof-based course provides a systematic and rigorous development of the calculus of functions on Euclidean space. Topics covered include sequences, series, the Riemann integral, and special functions.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "MTH 37000",
+      "prereqs": [
+        "MTH 37000"
+      ],
+      "coreq_codes": [],
+      "grade_prereq_rules": [
+        {
+          "course": "MTH 37000",
+          "min_grade": "C"
+        }
+      ],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 38901",
+      "department": "MTH",
+      "number": "38901",
+      "title": "Undergraduate Research",
+      "credits": 3,
+      "level": 30000,
+      "description": "This course provides undergraduates with an opportunity to perform research in pure or applied mathematics. Under the supervision of a faculty member, a student will independently study a chosen area of mathematics. Students are expected to explore significant problems in their topic, draw conclusions, and, if applicable, identify real world applications to their work.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 3,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 2,
+            "modalities": {
+              "OG": 2,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 39000-39999",
+      "department": "MTH",
+      "number": "39000-39999",
+      "title": "Special Topics in Applied Mathematics",
+      "credits": 3,
+      "level": 30000,
+      "description": "",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
+    },
+    {
+      "code": "MTH 48001",
+      "department": "MTH",
+      "number": "48001",
+      "title": "Mathematics Internship",
+      "credits": 3,
+      "level": 40000,
+      "description": "This course offers students the opportunity to earn academic credit while gaining practical work experience in a professional environment. The work experience should expand upon and apply the knowledge obtained through the student’s coursework.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk",
+        "SU-6wk1"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall, Spring, & Summer (On-Ground)",
+        "modalities": [
+          "On-Ground"
+        ],
+        "has_online_option": false,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "total_sections_observed": 3,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ]
+          },
+          {
+            "term": "2027 Summer",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "6wk1"
+            ],
+            "section_tags": [
+              "27SU-6wk1_OG"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "code": "MTH 49000-49999",
+      "department": "MTH",
+      "number": "49000-49999",
+      "title": "Special Topics in Mathematics",
+      "credits": 3,
+      "level": 40000,
+      "description": "",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [],
+      "modalities": [],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "schedule_telemetry": {
+        "offering_status_text": "No historical offerings found",
+        "modalities": [],
+        "has_online_option": false,
+        "has_on_ground_option": false,
+        "has_hybrid_option": false,
+        "total_sections_observed": 0,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring",
+          "2027 Summer"
+        ],
+        "term_breakdown": []
+      }
     }
   ],
   "ge_popularity_stats": [
