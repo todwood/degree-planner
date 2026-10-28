@@ -1099,6 +1099,16 @@
   5. Re-established authenticated remote `origin` and executed `git push origin source --force --tags`.
   6. Verified all 112 unit tests pass (100%) and production Vite build compiles cleanly with 0 errors.
 
+### 68. Read-Only Deterministic Architecture & Mutation Surface Remediation
+- **Objective:** Convert the advising platform into an immutable, read-only advising system: eliminate client-side mutations, prune unused database write methods, decommission degree checklist imports, and isolate peer recommendation metrics.
+- **Execution:**
+  1. *Master Curriculum Inspector:* Converted `SharedDatabaseModal.jsx` into a 100% read-only catalog inspector. Replaced all editable form inputs and save/add/peer-verification triggers with high-density read-only attribute ledgers, official session availability badges, and verbatim catalog descriptions.
+  2. *Decommission Degree Imports:* Removed `DegreeChecklistModal.jsx` and unverified preset catalog `csthProgramCatalog.js`. In `Screen1Intake.jsx`, pruned the `[+ Add Major / Minor / Certificate]` button and `__add_new__` dropdown option, ensuring program selection is strictly locked to verified degrees in `masterDatabase.json`.
+  3. *Eliminate Storage Hydration & Mutation Methods:* Rewrote `dbAdapter.js` to read directly from static `masterDatabase.json` without hydration from `IndexedDB` or `localStorage`. Pruned dead mutation functions (`saveCourse`, `deleteCourse`, `addPolicyException`, `incrementGEStat`, `saveFacultyProfile`, `saveProgram`) and deleted `applyHarvesterToDatabase` in `transcriptParser.js`.
+  4. *Fix Recommendation Self-Contamination:* Updated `courseRecommendations.js` so that peer completion counts and mean GPAs are strictly computed from baseline institutional records without incorporating active student grades. Unranked courses with zero peer completions display as `New / Unranked` with `N/A` grade badges.
+  5. *Test Suite Continuity:* All 112 Vitest unit tests pass with 100% success across 9 test files. Production Vite bundle compiles cleanly with 0 errors in 4.17s.
+  6. *Headless Verification:* `.tmp/verify_readonly_architecture.mjs` validated Screen 1 program selector, read-only database inspector, and Screen 3 recommendation drawer with clean process teardown (exit code 0).
+
 ### 69. High-Density Searchable Comboboxes for Catalog Year and Degree Program
 - **Objective:** Eliminate degree title text truncation on Screen 1 and implement accessible, searchable comboboxes for Catalog Year and Degree Program with zero regression on transcript intake, mock student profiles, and downstream transitions.
 - **Architectural Implementation:**
@@ -1123,6 +1133,27 @@
   - *Headless E2E Verification:* `.tmp/verify_searchable_selectors.mjs` verified full title display without truncation, instant typing filter, keyboard commit (`Enter`), cancellation (`Escape`), cross-year continuity preservation, transcript auto-detection, and downstream transition to Screen 2/3 with clean process teardown (exit code 0).
   - *Regression E2E Verification:* `.tmp/verify_mock_students_intake.mjs` confirmed all 3 verified degrees continue to ingest and schedule properly end-to-end.
   - *Live Deployment:* Committed (`912b2da`), pushed to `origin/source`, and deployed to GitHub Pages (`todwood/degree-planner`). Verified live at `https://todwood.github.io/degree-planner/` with 0 console errors.
+
+### 70. Offline Course Merge Pipeline & Schedule Telemetry Integration
+- **Objective:** Construct a deterministic offline CLI merge pipeline (`execution/merge_staged_courses.js`) and schema validation suite to merge staged catalog additions and deep `schedule_telemetry` attributes into `src/data/masterDatabase.json` without disrupting the audit engine or scheduler.
+- **Architectural Implementation:**
+  1. *Deterministic CLI Merge Script (`execution/merge_staged_courses.js`):*
+     - CLI flags support `--staging=<path>` and optional `--target=<path>` and `--dry-run`.
+     - Validates JSON parse and file existence on both staging and master database.
+     - Merges staged courses deterministically: for existing courses, updates description, credits (guaranteed numeric), prerequisites, `offerings`, and appends `schedule_telemetry`.
+     - For newly introduced courses, constructs valid `masterDatabase.json` schema objects with normalized codes, derived session booleans (`FA_I_8wk`, `FA_II_8wk`, `FA_16wk`, etc.), and default `Verified` status.
+     - Enforces program integrity check: guarantees every course referenced across all 3 verified degrees (`Cybersecurity, BS`, `IT - Applications Development`, `IT - Networking`) across all active catalog years exists in the merged catalog before writing.
+     - Formats output `src/data/masterDatabase.json` with standard 2-space indentation.
+  2. *Scheduler Offerings Flexibility (`src/engine/scheduler.js`):*
+     - Enhanced `resolveCourseAvailability` to resolve legacy/staged `offerings` string arrays when `offered_sessions` is not pre-populated.
+     - Added robust session token matching for `FA-16wk`, `SP-16wk`, and `SU-` variations.
+  3. *Compatibility Test Suite (`tests/courseTelemetryCompatibility.test.js`):*
+     - Added 13 unit tests validating that courses with `schedule_telemetry` retain numeric credits, `offerings` resolve accurately in `scheduler.js`, helper pipeline functions map correctly, and all 3 verified degree programs audit with 0 missing course errors.
+- **Verification:**
+  - *Unit Tests:* 139 / 139 passing (100%) across 11 test files.
+  - *Production Build:* `npm run build` compiled cleanly in 4.54s with zero errors.
+  - *Headless E2E Verification:* `.tmp/verify_searchable_selectors.mjs` and `.tmp/verify_mock_students_intake.mjs` executed cleanly with 0 errors and proper process teardown.
+
 
 
 
