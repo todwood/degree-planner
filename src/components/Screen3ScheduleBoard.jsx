@@ -13,7 +13,12 @@ import {
   X
 } from 'lucide-react';
 import { exportDegreePlanPdf } from '../engine/pdfExporter.js';
-import { validateScheduleMove } from '../engine/scheduler.js';
+import {
+  validateScheduleMove,
+  evaluateSemesterPlateau,
+  detectRotationalPacingDelay,
+  initializeTrackPlans
+} from '../engine/scheduler.js';
 import { isTransferPlaceholder } from '../engine/transcriptParser.js';
 import { computeRetakeNetCredits } from '../engine/waterfallAudit.js';
 import dbAdapter from '../data/dbAdapter.js';
@@ -485,8 +490,8 @@ export function executeCancelRetake(schedule, courseCode, sourceSemId, sourceSlo
 }
 
 export default function Screen3ScheduleBoard({
-  schedule,
-  setSchedule,
+  schedule: propSchedule,
+  setSchedule: propSetSchedule,
   auditResult,
   parsedTranscript,
   facultyProfile,
@@ -508,6 +513,87 @@ export default function Screen3ScheduleBoard({
   const [movingCourseInfo, setMovingCourseInfo] = useState(null); // { course, sourceSemId, sourceSlotKey, targetSemId, targetSlotKey }
   const [moveFeedback, setMoveFeedback] = useState(null); // { message, type: 'success' | 'warning' }
   const moveFeedbackTimeoutRef = useRef(null);
+
+  // Initialize track plans if primary program has multiple tracks (e.g. Data Science BS)
+  const trackInfo = useMemo(() => {
+    return initializeTrackPlans({
+      auditResult,
+      parsedTranscript,
+      constraints,
+      masterDb,
+      declaredPrograms: auditResult?.declaredProgramsOrdered || auditResult?.selectedPrograms
+    });
+  }, [auditResult, parsedTranscript, constraints, masterDb]);
+
+  const [activePlanTrackId, setActivePlanTrackId] = useState(
+    () => trackInfo?.activeTrackId || 'option_a'
+  );
+
+  const [trackPlansState, setTrackPlansState] = useState(() => trackInfo?.plans || null);
+
+  useEffect(() => {
+    if (trackInfo.hasMultipleTracks && trackInfo.plans) {
+      setTrackPlansState((prev) => {
+        if (!prev) return trackInfo.plans;
+        const next = { ...trackInfo.plans };
+        for (const t of trackInfo.tracks) {
+          if (prev[t.id]) {
+            next[t.id] = {
+              ...next[t.id],
+              schedule: prev[t.id].schedule
+            };
+          }
+        }
+        return next;
+      });
+    }
+  }, [trackInfo]);
+
+  const pacingOpportunity = useMemo(() => {
+    return (
+      propSchedule?.pacingOpportunity ||
+      detectRotationalPacingDelay(auditResult, parsedTranscript, constraints)
+    );
+  }, [propSchedule, auditResult, parsedTranscript, constraints]);
+
+  const [isPreviewing15cr, setIsPreviewing15cr] = useState(false);
+
+  // Active schedule resolution
+  const schedule = useMemo(() => {
+    if (isPreviewing15cr && pacingOpportunity?.optimizedPlan) {
+      return pacingOpportunity.optimizedPlan;
+    }
+    if (trackInfo.hasMultipleTracks && trackPlansState && trackPlansState[activePlanTrackId]) {
+      return trackPlansState[activePlanTrackId].schedule;
+    }
+    return propSchedule;
+  }, [isPreviewing15cr, pacingOpportunity, trackInfo.hasMultipleTracks, trackPlansState, activePlanTrackId, propSchedule]);
+
+  const setSchedule = (updater) => {
+    if (trackInfo.hasMultipleTracks) {
+      setTrackPlansState((prev) => {
+        if (!prev || !prev[activePlanTrackId]) return prev;
+        const currentSched = prev[activePlanTrackId].schedule;
+        const nextSched = typeof updater === 'function' ? updater(currentSched) : updater;
+        return {
+          ...prev,
+          [activePlanTrackId]: {
+            ...prev[activePlanTrackId],
+            schedule: nextSched
+          }
+        };
+      });
+    }
+    propSetSchedule?.(updater);
+  };
+
+  const handleSwitchTrackPlan = (trackId) => {
+    setActivePlanTrackId(trackId);
+    setIsPreviewing15cr(false);
+    if (trackPlansState && trackPlansState[trackId]?.schedule) {
+      propSetSchedule?.(trackPlansState[trackId].schedule);
+    }
+  };
 
   const historicalCourses = useMemo(() => {
     return (
@@ -1204,6 +1290,19 @@ export default function Screen3ScheduleBoard({
                   <span className="text-[10px] font-mono font-bold text-[#857542] bg-[#F7F5EE] px-1.5 py-0.5 rounded border border-[#B5A36A]">
                     {semCreditLabel}
                   </span>
+                  <span
+                    data-testid={`semester-header-plateau-${sem.id}`}
+                    title={evaluateSemesterPlateau(sem.totalCredits || 0).tooltip}
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                      evaluateSemesterPlateau(sem.totalCredits || 0).status === 'PART_TIME'
+                        ? 'bg-amber-100 text-amber-800 border-amber-300'
+                        : evaluateSemesterPlateau(sem.totalCredits || 0).status === 'PLATEAU'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        : 'bg-purple-100 text-purple-900 border-purple-300'
+                    }`}
+                  >
+                    {evaluateSemesterPlateau(sem.totalCredits || 0).label}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
@@ -1305,6 +1404,19 @@ export default function Screen3ScheduleBoard({
             )}
             <span className="text-[10px] font-mono font-bold text-[#857542] bg-[#F7F5EE] px-1.5 py-0.5 rounded border border-[#B5A36A]">
               {semCreditLabel}
+            </span>
+            <span
+              data-testid={`semester-header-plateau-${sem.id}`}
+              title={evaluateSemesterPlateau(sem.totalCredits || 0).tooltip}
+              className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                evaluateSemesterPlateau(sem.totalCredits || 0).status === 'PART_TIME'
+                  ? 'bg-amber-100 text-amber-800 border-amber-300'
+                  : evaluateSemesterPlateau(sem.totalCredits || 0).status === 'PLATEAU'
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                  : 'bg-purple-100 text-purple-900 border-purple-300'
+              }`}
+            >
+              {evaluateSemesterPlateau(sem.totalCredits || 0).label}
             </span>
           </div>
           <button
@@ -1535,6 +1647,84 @@ export default function Screen3ScheduleBoard({
           </button>
         </div>
       </div>
+
+      {/* Track-Driven Multi-Plan Comparator Tabs (Conditional: Data Science BS / Programs with Tracks) */}
+      {trackInfo.hasMultipleTracks && (
+        <div
+          data-testid="track-plan-comparator"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5 bg-neutral-100 rounded-xl border border-neutral-200/90 shadow-2xs"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            {trackInfo.tracks.map((t, idx) => {
+              const planLetter = String.fromCharCode(65 + idx);
+              const icon = idx === 0 ? '★' : '🔀';
+              const formattedTrackName = t.name.replace(/^Option\s+[A-Za-z]:\s*/, '');
+              const tabLabel = `${icon} Plan ${planLetter}: Option ${planLetter} (${formattedTrackName} — ${t.totalElectiveCredits} cr electives)`;
+              const isActive = activePlanTrackId === t.id;
+
+              return (
+                <button
+                  key={t.id}
+                  data-testid={`plan-tab-${t.id}`}
+                  onClick={() => handleSwitchTrackPlan(t.id)}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#857542] text-white shadow-sm ring-2 ring-[#857542]/30'
+                      : 'bg-white text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 border border-neutral-300'
+                  }`}
+                >
+                  <span>{tabLabel}</span>
+                  {trackPlansState && trackPlansState[t.id]?.projectedGraduationTerm && (
+                    <span
+                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-600'
+                      }`}
+                    >
+                      Conferral: {trackPlansState[t.id].projectedGraduationTerm}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div data-testid="active-track-elective-target" className="text-xs text-neutral-600 font-semibold px-2">
+            Target: <strong className="text-neutral-900 font-bold">{trackPlansState?.[activePlanTrackId]?.electiveCreditsRequired || 27} cr</strong> Elective Pool
+          </div>
+        </div>
+      )}
+
+      {/* Pacing Opportunity Banner (Conditional on Avoidable Rotational Delay) */}
+      {pacingOpportunity?.hasOpportunity && (
+        <div
+          data-testid="pacing-opportunity-banner"
+          className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-amber-950"
+        >
+          <div className="flex items-start space-x-3">
+            <span className="text-xl">💡</span>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                Pacing Opportunity
+              </h4>
+              <p className="text-xs text-amber-900 mt-0.5 leading-relaxed font-medium">
+                💡 Pacing Insight: {pacingOpportunity.message.replace(/^💡\s*Pacing Insight:\s*/, '')}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 shrink-0">
+            <button
+              data-testid="preview-15cr-btn"
+              onClick={() => setIsPreviewing15cr((prev) => !prev)}
+              className={`px-3.5 py-1.5 text-xs font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5 cursor-pointer ${
+                isPreviewing15cr
+                  ? 'bg-neutral-900 hover:bg-neutral-800 text-white ring-2 ring-neutral-400'
+                  : 'bg-[#857542] hover:bg-[#6E6035] text-white'
+              }`}
+            >
+              <span>{isPreviewing15cr ? '✓ Return to Current Pace' : '[Preview 15 cr Pace]'}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Student Advising Profile & Graduation Benchmark Banner */}
       {(parsedTranscript?.studentMetadata?.name || schedule?.studentMetadata?.name) && (() => {
@@ -2708,8 +2898,26 @@ function SemesterFooter({
     return sum + Number(net);
   }, 0);
 
+  const plateau = evaluateSemesterPlateau(enrolledCredits);
+
   return (
     <div className="pt-2 border-t border-neutral-100 space-y-1.5 text-xs">
+      {/* Lindenwood 12-18 Credit Tuition Plateau Badge */}
+      <div
+        data-testid={`semester-plateau-${sem.id}`}
+        title={plateau.tooltip}
+        className={`py-1 px-2 rounded text-[11px] font-semibold border flex items-center justify-between mb-1 cursor-help transition-colors ${
+          plateau.status === 'PART_TIME'
+            ? 'bg-amber-50 text-amber-800 border-amber-300/80'
+            : plateau.status === 'PLATEAU'
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-300/80'
+            : 'bg-purple-50 text-purple-900 border-purple-300/80'
+        }`}
+      >
+        <span>{plateau.label}</span>
+        <span className="text-[10px] opacity-75 font-mono">{enrolledCredits} cr</span>
+      </div>
+
       {/* Semester Summary Metrics */}
       <div
         data-testid={`semester-metrics-${sem.id}`}

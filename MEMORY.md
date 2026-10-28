@@ -1307,3 +1307,31 @@
   - *Autonomous Headless Playwright Verification (`.tmp/verify_mock_students_intake.mjs`):* Verified Screen 0 bypass, Brandon Paz intake, Screen 2 audit upgrades (accordions, upper-division meter, GE categories), and Screen 3 roadmap column metrics with zero console errors and clean process teardown.
   - *Production Build:* Vite production build succeeded cleanly with 0 errors in 4.61s.
   - *Live Deployment:* Deployed to GitHub Pages via `node execution/deploy_to_github_pages.js --live` and verified end-to-end via headless Chrome automation (`node execution/verify_live_pages.js`), asserting 7/7 checkpoints and 0 console errors on live site.
+
+
+### 77. Track-Driven Dual Plans, 12-18 Tuition Plateau Indicators, and Pacing Insights on Screen 3
+- **Objective:** Implement conditional multi-track plan tabs for programs with curricular tracks (e.g. Data Science BS), Lindenwood 12–18 credit tuition plateau policy badges on semester columns, rotational delay detection for constrained pacing (e.g. 12cr pace) with actionable callout banner on Screen 3, and support for student intake preference limits (`maxCreditsPerSemester` and `maxCoursesPer8Week`).
+- **Key Architectural Decisions & Implementations:**
+  1. *Track-Driven Multi-Plan Comparator (`src/components/Screen3ScheduleBoard.jsx` & `src/engine/scheduler.js`):*
+     - Implemented `initializeTrackPlans` in `src/engine/scheduler.js` inspecting `flexible_elective_configurations` / tracks.
+     - For Data Science BS: initializes dual plans: `[★ Plan A: Option A (Domain Depth — 27 cr electives)]` (`data-testid="plan-tab-option_a"`) and `[🔀 Plan B: Option B (Balanced Applied Science — 30 cr electives)]` (`data-testid="plan-tab-option_b"`).
+     - Maintains independent semester course allocations, prerequisite validations, and graduation dates per plan; switching tabs switches active board with zero layout shifts or lost edits.
+     - For single-track programs (Computer Science BS, Cybersecurity BS), renders clean roadmap with plan tabs completely hidden.
+  2. *Lindenwood 12–18 Credit Tuition Plateau Indicators:*
+     - Implemented `evaluateSemesterPlateau` and `getTuitionPlateauBadge` in `src/engine/scheduler.js`.
+     - In each semester column header and footer (`SemesterFooter`), renders:
+       - `< 12 credits`: Amber badge `⚠️ Part-Time (<12 cr)` with aid/NCAA eligibility tooltip (`data-testid="semester-plateau-{sem.id}"`).
+       - `12–18 credits`: Subtle emerald badge `✓ Flat Tuition Plateau (12–18 cr)`.
+       - `> 18 credits`: Purple badge `⚠️ Overload Form Required (>18 cr)`.
+  3. *Integrated "Pacing Opportunity" Callout Banner:*
+     - Implemented `detectRotationalPacingDelay` in `src/engine/scheduler.js`.
+     - When constrained student pace (<= 12 credits) forces rotational coursework (e.g. Fall-only or Spring-only courses) into multi-semester delays, renders an actionable callout card on Screen 3:
+       `💡 Pacing Insight: Taking 15 credits in {Term} unlocks {Course Code} ({Rotation}) and advances graduation by {N} semesters (Conferral: {Earlier Term}).`
+     - Provided `[Preview 15 cr Pace]` toggle button (`data-testid="preview-15cr-btn"`) that temporarily previews the accelerated 15-credit schedule without altering current student state, and toggles back to `✓ Return to Current Pace`.
+  4. *Intake Preferences Enforcement (`maxCreditsPerSemester` & `maxCoursesPer8Week`):*
+     - Enforces `maxCreditsPerSemester` (e.g. 12, 15, 18 credits) and `maxCoursesPer8Week` (e.g. maximum 2 courses in 8-week session I or II lanes) in `generateBaseSchedule`.
+- **Verification & Deployment:**
+  - *Unit Tests (`tests/trackComparatorAndPlateau.test.js`):* 14 comprehensive unit tests validating Data Science BS dual plans (27cr vs 30cr), single-track Computer Science BS handling (`hasMultipleTracks: false`), plateau policy tiers, rotational delay detector, and intake preference limits. Full Vitest suite: 188 / 188 passing (100% green across 16 test files).
+  - *Autonomous Headless Playwright Verification (`.tmp/verify_track_comparator_ui.mjs`):* Verified Data Science BS plan tabs switching, Computer Science BS single-track clean roadmap, 12cr Part-Time plateau badge, Pacing Opportunity banner, and preview toggle with 0 console errors and clean process teardown.
+  - *Production Build:* Vite production build succeeded cleanly with 0 errors in 4.77s.
+  - *Live Deployment:* Deployed to GitHub Pages via `node execution/deploy_to_github_pages.js --live` and verified end-to-end via headless Chrome automation (`node execution/verify_live_pages.js`), asserting 7/7 checkpoints and 0 console errors on live site.

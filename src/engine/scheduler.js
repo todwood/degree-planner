@@ -6,6 +6,7 @@
 
 import masterDbDefault from '../data/masterDatabase.json' with { type: 'json' };
 import { normalizeCourseCode, parseTermInfo } from './transcriptParser.js';
+import { runDegreeAudit, resolveTrackConfiguration } from './waterfallAudit.js';
 
 /**
  * Official Tactile Weight Flexibility Palette (Style.md Section 2)
@@ -675,11 +676,17 @@ function generateBaseSchedule(auditResult, parsedTranscript, constraints = {}) {
       ? 6
       : 9;
   const max16wkCredits =
-    constraints.max16wkCredits !== undefined
+    constraints.maxCreditsPerSemester !== undefined
+      ? Number(constraints.maxCreditsPerSemester)
+      : constraints.max16wkCredits !== undefined
       ? Number(constraints.max16wkCredits)
       : pacingMode === 'Part-Time'
       ? 11
       : 18;
+  const maxCoursesPer8Week =
+    constraints.maxCoursesPer8Week !== undefined
+      ? Number(constraints.maxCoursesPer8Week)
+      : Infinity;
   const allowSummer =
     constraints.summerAvailability === 'Yes Summer' || Boolean(constraints.allowSummer);
   const maxSummerCredits =
@@ -975,7 +982,12 @@ function generateBaseSchedule(auditResult, parsedTranscript, constraints = {}) {
     // -------------------------------------------------------------------------
     const slot1ScheduledSet = new Set();
     let madeProgress1 = true;
-    while (madeProgress1 && lane1Credits < max8wkCredits && totalSemCredits() < max16wkCredits) {
+    while (
+      madeProgress1 &&
+      lane1Credits < max8wkCredits &&
+      totalSemCredits() < max16wkCredits &&
+      lane1.length < maxCoursesPer8Week
+    ) {
       madeProgress1 = false;
       const candidates = getSortedCandidatesForSlot(
         slot1Key,
@@ -990,10 +1002,12 @@ function generateBaseSchedule(auditResult, parsedTranscript, constraints = {}) {
         const pairedLabCompact = ciscoLectureToLab[cand.compactCode];
         const pairedLab = pairedLabCompact ? unscheduled.get(pairedLabCompact) : null;
         const neededCredits = cand.credits + (pairedLab ? pairedLab.credits : 0);
+        const neededCourses = pairedLab ? 2 : 1;
 
         if (
           lane1Credits + neededCredits <= max8wkCredits &&
-          totalSemCredits() + neededCredits <= max16wkCredits
+          totalSemCredits() + neededCredits <= max16wkCredits &&
+          lane1.length + neededCourses <= maxCoursesPer8Week
         ) {
           lane1.push(cand);
           lane1Credits += cand.credits;
@@ -1025,7 +1039,12 @@ function generateBaseSchedule(auditResult, parsedTranscript, constraints = {}) {
     // -------------------------------------------------------------------------
     const slot2ScheduledSet = new Set();
     let madeProgress2 = true;
-    while (madeProgress2 && lane2Credits < max8wkCredits && totalSemCredits() < max16wkCredits) {
+    while (
+      madeProgress2 &&
+      lane2Credits < max8wkCredits &&
+      totalSemCredits() < max16wkCredits &&
+      lane2.length < maxCoursesPer8Week
+    ) {
       madeProgress2 = false;
       const candidates = getSortedCandidatesForSlot(
         slot2Key,
@@ -1039,10 +1058,12 @@ function generateBaseSchedule(auditResult, parsedTranscript, constraints = {}) {
         const pairedLabCompact = ciscoLectureToLab[cand.compactCode];
         const pairedLab = pairedLabCompact ? unscheduled.get(pairedLabCompact) : null;
         const neededCredits = cand.credits + (pairedLab ? pairedLab.credits : 0);
+        const neededCourses = pairedLab ? 2 : 1;
 
         if (
           lane2Credits + neededCredits <= max8wkCredits &&
-          totalSemCredits() + neededCredits <= max16wkCredits
+          totalSemCredits() + neededCredits <= max16wkCredits &&
+          lane2.length + neededCourses <= maxCoursesPer8Week
         ) {
           lane2.push(cand);
           lane2Credits += cand.credits;
@@ -1402,9 +1423,243 @@ export function generateOptimalSchedule(auditResult, parsedTranscript, constrain
     }
   }
 
+  const pacingOpportunity = detectRotationalPacingDelay(auditResult, parsedTranscript, constraints);
+
   return {
     ...basePlan,
-    whatIfSuggestions: whatIfSuggestions.slice(0, 2)
+    whatIfSuggestions: whatIfSuggestions.slice(0, 2),
+    pacingOpportunity
+  };
+}
+
+/**
+ * Institutional Tuition Plateau Evaluator (12–18 credit flat tuition window).
+ * Tag semester loads according to Lindenwood institutional policy:
+ * - < 12 credits: Part-Time (< 12 cr)
+ * - 12–18 credits: Flat Tuition Plateau (12–18 cr)
+ * - > 18 credits: Overload Form Required (> 18 cr)
+ */
+export function evaluateSemesterPlateau(credits) {
+  const num = Number(credits) || 0;
+  if (num < 12) {
+    return {
+      status: 'PART_TIME',
+      label: '⚠️ Part-Time (<12 cr)',
+      badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
+      tooltip:
+        'Below 12-credit full-time plateau. May impact institutional aid, scholarships, or NCAA eligibility.'
+    };
+  }
+  if (num <= 18) {
+    return {
+      status: 'PLATEAU',
+      label: '✓ Flat Tuition Plateau (12–18 cr)',
+      badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+      tooltip:
+        'Within the standard full-time flat tuition plateau (12–18 credit hours).'
+    };
+  }
+  return {
+    status: 'OVERLOAD',
+    label: '⚠️ Overload Form Required (>18 cr)',
+    badgeClass: 'bg-purple-100 text-purple-900 border-purple-300',
+    tooltip:
+      'Exceeds 18-credit plateau. Requires minimum GPA threshold, Academic Overload Form approval, and per-credit surcharge.'
+  };
+}
+
+export const getTuitionPlateauBadge = evaluateSemesterPlateau;
+
+/**
+ * Detects if a constrained student pace (e.g. maxCredits <= 12) causes a rotational delay
+ * (e.g. Fall-only or Spring-only critical path course pushed a full year later),
+ * and calculates the pacing opportunity unlocked by a 15-credit pace.
+ */
+export function detectRotationalPacingDelay(auditResult, parsedTranscript, constraints = {}) {
+  if (!auditResult) return { hasOpportunity: false, message: null };
+
+  const semCap =
+    constraints.maxCreditsPerSemester !== undefined
+      ? Number(constraints.maxCreditsPerSemester)
+      : constraints.max16wkCredits !== undefined
+      ? Number(constraints.max16wkCredits)
+      : constraints.pacingMode === 'Part-Time'
+      ? 11
+      : 18;
+
+  // Only evaluate rotational delay warnings if student pace is restricted to <= 12 credits
+  if (semCap > 12) {
+    return { hasOpportunity: false, message: null };
+  }
+
+  const currentPlan = generateBaseSchedule(auditResult, parsedTranscript, constraints);
+  const currentSortKey = getConferralSortKey(currentPlan.projectedGraduationTerm);
+
+  // Simulate 15-credit pace
+  const pace15Constraints = {
+    ...constraints,
+    maxCreditsPerSemester: 15,
+    max16wkCredits: 15,
+    max8wkCredits: Math.max(9, Number(constraints.max8wkCredits || 6))
+  };
+  const optimizedPlan = generateBaseSchedule(auditResult, parsedTranscript, pace15Constraints);
+  const optimizedSortKey = getConferralSortKey(optimizedPlan.projectedGraduationTerm);
+
+  if (optimizedSortKey >= currentSortKey) {
+    return { hasOpportunity: false, message: null };
+  }
+
+  const currentActiveCount = (currentPlan.semesters || []).filter(
+    (s) => s.totalCredits > 0
+  ).length;
+  const optimizedActiveCount = (optimizedPlan.semesters || []).filter(
+    (s) => s.totalCredits > 0
+  ).length;
+  const semestersAdvanced = Math.max(1, currentActiveCount - optimizedActiveCount);
+
+  // Map courses in currentPlan to their scheduled term
+  const currentCourseMap = new Map();
+  for (const sem of currentPlan.semesters || []) {
+    for (const lane of Object.values(sem.lanes || {})) {
+      for (const c of lane) {
+        currentCourseMap.set(c.code, sem);
+      }
+    }
+  }
+
+  let delayedCourseInfo = null;
+  for (const sem of optimizedPlan.semesters || []) {
+    for (const lane of Object.values(sem.lanes || {})) {
+      for (const c of lane) {
+        const currSem = currentCourseMap.get(c.code);
+        if (!currSem) continue;
+
+        // Is it delayed by at least a calendar term?
+        if (
+          currSem.year > sem.year ||
+          (currSem.year === sem.year && currSem.season !== sem.season)
+        ) {
+          const sessions = c.offered_sessions || [];
+          const isFallOnly =
+            sessions.length > 0 && sessions.every((s) => s.startsWith('FA'));
+          const isSpringOnly =
+            sessions.length > 0 && sessions.every((s) => s.startsWith('SP'));
+
+          const rotationLabel = isFallOnly
+            ? 'Fall-only'
+            : isSpringOnly
+            ? 'Spring-only'
+            : `${sem.season}-only`;
+
+          const candidate = {
+            courseCode: c.code,
+            courseTitle: c.title,
+            rotation: rotationLabel,
+            term: sem.title,
+            isStrictlyRotational: isFallOnly || isSpringOnly
+          };
+
+          if (!delayedCourseInfo) {
+            delayedCourseInfo = candidate;
+          } else if (!delayedCourseInfo.isStrictlyRotational && candidate.isStrictlyRotational) {
+            delayedCourseInfo = candidate;
+            break;
+          }
+        }
+      }
+    }
+    if (delayedCourseInfo && delayedCourseInfo.isStrictlyRotational) break;
+  }
+
+  const courseCode = delayedCourseInfo?.courseCode || 'Key Major Coursework';
+  const rotation = delayedCourseInfo?.rotation || 'Annual Rotation';
+  const term = delayedCourseInfo?.term || 'Upcoming Semester';
+
+  const message = `Taking 15 credits in ${term} unlocks ${courseCode} (${rotation}) and advances graduation by ${semestersAdvanced} semester${
+    semestersAdvanced > 1 ? 's' : ''
+  } (Conferral: ${optimizedPlan.projectedGraduationTerm}).`;
+
+  return {
+    hasOpportunity: true,
+    courseCode,
+    courseTitle: delayedCourseInfo?.courseTitle,
+    rotation,
+    term,
+    semestersAdvanced,
+    currentGraduationTerm: currentPlan.projectedGraduationTerm,
+    earlierGraduationTerm: optimizedPlan.projectedGraduationTerm,
+    message,
+    optimizedPlan
+  };
+}
+
+/**
+ * Initializes Track-Driven Dual Plans for programs with flexible elective configurations (e.g. Data Science BS),
+ * or returns single-track metadata for single-track programs (e.g. Computer Science BS).
+ */
+export function initializeTrackPlans({
+  auditResult = null,
+  parsedTranscript = null,
+  constraints = {},
+  masterDb = masterDbDefault,
+  declaredPrograms = []
+} = {}) {
+  const db = masterDb || masterDbDefault;
+  const programs =
+    auditResult?.selectedPrograms && auditResult.selectedPrograms.length > 0
+      ? auditResult.selectedPrograms
+      : declaredPrograms.length > 0
+      ? declaredPrograms
+          .map((p) => (typeof p === 'string' ? db.programs.find((x) => x.id === p) : p))
+          .filter(Boolean)
+      : auditResult?.primaryProgram
+      ? [auditResult.primaryProgram]
+      : [];
+
+  const trackHost =
+    programs.find((p) => resolveTrackConfiguration(p).hasTracks) || null;
+  const trackConfig = trackHost ? resolveTrackConfiguration(trackHost) : null;
+
+  if (
+    !trackConfig ||
+    !trackConfig.hasTracks ||
+    !Array.isArray(trackConfig.tracks) ||
+    trackConfig.tracks.length === 0
+  ) {
+    return {
+      hasMultipleTracks: false,
+      tracks: [],
+      activeTrackId: null,
+      plans: null
+    };
+  }
+
+  const plans = {};
+  for (const track of trackConfig.tracks) {
+    const trackAudit = runDegreeAudit({
+      studentRecord: parsedTranscript,
+      declaredPrograms: programs.map((p) => p.id),
+      catalogDb: db,
+      auditOptions: { ...(auditResult?.flags || {}), activeTrackId: track.id }
+    });
+
+    const trackSchedule = generateOptimalSchedule(trackAudit, parsedTranscript, constraints);
+
+    plans[track.id] = {
+      trackId: track.id,
+      trackName: track.name,
+      electiveCreditsRequired: track.totalElectiveCredits,
+      auditResult: trackAudit,
+      schedule: trackSchedule,
+      projectedGraduationTerm: trackSchedule.projectedGraduationTerm
+    };
+  }
+
+  return {
+    hasMultipleTracks: true,
+    tracks: trackConfig.tracks,
+    activeTrackId: trackConfig.tracks[0].id,
+    plans
   };
 }
 
