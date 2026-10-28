@@ -1279,3 +1279,31 @@
      - *Vitest Unit Tests (`tests/multiProgramIntake.test.js`):* Added 7 comprehensive tests verifying primary/secondary flags, primary swapping, secondary promotion on removal, duplicate program ID rejection, 3-credential N-way overlap, and 100% schema validation across all 20 synthetic student records. Full suite: 158 / 158 passing (100%) across 13 test files.
      - *Headless UI Verification (`.tmp/verify_multiprogram_intake.mjs`):* Verified live interactive stacking (CS BS + Data Science BS + Math Minor + Cyber Minor + Data Analysis Cert), asserted dynamic header `DECLARED CREDENTIALS STACK (2 Majors, 2 Minors, 1 Certificate)`, executed `[Make Primary]` swapping, executed minor removal, simulated rapid stack loading across 5 random synthetic students with 0 console errors and 0 DOM crashes, and captured screenshot to `.tmp/multiprogram_intake_verified.png`.
      - *Process Teardown Invariant:* Strictly terminated child Vite preview processes via PowerShell `Stop-Process` and local port teardown in a `finally` block before calling `process.exit(0)`.
+
+
+### 76. Wiring Upgraded Multi-Program Audit Engine to Screen 2 and Screen 3
+- **Objective:** Wire the pure deterministic degree audit engine outputs from `src/engine/waterfallAudit.js` (multi-program waterfall, CORE 42 transfer waiver, 42 upper-division gate, composition C gate, retake net math, and track bifurcation) into `src/components/Screen2Audit.jsx` and `src/components/Screen3Schedule.jsx` (aliased to `Screen3ScheduleBoard.jsx`) with 0 runtime LLM calls, 0 FERPA regressions, and 100% test coverage.
+- **Key Architectural Decisions & Implementations:**
+  1. *Screen 2 Multi-Program Audit Accordions (`data-testid="multi-program-accordions"`):*
+     - Iterates over `auditResults.programLedgers` (aliasing `programAudits`) to render distinct credential sections: `🎓 Primary Major`, `🎓 Secondary Major (if declared)`, `📘 Minor(s) (if declared)`, and `📜 Certificate(s) (if declared)`.
+     - Displays cross-counting badge `[Shared with {Program Name}]` (`data-testid="cross-counted-{code}"`) on shared courses across stacked credentials (e.g. Calculus shared between CS BS and Math Minor).
+  2. *Missouri CORE 42 Transfer Block Banner (`data-testid="core42-transfer-banner"`):*
+     - If `auditOptions.core42Completed === true` (or passed via auditResult), displays the alert banner: `✓ Missouri CORE 42 / AA Transfer Block Active — 42 Lower-Division GE Credits Cleared`.
+     - Marks all 8 GE distribution categories with green checkmarks and explicitly notes `"Cleared via CORE 42 Transfer Block"`.
+  3. *Institutional 42 Upper-Division Meter (`data-testid="upper-division-meter"`):*
+     - Renders institutional upper-division progress in the audit summary header: `42 Upper-Division Hours: {upperDivisionGate.completed} / 42 credits`.
+     - If `< 42` credits earned/in-progress, renders amber badge: `⚠️ Deficient by {upperDivisionGate.remaining} cr`.
+  4. *Composition Gatekeeper Warning (`data-testid="composition-gatekeeper-alert"`):*
+     - If `compositionGatekeeper.hasWarning === true` (or warnings present), displays an amber alert on the Written Communication block: `"Grade of C or higher required to satisfy Composition GE. Course eligible for retake."`.
+  5. *Curricular Track Bifurcation Pills (Data Science BS):*
+     - When `flexible_elective_configurations` exists, renders interactive track pills: `[ ◉ Option A: Domain Depth (9/18) ]` and `[ ○ Option B: Balanced Applied Science (15/15) ]`.
+     - Clicking a pill triggers reactive recalculation of elective requirement bars via `handleSelectTrack`.
+  6. *Screen 3 Schedule Board Retake Badges & Metrics:*
+     - Created drop-in alias `src/components/Screen3Schedule.jsx` re-exporting `Screen3ScheduleBoard.jsx`.
+     - Course card retake badge: when `isRetake === true` and prior grade was `D`, renders amber badge `🔁 Retake (0 Net Cr / 3 Enrolled Cr)`.
+     - Semester column summary metrics: in each semester column footer, renders `Enrolled: {enrolledCredits} cr | Net Toward Degree: {netCredits} cr` (`data-testid="semester-metrics-{sem.id}"`).
+- **Verification & Deployment:**
+  - *Unit Tests:* 174 / 174 Vitest tests passing across 15 test files (`npm test`) — 100% green with zero regressions.
+  - *Autonomous Headless Playwright Verification (`.tmp/verify_mock_students_intake.mjs`):* Verified Screen 0 bypass, Brandon Paz intake, Screen 2 audit upgrades (accordions, upper-division meter, GE categories), and Screen 3 roadmap column metrics with zero console errors and clean process teardown.
+  - *Production Build:* Vite production build succeeded cleanly with 0 errors in 4.61s.
+  - *Live Deployment:* Deployed to GitHub Pages via `node execution/deploy_to_github_pages.js --live` and verified end-to-end via headless Chrome automation (`node execution/verify_live_pages.js`), asserting 7/7 checkpoints and 0 console errors on live site.
