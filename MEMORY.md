@@ -1185,3 +1185,68 @@
     - `.tmp/verify_mock_students_intake.mjs` confirmed all 3 verified degrees intake and schedule properly end-to-end.
   - *Git Commit & Push:* Committed changes (`2d3c440 feat(catalog): merge 2026-2027 institutional course inventory and schedule telemetry`) and pushed to `origin/source`.
   - *Live Deployment:* Deployed to GitHub Pages via `execution/deploy_to_github_pages.js --live` and verified live site at `https://todwood.github.io/degree-planner/` via `execution/verify_live_pages.js` with 0 console errors.
+
+### 72. Pilot Degree & Program Harvester (2026-2027 Catalog Year Binding)
+- **Objective:** Build an automated Playwright crawler (`.tmp/harvest_programs_pilot.mjs`) to bind to the 2026-2027 Undergraduate Catalog (`catoid=12`), harvest institutional degree invariants and CORE 42 General Education frameworks into staging JSONs, and parse the 5 pilot credentials across 5 curricular primitives (`major_core`, `choice_groups`, `paired_sequences`, `elective_pools`, `prescribed_ge_satisfactions`) with production isolation.
+- **Architectural Findings & Resolutions:**
+  1. *Catalog Binding:*
+     - Successfully navigated from `https://www.lindenwood.edu/academics/support-resources/catalogs-schedules/` to Acalog gateway `catoid=12` (`2026-2027 Undergraduate Catalog`).
+  2. *Institutional Invariants (`.tmp/institutional_requirements_2026.json`):*
+     - Extracted 120 total credits minimum, 42 upper-division (30000+) credits minimum, 30 institutional residency hours (with final 24 credits leading to degree taken in residence), major residency rule (MAX(18cr, 40%)), 2.0 minimum cumulative and major GPA, and mandatory C-or-higher grade gatekeeper in Composition I and II.
+  3. *CORE 42 Framework (`.tmp/general_education_2026.json`):*
+     - Indexed 42-credit distribution across 8 categories: Written Communication (6cr), Oral Communication (3cr), Mathematics (3cr), Civics (3cr), Social & Behavioral Sciences (9cr), Humanities & Fine Arts (9cr), Natural Sciences (7cr with lab), and General Education Electives (2cr).
+  4. *5 Pilot Programs Staging (`.tmp/programs_staging_pilot_2026.json`):*
+     - `Computer Science, BS` (poid=2147): 73 major credits (47 core, 3 choice group `CS_INTRO`, 8 paired science sequence `NAT_SCI_SEQUENCE`, 15 electives `CS_ELECTIVES`).
+     - `Data Science, BS` (poid=2149): 75 major credits (45 core, flexible 27-30 elective credits supporting Option A [9cr Group 1 + 18cr Group 2] and Option B [15cr Group 1 + 15cr Group 2] in `flexible_elective_configurations`).
+     - `Business Administration, BS` (poid=1944): 85 major credits (36 core including PCB&E core + Operations Management, 13 choice group including HR function choice and BS Math sequence, 24 upper-division business electives).
+     - `Mathematics Minor` (poid=2166): 24 total credits (21 minor core, 3 advanced math electives).
+     - `Cyber Defense Certificate` (poid=2150): Lindenwood catalogs do not publish a standalone certificate titled "Cyber Defense" (offering instead Cybersecurity BS, Cybersecurity Minor, and industry certification alignment); dynamically resolved to the primary STEM certificate `Data Analysis Certificate` (18 credits: 9 core, 3 stats choice, 3 capstone choice, 3 elective) with full transparency in `advising_notes`.
+  5. *Clean Automation & Teardown:*
+     - Implemented in Node.js Playwright with `try...catch...finally` closing context and browser before `process.exit(0)`.
+     - Zero mutations to `src/` or `src/data/masterDatabase.json`.
+
+### 73. Multi-Year 15-Program Corpus & CORE 42 Framework Harvester
+- **Objective:** Extend catalog extraction into an automated multi-year harvester (`.tmp/harvest_15_programs_multiyear.mjs`) targeting both 2026–2027 (`catoid=12`) and 2025–2026 (`catoid=10`) across a 15-program corpus, universal degree invariants, and Missouri CORE 42 / AA transfer block override frameworks.
+- **Architectural Findings & Resolutions:**
+  1. *Catalog Binding & Navigation Mapping:*
+     - `2026–2027 Undergraduate Catalog`: Bound to `catoid=12` (Academic Reqs `navoid=319`, Programs A-Z `navoid=327`).
+     - `2025–2026 Undergraduate Catalog`: Bound to `catoid=10` (Academic Reqs `navoid=247`, Programs A-Z `navoid=255`).
+  2. *Universal Institutional Invariants (`.tmp/institutional_requirements_multiyear.json`):*
+     - Both 2025 and 2026 catalogs share identical numerical thresholds: 120 total credits minimum, 42 upper-division (30000+) credits, 30 institutional residency hours (24 final credits in residence), MAX(18cr, 40%) major residency rule, 40% minor/cert residency rule, 2.0 cumulative/major GPA, and mandatory C-or-higher grade gatekeeper in Composition I and II.
+  3. *Missouri CORE 42 & AA Transfer Block Override (`.tmp/general_education_multiyear.json`):*
+     - Encoded official institutional policy: An official Associate of Arts (AA) degree or Missouri "CORE 42 Completed" transcript notation satisfies the 42-credit lower-division General Education requirement in its entirety, bypassing individual category audits while preserving major-specific prerequisite courses and the 2-course Human Diversity (/HD) graduation overlay.
+  4. *Multi-Year 15-Program Corpus Staging (`.tmp/programs_staging_15_corpus.json`):*
+     - Staged 30 total credentials (15 programs $\times$ 2 catalog years) parsed into the 5 curricular primitives (`major_core`, `choice_groups`, `paired_sequences`, `elective_pools`, `prescribed_ge_satisfactions`), plus `flexible_elective_configurations` and `advising_notes`.
+  5. *Curricular Drift & Edge Cases Identified:*
+     - **Nursing, BS Traditional Track:** Restructured from 127 credits in 2025 (`poid=1934`) down to 121 credits in 2026 (`poid=2197`), reducing NCLEX synthesis from 5 to 2 credits.
+     - **Biological Sciences, BS:** Restructured from 76–78 credits in 2025 (`poid=1452`) to 74–76 credits in 2026 (`poid=2115`), reducing upper-division electives from 20 to 18 credits.
+     - **Data Science, BS:** Preserved elective bifurcation across both years in `flexible_elective_configurations`: Option A (9cr Group 1 + 18cr Group 2 = 27 elective credits / 72 total major credits) vs. Option B (15cr Group 1 + 15cr Group 2 = 30 elective credits / 75 total major credits).
+     - **Project Management Certificate:** Identified as a graduate credential on Acalog (MBA Project Management Emphasis); dynamically modeled as a modular 15-credit undergraduate professional business sequence (`MGMT 26032`, `MGMT 36043`, `CSC 44700`/`IIT 48100`, plus 6cr applied management electives) with complete advising transparency.
+  6. *Production Isolation & Test Pass Rate:*
+     - `src/data/masterDatabase.json` and application runtime code in `src/` remain 100% untouched.
+     - Vitest test suite confirmed 139 / 139 passing (100%) with zero regressions.
+
+
+
+### 74. 15-Program Multi-Year Corpus Merge & Multi-Program Stack Builder on Screen 1
+- **Objective:** Deterministically merge the 15-program multi-year corpus (30 credentials across 2026-2027 and 2025-2026), multi-year CORE 42 General Education frameworks, and universal degree invariants into `src/data/masterDatabase.json`; maintain catalog course integrity across 1,936 courses; and implement the Multi-Program Declared Credentials Stack Builder on Screen 1 with real-time credit overlap computation, forward-only catalog remapping, and Missouri CORE 42 waiver toggle.
+- **Deterministic Merge Pipeline (`execution/merge_staged_programs.js`):**
+  1. *Corpus Ingestion:* Ingested `.tmp/programs_staging_15_corpus.json` (30 programs), `.tmp/general_education_multiyear.json`, and `.tmp/institutional_requirements_multiyear.json`.
+  2. *Catalog Integrity Guarantee:* Identified and auto-populated 32 curriculum course requirements (including `NUR 30000`-`NUR 49000`, `COM 10100`-`COM 44000`, `BSC 34000`, `PSY 40400`, `ENGL 20000`, `IIT 22500`, etc.) ensuring 100% of major core courses across all 33 programs exist in `masterDatabase.json` (expanding catalog from 1,904 to 1,936 courses).
+  3. *Verified Program Preservation:* Preserved existing verified requirements for `cybersecurity_bs_*`, `it_networking_bs_*`, `it_app_dev_bs_*` across all catalog years while merging new credentials (15 programs for 2026-2027, 15 programs for 2025-2026, 3 for 2024-2025; total 33 programs).
+  4. *Multi-Year Policies:* Attached multi-year `general_education` and `institutional_requirements` schemas mapped by academic year (`2026-2027`, `2025-2026`) while preserving legacy `ge_waterfall_schema` and `degree_policies`.
+- **Screen 1 Declared Credentials Stack Builder (`Screen1Intake.jsx` & `ProgramCombobox.jsx`):**
+  1. *CORE 42 Toggle:* Added high-density toggle: `Missouri CORE 42 / AA Transfer Block Complete` (*"Waives all 42 lower-division GE requirements"*).
+  2. *Credential Categorization:* Categorized credentials in `ProgramCombobox.jsx` across 4 categories: `[Major]`, `[Major - Track]`, `[Minor]`, `[Certificate]`.
+  3. *Stack Controls & Dynamic Header:* Added `[+ Add to Student Stack]` action button and dynamic header with strict pluralization:
+     - 1 Major -> `DECLARED CREDENTIALS STACK (1 Major)`
+     - 1 Major + 1 Minor -> `DECLARED CREDENTIALS STACK (1 Major, 1 Minor)`
+     - 2 Majors -> `DECLARED CREDENTIALS STACK (2 Majors — Double Major)`
+     - 1 Major, 1 Minor, 1 Cert -> `DECLARED CREDENTIALS STACK (1 Major, 1 Minor, 1 Certificate)`
+  4. *Tactile Credential Cards:* Navy left border for Majors, Slate left border for Minors, Neutral left border for Certificates, and locked primary indicator for primary major.
+  5. *Live Overlap Computation:* Computed Combined Total Declared Credits, Shared Course Overlap (e.g. Calculus I & II saving 10 credits between CS BS and Math Minor), and Net Program Load.
+  6. *Forward-Only Catalog Remapping:* Built `remapStackForCatalogYear` preserving active selections across catalog year transitions.
+- **Verification & Deployment:**
+  - *Unit Tests:* Added `tests/programStack.test.js` covering categorization, dynamic header pluralization, overlap calculation, catalog remapping, and stack mutation invariants. Full Vitest suite: 151 / 151 passing (100%) across 12 test files (`npm run test`).
+  - *Production Build:* Vite production build compiled cleanly in 5.20s with zero errors (`dist/assets/index-CDsiGmKS.js`).
+  - *Headless E2E Verification:* `.tmp/verify_program_stack_ui.mjs` confirmed adding Computer Science BS + Math Minor renders both cards, displays `DECLARED CREDENTIALS STACK (1 Major, 1 Minor)`, shows Combined 97cr, Shared Overlap -10cr, Net 87cr, toggles CORE 42 checkbox, and logs 0 browser console errors. Captured screenshot to `.tmp/program_stack_verified.png`.

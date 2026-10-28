@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useId } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useId } from 'react';
 import {
   FileText,
   UploadCloud,
@@ -18,7 +18,8 @@ import {
   ChevronDown,
   Search,
   Check,
-  Trash2
+  Trash2,
+  Lock
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import {
@@ -37,8 +38,14 @@ import {
 } from '../engine/transcriptParser.js';
 import { calculateStartingSemester } from '../engine/scheduler.js';
 import dbAdapter from '../data/dbAdapter.js';
-import ProgramCombobox from './ProgramCombobox.jsx';
+import ProgramCombobox, { parseProgramDetails } from './ProgramCombobox.jsx';
 import CatalogYearCombobox from './CatalogYearCombobox.jsx';
+import {
+  getProgramCategory,
+  formatDeclaredStackHeader,
+  calculateStackOverlap,
+  remapStackForCatalogYear
+} from '../utils/programStackUtils.js';
 
 export const ANTHOLOGY_SOP_GUIDE_URL =
   'https://scribehow.com/shared/Export_Student_Course_Schedules_All_Results_from_Anthology';
@@ -285,11 +292,22 @@ export default function Screen1Intake({
   const [studentPhone, setStudentPhone] = useState('');
   const [detectedGpa, setDetectedGpa] = useState('');
 
-  // Program selection (Separate Catalog Year and Degree dropdowns)
+  // Program selection (Separate Catalog Year, CORE 42 Waiver, and Multi-Program Stack)
   const [catalogYear, setCatalogYearState] = useState(propCatalogYear || '2026-2027');
   const [minCatalogYearStart, setMinCatalogYearStart] = useState(2024);
   const [selectedProgramId, setSelectedProgramIdState] = useState(propProgramId || 'cybersecurity_bs_2026');
   const [additionalPrograms, setAdditionalProgramsState] = useState(propAdditionalPrograms || []);
+  const [core42TransferBlock, setCore42TransferBlock] = useState(false);
+  const [stagedComboboxProgramId, setStagedComboboxProgramId] = useState(propProgramId || 'cybersecurity_bs_2026');
+  const [declaredProgramIds, setDeclaredProgramIds] = useState(() => {
+    const initial = [propProgramId || 'cybersecurity_bs_2026'];
+    if (Array.isArray(propAdditionalPrograms)) {
+      for (const p of propAdditionalPrograms) {
+        if (p && !initial.includes(p)) initial.push(p);
+      }
+    }
+    return initial;
+  });
 
   const setCatalogYear = (cy) => {
     setCatalogYearState(cy);
@@ -297,7 +315,22 @@ export default function Screen1Intake({
   };
   const setSelectedProgramId = (pId) => {
     setSelectedProgramIdState(pId);
+    setStagedComboboxProgramId(pId);
     onSelectProgramId?.(pId);
+    setDeclaredProgramIds((prev) => {
+      const p = (masterDb?.programs || []).find((x) => x.id === pId);
+      const isMajor = p && getProgramCategory(p).startsWith('Major');
+      if (isMajor) {
+        const nonMajors = prev.filter((id) => {
+          const item = (masterDb?.programs || []).find((x) => x.id === id);
+          return item && !getProgramCategory(item).startsWith('Major');
+        });
+        return [pId, ...nonMajors];
+      } else {
+        if (!prev.includes(pId)) return [...prev, pId];
+        return prev;
+      }
+    });
   };
   const setAdditionalPrograms = (progsOrFn) => {
     if (typeof progsOrFn === 'function') {
@@ -313,7 +346,16 @@ export default function Screen1Intake({
   };
 
   useEffect(() => {
-    if (propProgramId) setSelectedProgramIdState(propProgramId);
+    if (propProgramId) {
+      setSelectedProgramIdState(propProgramId);
+      setStagedComboboxProgramId(propProgramId);
+      setDeclaredProgramIds((prev) => {
+        if (!prev.includes(propProgramId)) {
+          return [propProgramId, ...prev.filter((id) => id !== propProgramId)];
+        }
+        return prev;
+      });
+    }
   }, [propProgramId]);
 
   useEffect(() => {
@@ -323,6 +365,55 @@ export default function Screen1Intake({
   useEffect(() => {
     if (propAdditionalPrograms) setAdditionalProgramsState(propAdditionalPrograms);
   }, [propAdditionalPrograms]);
+
+  const declaredPrograms = useMemo(() => {
+    const list = masterDb?.programs || [];
+    return declaredProgramIds
+      .map((id) => list.find((p) => p.id === id))
+      .filter(Boolean);
+  }, [declaredProgramIds, masterDb]);
+
+  const stackOverlap = useMemo(() => {
+    return calculateStackOverlap(declaredPrograms, masterDb);
+  }, [declaredPrograms, masterDb]);
+
+  const handleAddProgramToStack = (progId) => {
+    if (!progId || declaredProgramIds.includes(progId)) return;
+    setDeclaredProgramIds((prev) => [...prev, progId]);
+    const addedProg = (masterDb?.programs || []).find((p) => p.id === progId);
+    if (addedProg) {
+      setAdditionalProgramsState((prev) => [...prev, addedProg.name]);
+    }
+  };
+
+  const handleRemoveProgramFromStack = (progId) => {
+    setDeclaredProgramIds((prev) => {
+      const next = prev.filter((id) => id !== progId);
+      if (next.length === 0) {
+        return [selectedProgramId];
+      }
+      return next;
+    });
+    const removedProg = (masterDb?.programs || []).find((p) => p.id === progId);
+    if (removedProg) {
+      setAdditionalProgramsState((prev) => prev.filter((n) => n !== removedProg.name));
+    }
+  };
+
+  const handleCatalogYearChange = (newYear) => {
+    setCatalogYear(newYear);
+    const remapped = remapStackForCatalogYear(declaredProgramIds, newYear, masterDb);
+    setDeclaredProgramIds(remapped);
+    const remappedPrimary =
+      remapped.find((id) => {
+        const p = (masterDb?.programs || []).find((x) => x.id === id);
+        return p && getProgramCategory(p).startsWith('Major');
+      }) || remapped[0];
+    if (remappedPrimary) {
+      setSelectedProgramId(remappedPrimary);
+      setStagedComboboxProgramId(remappedPrimary);
+    }
+  };
 
   // Scheduling Constraints
   const [modalityPreference, setModalityPreferenceState] = useState(
@@ -1487,10 +1578,15 @@ export default function Screen1Intake({
       }
     };
 
+    cleanParsed.studentMetadata.core42Completed = core42TransferBlock;
+    cleanParsed.studentMetadata.declaredPrograms = declaredProgramIds;
+
     onIntakeComplete({
       parsedTranscript: cleanParsed,
       selectedProgramId,
       additionalPrograms,
+      declaredPrograms: declaredProgramIds,
+      core42Completed: core42TransferBlock,
       constraints: {
         startSemester: calculatedStartSemester || 'Spring 2027',
         modalityPreference,
@@ -1498,7 +1594,8 @@ export default function Screen1Intake({
         maxSummerCredits: summerAvailability === 'No Summer' ? 0 : Number(maxSummerCredits) || 6,
         pacingMode,
         max8wkCredits,
-        max16wkCredits
+        max16wkCredits,
+        core42Completed: core42TransferBlock
       },
       directToSchedule: true
     });
@@ -1581,7 +1678,9 @@ export default function Screen1Intake({
           parsed.studentMetadata?.catalogYear ||
           catalogYear,
         pacingMode,
-        major: masterDb.programs.find((p) => p.id === selectedProgramId)?.name || ''
+        major: masterDb.programs.find((p) => p.id === selectedProgramId)?.name || '',
+        core42Completed: core42TransferBlock,
+        declaredPrograms: declaredProgramIds
       };
 
       const deterministicStart = calculatedStartSemester || calculateStartingSemester(parsed);
@@ -1590,6 +1689,8 @@ export default function Screen1Intake({
         parsedTranscript: parsed,
         selectedProgramId,
         additionalPrograms,
+        declaredPrograms: declaredProgramIds,
+        core42Completed: core42TransferBlock,
         constraints: {
           startSemester: deterministicStart,
           modalityPreference,
@@ -1597,7 +1698,8 @@ export default function Screen1Intake({
           maxSummerCredits: summerAvailability === 'No Summer' ? 0 : Number(maxSummerCredits) || 6,
           pacingMode,
           max8wkCredits,
-          max16wkCredits
+          max16wkCredits,
+          core42Completed: core42TransferBlock
         }
       });
     } catch (err) {
@@ -1863,20 +1965,21 @@ export default function Screen1Intake({
                 </span>
               </div>
 
-              {/* Section A: Catalog Year -> Degree/Emphasis -> [+ Add Major / Minor / Certificate] ABOVE Optional Bingo Sheet Dropzone */}
-              <div className="p-3.5 bg-white rounded-xl border border-neutral-200/90 shadow-2xs space-y-3">
+              {/* Section A: Degree Curriculum & Catalog + Declared Credentials Stack Builder */}
+              <div className="p-3.5 bg-white rounded-xl border border-neutral-200/90 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-neutral-100 gap-2">
                   <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wide flex items-center space-x-1.5">
                     <BookOpen className="w-3.5 h-3.5 text-[#857542] flex-shrink-0" />
-                    <span>Degree Curriculum &amp; Catalog</span>
+                    <span>Degree Curriculum &amp; Declared Credentials Stack</span>
                   </h3>
                   <span className="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
-                    Verified Degree Programs
+                    Verified Degree Programs &amp; Minors
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                  {/* Dropdown 1: Catalog Year (Forward-only selection) */}
+                {/* 1. Catalog Year & CORE 42 Header Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+                  {/* Catalog Year (Forward-only selection) */}
                   <div className="md:col-span-5">
                     <label className="block text-xs font-bold text-neutral-800 mb-1.5">
                       <span>Catalog Year (Forward-Only)</span>
@@ -1885,71 +1988,195 @@ export default function Screen1Intake({
                     <CatalogYearCombobox
                       catalogYear={catalogYear}
                       minCatalogYearStart={minCatalogYearStart}
-                      onChange={(newYear) => {
-                        setCatalogYear(newYear);
-                        const currentProg = (masterDb.programs || []).find(
-                          (p) => p.id === selectedProgramId
-                        );
-                        const matching = (masterDb.programs || []).filter(
-                          (p) => p.catalog_year_id === newYear
-                        );
-                        if (matching.length > 0) {
-                          const sameName = currentProg
-                            ? matching.find((p) => p.name === currentProg.name)
-                            : null;
-                          setSelectedProgramId(sameName ? sameName.id : matching[0].id);
-                        }
-                      }}
+                      onChange={handleCatalogYearChange}
                     />
                     <p className="text-[10px] text-neutral-500 mt-1">
                       Forward-only catalog switching from matriculation year
                     </p>
                   </div>
 
-                  {/* Dropdown 2: Primary Degree / Emphasis Seeking */}
-                  <div className="md:col-span-7">
-                    <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
-                      <span>Primary Degree / Emphasis</span>
-                      <span className="text-red-600 ml-0.5">*</span>
-                    </label>
-                    <ProgramCombobox
-                      programs={(masterDb.programs || []).filter(
-                        (p) => p.catalog_year_id === catalogYear
-                      )}
-                      selectedProgramId={selectedProgramId}
-                      onSelectProgramId={(newId) => setSelectedProgramId(newId)}
+                  {/* Missouri CORE 42 / AA Transfer Block Complete Toggle */}
+                  <div className="md:col-span-7 bg-[#F7F5EE]/80 border border-[#B5A36A]/40 rounded-lg p-2.5 flex items-start gap-2.5">
+                    <input
+                      type="checkbox"
+                      id="core42-transfer-toggle"
+                      data-testid="core42-transfer-toggle"
+                      checked={core42TransferBlock}
+                      onChange={(e) => setCore42TransferBlock(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-[#857542] focus:ring-[#857542] cursor-pointer"
                     />
-                    <p className="text-[10px] text-neutral-500 mt-1">
-                      Auto-selected from parsed student record
-                    </p>
+                    <label htmlFor="core42-transfer-toggle" className="cursor-pointer select-none">
+                      <span className="block text-xs font-bold text-neutral-900 leading-tight">
+                        Missouri CORE 42 / AA Transfer Block Complete
+                      </span>
+                      <span className="block text-[10px] font-medium text-neutral-600 mt-0.5">
+                        Waives all 42 lower-division GE requirements
+                      </span>
+                    </label>
                   </div>
                 </div>
 
-                {/* Declared Minors / Secondary Credentials */}
-                {additionalPrograms.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    <span className="text-[10px] font-bold text-neutral-600 uppercase">
-                      Detected Secondary / Minors:
-                    </span>
-                    {additionalPrograms.map((prog, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center space-x-1 bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      >
-                        <span>{prog}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setAdditionalPrograms((prev) => prev.filter((_, i) => i !== idx))
+                {/* 2. Credential Combobox & Add Action */}
+                <div className="space-y-1.5 pt-1 border-t border-neutral-100">
+                  <label className="block text-xs font-bold text-neutral-800">
+                    <span>Add Degree, Emphasis, Minor, or Certificate</span>
+                  </label>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <ProgramCombobox
+                        programs={(masterDb.programs || []).filter(
+                          (p) => p.catalog_year_id === catalogYear
+                        )}
+                        selectedProgramId={stagedComboboxProgramId}
+                        onSelectProgramId={(newId) => {
+                          setStagedComboboxProgramId(newId);
+                          const p = (masterDb?.programs || []).find((x) => x.id === newId);
+                          if (p && getProgramCategory(p).startsWith('Major')) {
+                            setSelectedProgramId(newId);
                           }
-                          className="hover:text-red-600 ml-1"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
+                        }}
+                      />
+                    </div>
+                    <button
+                      id="add-program-to-stack-button"
+                      data-testid="add-program-to-stack-button"
+                      type="button"
+                      disabled={declaredProgramIds.includes(stagedComboboxProgramId)}
+                      onClick={() => handleAddProgramToStack(stagedComboboxProgramId)}
+                      className="px-3.5 py-2.5 bg-[#1E293B] hover:bg-[#0F172A] disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>+ Add to Student Stack</span>
+                    </button>
                   </div>
-                )}
+                </div>
+
+                {/* 3. The Declared Credentials Stack Display */}
+                <div className="pt-2 border-t border-neutral-100 space-y-2">
+                  <div className="flex items-center justify-between pb-1">
+                    <span
+                      id="declared-stack-header"
+                      data-testid="declared-stack-header"
+                      className="text-[11px] font-extrabold tracking-wider text-neutral-800"
+                    >
+                      {formatDeclaredStackHeader(declaredPrograms)}
+                    </span>
+                    <span className="text-[10px] font-semibold text-neutral-500">
+                      {declaredPrograms.length} {declaredPrograms.length === 1 ? 'Credential' : 'Credentials'} Active
+                    </span>
+                  </div>
+
+                  {/* Cards Stack */}
+                  <div className="space-y-2" id="declared-credentials-stack">
+                    {declaredPrograms.map((prog, index) => {
+                      const category = getProgramCategory(prog);
+                      const isPrimary = index === 0 && (category === 'Major' || category === 'Major - Track');
+                      const credits = prog.total_program_credits || prog.total_major_credits || 0;
+                      const details = parseProgramDetails(prog.name);
+
+                      let borderClass = 'border-l-4 border-l-[#1E293B]';
+                      let badgeText = category;
+                      let badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
+                      let iconText = '🎓';
+
+                      if (category === 'Minor') {
+                        borderClass = 'border-l-4 border-l-slate-400';
+                        badgeText = 'Minor';
+                        badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+                        iconText = '📘';
+                      } else if (category === 'Certificate') {
+                        borderClass = 'border-l-4 border-l-neutral-300';
+                        badgeText = 'Certificate';
+                        badgeClass = 'bg-neutral-100 text-neutral-700 border-neutral-300';
+                        iconText = '📜';
+                      } else if (category === 'Major - Track') {
+                        borderClass = 'border-l-4 border-l-[#1E293B]';
+                        badgeText = 'Major - Track';
+                        badgeClass = 'bg-[#857542]/15 text-[#857542] border-[#857542]/30';
+                        iconText = '🎓';
+                      }
+
+                      return (
+                        <div
+                          key={prog.id}
+                          id={`declared-card-${prog.id}`}
+                          data-testid={`declared-card-${prog.id}`}
+                          className={`p-3 bg-neutral-50/70 hover:bg-neutral-50 rounded-lg border border-neutral-200 ${borderClass} transition flex items-center justify-between gap-3 shadow-2xs`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm select-none">{iconText}</span>
+                              <span className="text-xs font-bold text-neutral-900 leading-tight">
+                                {details.discipline}
+                              </span>
+                              <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${badgeClass}`}>
+                                {badgeText}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-neutral-600 flex-wrap">
+                              {details.emphasis && (
+                                <span className="font-semibold text-[#857542] bg-[#F7F5EE] border border-[#B5A36A]/40 px-1 rounded">
+                                  {details.emphasis}
+                                </span>
+                              )}
+                              <span className="font-mono font-medium">
+                                {credits} credits
+                              </span>
+                              {isPrimary ? (
+                                <span className="inline-flex items-center gap-1 font-bold text-[#857542] bg-[#857542]/10 border border-[#857542]/30 px-1.5 py-0.5 rounded">
+                                  <Lock className="w-2.5 h-2.5" />
+                                  <span>Primary Degree (Locked)</span>
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {!isPrimary ? (
+                              <button
+                                type="button"
+                                id={`remove-program-${prog.id}`}
+                                data-testid={`remove-program-${prog.id}`}
+                                onClick={() => handleRemoveProgramFromStack(prog.id)}
+                                className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                                title={`Remove ${prog.name}`}
+                                aria-label={`Remove ${prog.name}`}
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <span className="text-neutral-400 p-1" title="Primary Degree (Locked)">
+                                <Lock className="w-4 h-4 text-neutral-400" />
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Live Overlap Footer */}
+                  <div
+                    id="declared-stack-overlap-footer"
+                    data-testid="declared-stack-overlap-footer"
+                    className="mt-2.5 p-2.5 bg-white rounded-lg border border-neutral-200 shadow-2xs flex flex-wrap items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-neutral-600">
+                        Combined Total: <strong className="font-bold text-neutral-900">{stackOverlap.totalDeclaredCredits} cr</strong>
+                      </span>
+                      <span className="text-neutral-300">|</span>
+                      <span className="text-neutral-600">
+                        Shared Overlap: <strong className="font-bold text-[#857542]">-{stackOverlap.sharedOverlapCredits} cr</strong>
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-neutral-600">
+                        Net Program Load: <strong className="font-extrabold text-[#1E293B] text-sm">{stackOverlap.netProgramLoad} cr</strong>
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Section B: Important Scheduling Building Constraints */}

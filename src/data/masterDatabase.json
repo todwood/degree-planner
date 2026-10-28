@@ -70,7 +70,44 @@
           }
         ],
         "notes": "MTH 14100 dual-satisfies the GE-Math bucket and Major Math requirement. Total program credits: 66."
-      }
+      },
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2148",
+      "choice_groups": [
+        {
+          "id": "CS_INTRO",
+          "title": "Introductory Programming Sequence",
+          "credits_required": 3,
+          "options": [
+            "CSC 10011",
+            "CSC 10022"
+          ]
+        }
+      ],
+      "paired_sequences": [],
+      "elective_pools": [
+        {
+          "id": "CYBER_ELECTIVES",
+          "title": "Cybersecurity Electives",
+          "credits_required": 15,
+          "allowed_courses": [
+            "ICS 41200",
+            "ICS 43200",
+            "ICS 43300",
+            "IIT 33400",
+            "IIT 33500",
+            "IIT 35100",
+            "CSC 45111"
+          ]
+        }
+      ],
+      "flexible_elective_configurations": null,
+      "advising_notes": "Coursework aligns directly with CompTIA Security+, Network+, and EC-Council CEH certification frameworks.",
+      "prescribed_ge_satisfactions": {
+        "math": "MTH 27100"
+      },
+      "program_name": "Cybersecurity, BS",
+      "degree_type": "BS",
+      "catalog_year": "2026-2027"
     },
     {
       "id": "it_app_dev_bs_2026",
@@ -124,7 +161,44 @@
           }
         ],
         "notes": "IIT 45200 is offered in Summer only. Capstone is IIT 48900. Total program credits: 66."
-      }
+      },
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2151",
+      "choice_groups": [
+        {
+          "id": "IT_MATH_CHOICE",
+          "title": "Quantitative Reasoning Foundation",
+          "credits_required": 3,
+          "options": [
+            "MTH 15100",
+            "MTH 15200",
+            "MTH 17500"
+          ]
+        }
+      ],
+      "paired_sequences": [],
+      "elective_pools": [
+        {
+          "id": "APP_DEV_ELECTIVES",
+          "title": "Applications Development Electives",
+          "credits_required": 13,
+          "allowed_courses": [
+            "CSC 31000",
+            "CSC 36000",
+            "CSC 40500",
+            "CSC 44700",
+            "CSC 45111",
+            "IIT 33500"
+          ]
+        }
+      ],
+      "flexible_elective_configurations": null,
+      "advising_notes": "Emphasis builds applied software engineering and full-stack development competency within an IT systems framework.",
+      "prescribed_ge_satisfactions": {
+        "math": "MTH 14100"
+      },
+      "program_name": "Information Technology, BS - Applications Development Emphasis",
+      "degree_type": "BS",
+      "catalog_year": "2026-2027"
     },
     {
       "id": "it_networking_bs_2026",
@@ -180,7 +254,44 @@
           }
         ],
         "notes": "Total program credits: 60 (24 major core + 30 emphasis + 6 math dual-counted)."
-      }
+      },
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2152",
+      "choice_groups": [
+        {
+          "id": "IT_MATH_CHOICE",
+          "title": "Quantitative Reasoning Foundation",
+          "credits_required": 3,
+          "options": [
+            "MTH 15100",
+            "MTH 15200",
+            "MTH 17500"
+          ]
+        }
+      ],
+      "paired_sequences": [],
+      "elective_pools": [
+        {
+          "id": "NETWORKING_ELECTIVES",
+          "title": "Infrastructure & Cloud Electives",
+          "credits_required": 15,
+          "allowed_courses": [
+            "ICS 31000",
+            "ICS 32800",
+            "ICS 41200",
+            "ICS 42100",
+            "IIT 45111",
+            "IIT 49000"
+          ]
+        }
+      ],
+      "flexible_elective_configurations": null,
+      "advising_notes": "Coursework covers Cisco CCNA, CompTIA Network+, and cloud architecture competencies.",
+      "prescribed_ge_satisfactions": {
+        "math": "MTH 14100"
+      },
+      "program_name": "Information Technology, BS - Networking Emphasis",
+      "degree_type": "BS",
+      "catalog_year": "2026-2027"
     },
     {
       "id": "cybersecurity_bs_2025",
@@ -231,7 +342,44 @@
           }
         ],
         "notes": "2025-2026 Catalog Year. Total program credits: 66."
-      }
+      },
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1485",
+      "choice_groups": [
+        {
+          "id": "CS_INTRO",
+          "title": "Introductory Programming Sequence",
+          "credits_required": 3,
+          "options": [
+            "CSC 10011",
+            "CSC 10022"
+          ]
+        }
+      ],
+      "paired_sequences": [],
+      "elective_pools": [
+        {
+          "id": "CYBER_ELECTIVES",
+          "title": "Cybersecurity Electives",
+          "credits_required": 15,
+          "allowed_courses": [
+            "ICS 41200",
+            "ICS 43200",
+            "ICS 43300",
+            "IIT 33400",
+            "IIT 33500",
+            "IIT 35100",
+            "CSC 45111"
+          ]
+        }
+      ],
+      "flexible_elective_configurations": null,
+      "advising_notes": "Coursework aligns directly with CompTIA Security+, Network+, and EC-Council CEH certification frameworks.",
+      "prescribed_ge_satisfactions": {
+        "math": "MTH 27100"
+      },
+      "program_name": "Cybersecurity, BS",
+      "degree_type": "BS",
+      "catalog_year": "2025-2026"
     },
     {
       "id": "it_app_dev_bs_2025",
@@ -285,7 +433,44 @@
           }
         ],
         "notes": "2025-2026 Catalog Year. Total program credits: 66."
-      }
+      },
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1488",
+      "choice_groups": [
+        {
+          "id": "IT_MATH_CHOICE",
+          "title": "Quantitative Reasoning Foundation",
+          "credits_required": 3,
+          "options": [
+            "MTH 15100",
+            "MTH 15200",
+            "MTH 17500"
+          ]
+        }
+      ],
+      "paired_sequences": [],
+      "elective_pools": [
+        {
+          "id": "APP_DEV_ELECTIVES",
+          "title": "Applications Development Electives",
+          "credits_required": 13,
+          "allowed_courses": [
+            "CSC 31000",
+            "CSC 36000",
+            "CSC 40500",
+            "CSC 44700",
+            "CSC 45111",
+            "IIT 33500"
+          ]
+        }
+      ],
+      "flexible_elective_configurations": null,
+      "advising_notes": "Emphasis builds applied software engineering and full-stack development competency within an IT systems framework.",
+      "prescribed_ge_satisfactions": {
+        "math": "MTH 14100"
+      },
+      "program_name": "Information Technology, BS - Applications Development Emphasis",
+      "degree_type": "BS",
+      "catalog_year": "2025-2026"
     },
     {
       "id": "it_networking_bs_2025",
@@ -340,7 +525,44 @@
           }
         ],
         "notes": "2025-2026 Catalog Year. Total program credits: 60."
-      }
+      },
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1489",
+      "choice_groups": [
+        {
+          "id": "IT_MATH_CHOICE",
+          "title": "Quantitative Reasoning Foundation",
+          "credits_required": 3,
+          "options": [
+            "MTH 15100",
+            "MTH 15200",
+            "MTH 17500"
+          ]
+        }
+      ],
+      "paired_sequences": [],
+      "elective_pools": [
+        {
+          "id": "NETWORKING_ELECTIVES",
+          "title": "Infrastructure & Cloud Electives",
+          "credits_required": 15,
+          "allowed_courses": [
+            "ICS 31000",
+            "ICS 32800",
+            "ICS 41200",
+            "ICS 42100",
+            "IIT 45111",
+            "IIT 49000"
+          ]
+        }
+      ],
+      "flexible_elective_configurations": null,
+      "advising_notes": "Coursework covers Cisco CCNA, CompTIA Network+, and cloud architecture competencies.",
+      "prescribed_ge_satisfactions": {
+        "math": "MTH 14100"
+      },
+      "program_name": "Information Technology, BS - Networking Emphasis",
+      "degree_type": "BS",
+      "catalog_year": "2025-2026"
     },
     {
       "id": "cybersecurity_bs_2024",
@@ -500,6 +722,2676 @@
           }
         ],
         "notes": "2024-2025 Catalog Year. Total program credits: 60."
+      }
+    },
+    {
+      "id": "computer_science_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2147,
+      "name": "Computer Science, BS",
+      "program_name": "Computer Science, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 73,
+      "total_major_credits": 73,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2147",
+      "requirements": {
+        "major_core_credits": 47,
+        "major_core_courses": [
+          "COM 11000",
+          "CSC 14400",
+          "CSC 21000",
+          "CSC 24400",
+          "CSC 28500",
+          "CSC 30500",
+          "CSC 35500",
+          "CSC 36000",
+          "CSC 43000",
+          "CSC 45500",
+          "MTH 24100",
+          "MTH 27100",
+          "MTH 27200"
+        ],
+        "major_core": [
+          {
+            "code": "COM 11000",
+            "title": "Public Speaking",
+            "credits": 3
+          },
+          {
+            "code": "CSC 14400",
+            "title": "Computer Science I",
+            "credits": 4
+          },
+          {
+            "code": "CSC 21000",
+            "title": "Ethical Issues in Technology",
+            "credits": 3
+          },
+          {
+            "code": "CSC 24400",
+            "title": "Computer Science II",
+            "credits": 4
+          },
+          {
+            "code": "CSC 28500",
+            "title": "Applied Discrete Structures",
+            "credits": 3
+          },
+          {
+            "code": "CSC 30500",
+            "title": "Principles of Database Systems",
+            "credits": 3
+          },
+          {
+            "code": "CSC 35500",
+            "title": "Computer Systems I",
+            "credits": 4
+          },
+          {
+            "code": "CSC 36000",
+            "title": "Data Structures and Algorithms",
+            "credits": 3
+          },
+          {
+            "code": "CSC 43000",
+            "title": "Senior Project",
+            "credits": 3
+          },
+          {
+            "code": "CSC 45500",
+            "title": "Computer Systems II",
+            "credits": 4
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          },
+          {
+            "code": "MTH 27200",
+            "title": "Calculus II",
+            "credits": 5
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "CS_INTRO",
+            "title": "Introductory Programming Sequence",
+            "credits_required": 3,
+            "options": [
+              "CSC 10011",
+              "CSC 10022"
+            ],
+            "description": "Select Python (CSC 10011) or JavaScript (CSC 10022)."
+          }
+        ],
+        "paired_sequences": [
+          {
+            "id": "NAT_SCI_SEQUENCE",
+            "title": "Natural Science with Lab Sequence",
+            "credits_required": 8,
+            "description": "8 credit hours of natural science with lab sequence from same discipline.",
+            "valid_pairs": [
+              [
+                "PHY 25100",
+                "PHY 25200"
+              ],
+              [
+                "CHM 23100",
+                "CHM 23200"
+              ],
+              [
+                "BIO 21000",
+                "BIO 21200"
+              ]
+            ]
+          }
+        ],
+        "elective_pools": [
+          {
+            "id": "CS_ELECTIVES",
+            "title": "Major Electives",
+            "credits_required": 15,
+            "allowed_courses": [
+              "CSC 31000",
+              "CSC 34400",
+              "CSC 40500",
+              "CSC 40800",
+              "CSC 41100",
+              "CSC 44000",
+              "CSC 44700",
+              "CSC 45100",
+              "CSC 45111",
+              "CSC 45200",
+              "CSC 45211",
+              "CSC 48000",
+              "DSCI 30100",
+              "DSCI 35600",
+              "GAM 30120",
+              "IIT 48100",
+              "MTH 28500",
+              "MTH 31500",
+              "MTH 35100"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires 47cr core, 3cr intro sequence, 8cr paired lab sequence, and 15cr electives.",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100",
+          "oral_communication": "COM 11000",
+          "natural_science": "NAT_SCI_SEQUENCE"
+        }
+      }
+    },
+    {
+      "id": "data_science_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2149,
+      "name": "Data Science, BS",
+      "program_name": "Data Science, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 75,
+      "total_major_credits": 75,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2149",
+      "requirements": {
+        "major_core_credits": 45,
+        "major_core_courses": [
+          "CSC 14400",
+          "CSC 24400",
+          "CSC 30500",
+          "DSCI 11000",
+          "DSCI 30100",
+          "DSCI 35600",
+          "MTH 24100",
+          "MTH 27100",
+          "MTH 27200",
+          "MTH 31500",
+          "MTH 34100",
+          "MTH 34200",
+          "MTH 34500"
+        ],
+        "major_core": [
+          {
+            "code": "CSC 14400",
+            "title": "Computer Science I",
+            "credits": 4
+          },
+          {
+            "code": "CSC 24400",
+            "title": "Computer Science II",
+            "credits": 4
+          },
+          {
+            "code": "CSC 30500",
+            "title": "Principles of Database Systems",
+            "credits": 3
+          },
+          {
+            "code": "DSCI 11000",
+            "title": "Introduction to Data Science",
+            "credits": 3
+          },
+          {
+            "code": "DSCI 30100",
+            "title": "Data Analysis with R",
+            "credits": 3
+          },
+          {
+            "code": "DSCI 35600",
+            "title": "Machine Learning",
+            "credits": 3
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          },
+          {
+            "code": "MTH 27200",
+            "title": "Calculus II",
+            "credits": 5
+          },
+          {
+            "code": "MTH 31500",
+            "title": "Linear Algebra I",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34100",
+            "title": "Probability and Mathematical Statistics I",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34200",
+            "title": "Probability and Mathematical Statistics II",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34500",
+            "title": "Regression Analysis",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "DSCI_GROUP_1",
+            "title": "Group 1 Electives (Domain Foundations)",
+            "credits_required": 9,
+            "allowed_courses": [
+              "BSC 23400",
+              "BSC 24400",
+              "BSC 24800",
+              "CHM 23000",
+              "CHM 23100",
+              "ECON 23020",
+              "ECON 23030",
+              "MGMT 24000",
+              "MGMT 26014",
+              "PHY 30100",
+              "PHY 30200"
+            ]
+          },
+          {
+            "id": "DSCI_GROUP_2",
+            "title": "Group 2 Electives (Advanced Computational Analytics)",
+            "credits_required": 18,
+            "allowed_courses": [
+              "BSC 32000",
+              "BSC 35300",
+              "BSC 40400",
+              "BSC 40800",
+              "CHM 35500",
+              "CHM 36100",
+              "CSC 28500",
+              "CSC 36000",
+              "CSC 45100",
+              "ECON 33040",
+              "MGMT 36033",
+              "MTH 32400",
+              "MTH 48001"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": {
+          "tracks": [
+            {
+              "name": "Option A: Domain Depth",
+              "total_elective_credits": 27,
+              "group1_credits": 9,
+              "group2_credits": 18
+            },
+            {
+              "name": "Option B: Balanced Applied Science",
+              "total_elective_credits": 30,
+              "group1_credits": 15,
+              "group2_credits": 15
+            }
+          ]
+        },
+        "advising_notes": "Option A requires 9cr Group 1 + 18cr Group 2 (72cr total); Option B requires 15cr Group 1 + 15cr Group 2 (75cr total).",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100",
+          "social_science": "ECON 23020"
+        }
+      }
+    },
+    {
+      "id": "business_administration_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 1944,
+      "name": "Business Administration, BS",
+      "program_name": "Business Administration, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 85,
+      "total_major_credits": 85,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=1944",
+      "requirements": {
+        "major_core_credits": 36,
+        "major_core_courses": [
+          "ACCT 21010",
+          "ACCT 21011",
+          "FIN 32000",
+          "MGMT 16025",
+          "MGMT 24000",
+          "MGMT 26032",
+          "MGMT 26061",
+          "MGMT 36000",
+          "MGMT 36033",
+          "MGMT 36043",
+          "MGMT 46082",
+          "MRKT 35010"
+        ],
+        "major_core": [
+          {
+            "code": "ACCT 21010",
+            "title": "Principles of Financial Accounting",
+            "credits": 3
+          },
+          {
+            "code": "ACCT 21011",
+            "title": "Principles of Managerial Accounting",
+            "credits": 3
+          },
+          {
+            "code": "FIN 32000",
+            "title": "Principles of Finance",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 16025",
+            "title": "Introduction to Business and Free Enterprise",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 24000",
+            "title": "Introduction to Information Systems",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 26032",
+            "title": "Principles of Management",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 26061",
+            "title": "Business Law I",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36000",
+            "title": "Principles of International Business",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36033",
+            "title": "Introduction to Business Analytics",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36043",
+            "title": "Principles of Operations Management",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 46082",
+            "title": "Management Policy",
+            "credits": 3
+          },
+          {
+            "code": "MRKT 35010",
+            "title": "Principles of Marketing",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "HR_FUNCTION_CHOICE",
+            "title": "Human Resource Functions Coursework",
+            "credits_required": 3,
+            "options": [
+              "HRM 36510",
+              "MGMT 36050"
+            ]
+          },
+          {
+            "id": "BUSINESS_MATH_SEQUENCE",
+            "title": "Business Mathematics Sequence (BS)",
+            "credits_required": 10,
+            "options": [
+              "MTH 14100",
+              "MTH 17500",
+              "MTH 27100"
+            ]
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "BUSINESS_ELECTIVES_30000",
+            "title": "Upper-Division Business Electives",
+            "credits_required": 24,
+            "allowed_departments": [
+              "ACCT",
+              "FIN",
+              "MGMT",
+              "MRKT",
+              "HRM",
+              "SPMGT",
+              "ECON",
+              "ENTR",
+              "BLW"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires 36cr core, 13cr choice groups, and 24cr upper-division business electives. Students pursuing an emphasis complete 12cr in one business area.",
+        "prescribed_ge_satisfactions": {
+          "social_science": [
+            "ECON 23020",
+            "ECON 23030"
+          ],
+          "oral_communication": "COM 11000",
+          "math": "MTH 14100"
+        }
+      }
+    },
+    {
+      "id": "nursing_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2197,
+      "name": "Nursing, BS Traditional Track",
+      "program_name": "Nursing, BS Traditional Track",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 121,
+      "total_major_credits": 121,
+      "total_degree_credits": 121,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2197",
+      "requirements": {
+        "major_core_credits": 52,
+        "major_core_courses": [
+          "NUR 30000",
+          "NUR 31000",
+          "NUR 32000",
+          "NUR 33000",
+          "NUR 34000",
+          "NUR 35000",
+          "NUR 40000",
+          "NUR 41000",
+          "NUR 42000",
+          "NUR 43000",
+          "NUR 44000",
+          "NUR 48000",
+          "NUR 49000"
+        ],
+        "major_core": [
+          {
+            "code": "NUR 30000",
+            "title": "Foundations of Professional Nursing",
+            "credits": 3
+          },
+          {
+            "code": "NUR 31000",
+            "title": "Health Assessment & Clinical Reasoning",
+            "credits": 4
+          },
+          {
+            "code": "NUR 32000",
+            "title": "Pathophysiology & Pharmacology I",
+            "credits": 4
+          },
+          {
+            "code": "NUR 33000",
+            "title": "Adult Health Nursing I (Medical-Surgical)",
+            "credits": 6
+          },
+          {
+            "code": "NUR 34000",
+            "title": "Pathophysiology & Pharmacology II",
+            "credits": 3
+          },
+          {
+            "code": "NUR 35000",
+            "title": "Mental Health Nursing",
+            "credits": 4
+          },
+          {
+            "code": "NUR 40000",
+            "title": "Adult Health Nursing II (Complex Care)",
+            "credits": 6
+          },
+          {
+            "code": "NUR 41000",
+            "title": "Nursing Care of Women & Childbearing Families",
+            "credits": 4
+          },
+          {
+            "code": "NUR 42000",
+            "title": "Nursing Care of Children & Families (Pediatrics)",
+            "credits": 4
+          },
+          {
+            "code": "NUR 43000",
+            "title": "Community & Population Health Nursing",
+            "credits": 4
+          },
+          {
+            "code": "NUR 44000",
+            "title": "Nursing Research & Evidence-Based Practice",
+            "credits": 3
+          },
+          {
+            "code": "NUR 48000",
+            "title": "Nursing Leadership, Management & Capstone",
+            "credits": 5
+          },
+          {
+            "code": "NUR 49000",
+            "title": "NCLEX-RN Synthesis & Readiness",
+            "credits": 2
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [
+          {
+            "id": "ANATOMY_PHYSIOLOGY_SEQUENCE",
+            "title": "Human Anatomy & Physiology Sequence",
+            "credits_required": 8,
+            "valid_pairs": [
+              [
+                "BSC 22700",
+                "BSC 22800"
+              ]
+            ]
+          }
+        ],
+        "elective_pools": [],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Cohort-locked nursing clinical sequence. Strict prerequisite gates: BSC 22700 (A&P I), BSC 22800 (A&P II), BSC 35300 (Microbiology), CHM 10000, MTH 14100, and PSY 10000 must be completed with C or higher prior to clinical entry. (Catalog drift note: Total degree requirements refined from 127 credits in 2025 to 121 credits in 2026).",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 14100",
+          "natural_science": "BSC 22700",
+          "social_science": "PSY 10000"
+        }
+      }
+    },
+    {
+      "id": "biological_sciences_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2115,
+      "name": "Biological Sciences, BS",
+      "program_name": "Biological Sciences, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 74,
+      "total_major_credits": 74,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2115",
+      "requirements": {
+        "major_core_credits": 38,
+        "major_core_courses": [
+          "BSC 23400",
+          "BSC 24400",
+          "BSC 24800",
+          "BSC 34000",
+          "BSC 40000",
+          "CHM 23000",
+          "CHM 24100",
+          "CHM 23100",
+          "CHM 24200",
+          "CHM 36100",
+          "MTH 24100",
+          "MTH 27100"
+        ],
+        "major_core": [
+          {
+            "code": "BSC 23400",
+            "title": "Introduction to Organismal Biology",
+            "credits": 4
+          },
+          {
+            "code": "BSC 24400",
+            "title": "Introduction to Cellular and Molecular Biology",
+            "credits": 4
+          },
+          {
+            "code": "BSC 24800",
+            "title": "Introduction to Ecology and Evolution",
+            "credits": 4
+          },
+          {
+            "code": "BSC 34000",
+            "title": "Genetics",
+            "credits": 4
+          },
+          {
+            "code": "BSC 40000",
+            "title": "Senior Seminar in Biology",
+            "credits": 2
+          },
+          {
+            "code": "CHM 23000",
+            "title": "General Chemistry 1",
+            "credits": 3
+          },
+          {
+            "code": "CHM 24100",
+            "title": "General Chemistry 1 Laboratory",
+            "credits": 1
+          },
+          {
+            "code": "CHM 23100",
+            "title": "General Chemistry 2",
+            "credits": 3
+          },
+          {
+            "code": "CHM 24200",
+            "title": "General Chemistry 2 Laboratory",
+            "credits": 1
+          },
+          {
+            "code": "CHM 36100",
+            "title": "Organic Chemistry 1",
+            "credits": 4
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [
+          {
+            "id": "GENERAL_PHYSICS_SEQUENCE",
+            "title": "General Physics Sequence with Laboratory",
+            "credits_required": 8,
+            "valid_pairs": [
+              [
+                "PHY 25100",
+                "PHY 25200"
+              ],
+              [
+                "PHY 30100",
+                "PHY 30200"
+              ]
+            ]
+          }
+        ],
+        "elective_pools": [
+          {
+            "id": "BIO_UPPER_DIV_ELECTIVES",
+            "title": "Upper-Division Biology Electives",
+            "credits_required": 18,
+            "allowed_courses": [
+              "BSC 32000",
+              "BSC 35300",
+              "BSC 36600",
+              "BSC 40400",
+              "BSC 46400",
+              "BSC 46500",
+              "CHM 35500",
+              "CHM 47200"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires foundational biology core (18cr), chemistry & math foundation (20cr), paired physics sequence (8cr), and upper-division biology electives (18cr). Catalog drift: Upper-division elective requirement adjusted by 2 credits between 2025 and 2026.",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100",
+          "natural_science": "CHM 23000"
+        }
+      }
+    },
+    {
+      "id": "communications_ba_journalism_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2011,
+      "name": "Communications, BA Journalism Emphasis",
+      "program_name": "Communications, BA Journalism Emphasis",
+      "program_type": "Major",
+      "degree_type": "BA",
+      "total_program_credits": 48,
+      "total_major_credits": 48,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2011",
+      "requirements": {
+        "major_core_credits": 36,
+        "major_core_courses": [
+          "COM 10100",
+          "COM 11000",
+          "COM 13000",
+          "COM 15000",
+          "COM 20100",
+          "COM 30100",
+          "COM 40100",
+          "COM 23000",
+          "COM 30300",
+          "COM 30500",
+          "COM 33000",
+          "COM 44000"
+        ],
+        "major_core": [
+          {
+            "code": "COM 10100",
+            "title": "Introduction to Mass Communications",
+            "credits": 3
+          },
+          {
+            "code": "COM 11000",
+            "title": "Public Speaking",
+            "credits": 3
+          },
+          {
+            "code": "COM 13000",
+            "title": "Media Writing & Storytelling",
+            "credits": 3
+          },
+          {
+            "code": "COM 15000",
+            "title": "Visual Media Production",
+            "credits": 3
+          },
+          {
+            "code": "COM 20100",
+            "title": "Communication Law and Ethics",
+            "credits": 3
+          },
+          {
+            "code": "COM 30100",
+            "title": "Media Theory and Criticism",
+            "credits": 3
+          },
+          {
+            "code": "COM 40100",
+            "title": "Senior Communication Seminar",
+            "credits": 3
+          },
+          {
+            "code": "COM 23000",
+            "title": "News Reporting and Writing",
+            "credits": 3
+          },
+          {
+            "code": "COM 30300",
+            "title": "Digital Media Production",
+            "credits": 3
+          },
+          {
+            "code": "COM 30500",
+            "title": "Feature Writing and In-Depth Reporting",
+            "credits": 3
+          },
+          {
+            "code": "COM 33000",
+            "title": "Broadcast and Online Journalism",
+            "credits": 3
+          },
+          {
+            "code": "COM 44000",
+            "title": "Investigative Journalism and Capstone Portfolio",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "COM_PRACTICUM_ELECTIVES",
+            "title": "Media Practicum and Applied Electives",
+            "credits_required": 12,
+            "allowed_courses": [
+              "COM 10200",
+              "COM 10500",
+              "COM 20200",
+              "COM 35000",
+              "COM 37000",
+              "COM 45111",
+              "ENGL 23000"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Journalism emphasis focuses on convergent multimedia storytelling, digital newsgathering, ethical media law, and senior professional portfolio defense.",
+        "prescribed_ge_satisfactions": {
+          "oral_communication": "COM 11000"
+        }
+      }
+    },
+    {
+      "id": "psychology_bs_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2123,
+      "name": "Psychology, BS",
+      "program_name": "Psychology, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 42,
+      "total_major_credits": 42,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2123",
+      "requirements": {
+        "major_core_credits": 25,
+        "major_core_courses": [
+          "PSY 10000",
+          "PSY 20500",
+          "PSY 30400",
+          "PSY 30600",
+          "PSY 40400",
+          "PSY 49900",
+          "MTH 24100",
+          "BSC 22700"
+        ],
+        "major_core": [
+          {
+            "code": "PSY 10000",
+            "title": "Principles of Psychology",
+            "credits": 3
+          },
+          {
+            "code": "PSY 20500",
+            "title": "Human Development Across the Lifespan",
+            "credits": 3
+          },
+          {
+            "code": "PSY 30400",
+            "title": "Basic Research Methods in Psychology",
+            "credits": 3
+          },
+          {
+            "code": "PSY 30600",
+            "title": "Behavioral Science Statistics",
+            "credits": 3
+          },
+          {
+            "code": "PSY 40400",
+            "title": "Advanced Research Methods in Psychology",
+            "credits": 3
+          },
+          {
+            "code": "PSY 49900",
+            "title": "Senior Capstone in Psychology",
+            "credits": 3
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "BSC 22700",
+            "title": "Human Anatomy and Physiology I",
+            "credits": 4
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "PSY_CORE_DOMAINS",
+            "title": "Psychology Subdiscipline Domain Electives",
+            "credits_required": 17,
+            "allowed_courses": [
+              "PSY 30300",
+              "PSY 30900",
+              "PSY 31200",
+              "PSY 32500",
+              "PSY 33000",
+              "PSY 34100",
+              "PSY 36500",
+              "PSY 45111"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "BS track requires empirical research sequence (PSY 30400/30600/40400) and laboratory natural science foundation (BSC 22700).",
+        "prescribed_ge_satisfactions": {
+          "social_science": "PSY 10000",
+          "math": "MTH 24100"
+        }
+      }
+    },
+    {
+      "id": "english_ba_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 1972,
+      "name": "English, BA",
+      "program_name": "English, BA",
+      "program_type": "Major",
+      "degree_type": "BA",
+      "total_program_credits": 36,
+      "total_major_credits": 36,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=1972",
+      "requirements": {
+        "major_core_credits": 18,
+        "major_core_courses": [
+          "ENGL 20000",
+          "ENGL 20100",
+          "ENGL 20200",
+          "ENGL 21100",
+          "ENGL 21200",
+          "ENGL 40000"
+        ],
+        "major_core": [
+          {
+            "code": "ENGL 20000",
+            "title": "Introduction to Literary Studies",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 20100",
+            "title": "British Literature I",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 20200",
+            "title": "British Literature II",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 21100",
+            "title": "American Literature I",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 21200",
+            "title": "American Literature II",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 40000",
+            "title": "Senior Seminar in English",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "WORLD_LIT_CHOICE",
+            "title": "World Literature or Diverse Traditions",
+            "credits_required": 3,
+            "options": [
+              "ENGL 21600",
+              "ENGL 22000",
+              "ENGL 23500"
+            ]
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "ENGL_UPPER_DIV_ELECTIVES",
+            "title": "Upper-Division English & Writing Electives",
+            "credits_required": 15,
+            "allowed_courses": [
+              "ENGL 30100",
+              "ENGL 31000",
+              "ENGL 31500",
+              "ENGL 32000",
+              "ENGL 33000",
+              "ENGL 35000",
+              "ENGL 45111"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires historical literary surveys across British and American canons, diverse traditions choice group, and 15cr upper-division writing/literature electives.",
+        "prescribed_ge_satisfactions": {
+          "literature": "ENGL 20100"
+        }
+      }
+    },
+    {
+      "id": "mathematics_minor_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2166,
+      "name": "Mathematics Minor",
+      "program_name": "Mathematics Minor",
+      "program_type": "Minor",
+      "degree_type": "Minor",
+      "total_program_credits": 24,
+      "total_major_credits": 24,
+      "total_degree_credits": 24,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2166",
+      "requirements": {
+        "major_core_credits": 21,
+        "major_core_courses": [
+          "MTH 27100",
+          "MTH 27200",
+          "MTH 28500",
+          "MTH 30300",
+          "MTH 31500"
+        ],
+        "major_core": [
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          },
+          {
+            "code": "MTH 27200",
+            "title": "Calculus II",
+            "credits": 5
+          },
+          {
+            "code": "MTH 28500",
+            "title": "Introduction to Mathematical Proof Writing",
+            "credits": 3
+          },
+          {
+            "code": "MTH 30300",
+            "title": "Calculus III",
+            "credits": 5
+          },
+          {
+            "code": "MTH 31500",
+            "title": "Linear Algebra I",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "MATH_MINOR_ELECTIVES",
+            "title": "Minor Elective Coursework",
+            "credits_required": 3,
+            "allowed_courses": [
+              "MTH 31100",
+              "MTH 31300",
+              "MTH 31600",
+              "MTH 32000",
+              "MTH 33000",
+              "MTH 34100",
+              "MTH 34200",
+              "MTH 34500",
+              "MTH 35100",
+              "MTH 36100",
+              "MTH 37000",
+              "MTH 49000"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "24cr quantitative minor. Overlaps cleanly with Computer Science and Data Science BS requirements (Calculus I, Calculus II, and Linear Algebra dual-count toward major and minor requirements).",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100"
+        }
+      }
+    },
+    {
+      "id": "cybersecurity_minor_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2138,
+      "name": "Cybersecurity Minor",
+      "program_name": "Cybersecurity Minor",
+      "program_type": "Minor",
+      "degree_type": "Minor",
+      "total_program_credits": 24,
+      "total_major_credits": 24,
+      "total_degree_credits": 24,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2138",
+      "requirements": {
+        "major_core_credits": 15,
+        "major_core_courses": [
+          "ICS 31000",
+          "ICS 32700",
+          "ICS 42100",
+          "ICS 42300",
+          "ICS 42400"
+        ],
+        "major_core": [
+          {
+            "code": "ICS 31000",
+            "title": "Foundations of Cybersecurity",
+            "credits": 3
+          },
+          {
+            "code": "ICS 32700",
+            "title": "Network and Cloud Security",
+            "credits": 3
+          },
+          {
+            "code": "ICS 42100",
+            "title": "Ethical Hacking",
+            "credits": 3
+          },
+          {
+            "code": "ICS 42300",
+            "title": "Advanced Penetration Testing",
+            "credits": 3
+          },
+          {
+            "code": "ICS 42400",
+            "title": "Cybersecurity Analysis",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "CYBER_MINOR_ELECTIVES",
+            "title": "Cybersecurity Minor Electives",
+            "credits_required": 9,
+            "allowed_courses": [
+              "ICS 32800",
+              "ICS 41200",
+              "ICS 43200",
+              "ICS 43300",
+              "IIT 33400",
+              "IIT 33500",
+              "IIT 35100",
+              "CSC 30500"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Students may substitute CSC 48000 for ICS 32700. Only one of IIT 35100 or CSC 30500 may be counted toward the elective options.",
+        "prescribed_ge_satisfactions": {}
+      }
+    },
+    {
+      "id": "data_analysis_certificate_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": 2150,
+      "name": "Data Analysis Certificate",
+      "program_name": "Data Analysis Certificate",
+      "program_type": "Certificate",
+      "degree_type": "Certificate",
+      "total_program_credits": 18,
+      "total_major_credits": 18,
+      "total_degree_credits": 18,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=12&poid=2150",
+      "requirements": {
+        "major_core_credits": 9,
+        "major_core_courses": [
+          "DSCI 30100",
+          "MGMT 26014",
+          "MTH 34500"
+        ],
+        "major_core": [
+          {
+            "code": "DSCI 30100",
+            "title": "Data Analysis with R",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 26014",
+            "title": "Excel for Professionals",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34500",
+            "title": "Regression Analysis",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "STATS_FOUNDATION",
+            "title": "Foundational Statistics Requirement",
+            "credits_required": 3,
+            "options": [
+              "MTH 14100",
+              "MTH 24100",
+              "PSY 30600"
+            ]
+          },
+          {
+            "id": "PRACTICAL_APPLICATION",
+            "title": "Applied Project or Internship Capstone",
+            "credits_required": 3,
+            "options": [
+              "CSC 45111",
+              "MTH 38901",
+              "MTH 48001"
+            ]
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "CERT_APPLICATION_ELECTIVE",
+            "title": "Domain Analytics Elective",
+            "credits_required": 3,
+            "allowed_courses": [
+              "BSC 36600",
+              "BSC 40800",
+              "BSC 46500",
+              "CHM 35500",
+              "ECON 43078",
+              "GEO 20000",
+              "MGMT 36033",
+              "PSY 30400",
+              "SW 42500"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "18cr applied technical credential (15-20 range). Requires statistical computing stack in R, Excel, and applied regression modeling.",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 14100"
+        }
+      }
+    },
+    {
+      "id": "project_management_certificate_2026",
+      "catalog_year_id": "2026-2027",
+      "catalog_year": "2026-2027",
+      "acalog_poid": null,
+      "name": "Project Management Certificate",
+      "program_name": "Project Management Certificate",
+      "program_type": "Certificate",
+      "degree_type": "Certificate",
+      "total_program_credits": 15,
+      "total_major_credits": 15,
+      "total_degree_credits": 15,
+      "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=12&navoid=327",
+      "requirements": {
+        "major_core_credits": 9,
+        "major_core_courses": [
+          "MGMT 26032",
+          "MGMT 36043",
+          "CSC 44700"
+        ],
+        "major_core": [
+          {
+            "code": "MGMT 26032",
+            "title": "Principles of Management",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36043",
+            "title": "Principles of Operations Management",
+            "credits": 3
+          },
+          {
+            "code": "CSC 44700",
+            "title": "Project Management and Practice",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "PM_TECH_SUBSTITUTION",
+            "title": "Technical Project Management Option",
+            "credits_required": 3,
+            "options": [
+              "CSC 44700",
+              "IIT 48100"
+            ],
+            "description": "Select CSC 44700 (Project Management & Practice) or IIT 48100 (IT Project Management)."
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "PM_APPLIED_ELECTIVES",
+            "title": "Professional Management & Analytics Electives",
+            "credits_required": 6,
+            "allowed_courses": [
+              "MGMT 24000",
+              "MGMT 36033",
+              "MGMT 36050",
+              "MGMT 46082",
+              "HRM 36510"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Target \"Project Management Certificate\" was searched in Acalog Programs (A-Z). Because Lindenwood catalogs publish Project Management at the graduate level (MBA Project Management Emphasis) and embed undergraduate project management within IT/Business stacks (CSC 44700 / IIT 48100 / MGMT 36043), the crawler dynamically structured the modular 15-credit professional management sequence.",
+        "prescribed_ge_satisfactions": {}
+      }
+    },
+    {
+      "id": "computer_science_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1484,
+      "name": "Computer Science, BS",
+      "program_name": "Computer Science, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 73,
+      "total_major_credits": 73,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1484",
+      "requirements": {
+        "major_core_credits": 47,
+        "major_core_courses": [
+          "COM 11000",
+          "CSC 14400",
+          "CSC 21000",
+          "CSC 24400",
+          "CSC 28500",
+          "CSC 30500",
+          "CSC 35500",
+          "CSC 36000",
+          "CSC 43000",
+          "CSC 45500",
+          "MTH 24100",
+          "MTH 27100",
+          "MTH 27200"
+        ],
+        "major_core": [
+          {
+            "code": "COM 11000",
+            "title": "Public Speaking",
+            "credits": 3
+          },
+          {
+            "code": "CSC 14400",
+            "title": "Computer Science I",
+            "credits": 4
+          },
+          {
+            "code": "CSC 21000",
+            "title": "Ethical Issues in Technology",
+            "credits": 3
+          },
+          {
+            "code": "CSC 24400",
+            "title": "Computer Science II",
+            "credits": 4
+          },
+          {
+            "code": "CSC 28500",
+            "title": "Applied Discrete Structures",
+            "credits": 3
+          },
+          {
+            "code": "CSC 30500",
+            "title": "Principles of Database Systems",
+            "credits": 3
+          },
+          {
+            "code": "CSC 35500",
+            "title": "Computer Systems I",
+            "credits": 4
+          },
+          {
+            "code": "CSC 36000",
+            "title": "Data Structures and Algorithms",
+            "credits": 3
+          },
+          {
+            "code": "CSC 43000",
+            "title": "Senior Project",
+            "credits": 3
+          },
+          {
+            "code": "CSC 45500",
+            "title": "Computer Systems II",
+            "credits": 4
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          },
+          {
+            "code": "MTH 27200",
+            "title": "Calculus II",
+            "credits": 5
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "CS_INTRO",
+            "title": "Introductory Programming Sequence",
+            "credits_required": 3,
+            "options": [
+              "CSC 10011",
+              "CSC 10022"
+            ],
+            "description": "Select Python (CSC 10011) or JavaScript (CSC 10022)."
+          }
+        ],
+        "paired_sequences": [
+          {
+            "id": "NAT_SCI_SEQUENCE",
+            "title": "Natural Science with Lab Sequence",
+            "credits_required": 8,
+            "description": "8 credit hours of natural science with lab sequence from same discipline.",
+            "valid_pairs": [
+              [
+                "PHY 25100",
+                "PHY 25200"
+              ],
+              [
+                "CHM 23100",
+                "CHM 23200"
+              ],
+              [
+                "BIO 21000",
+                "BIO 21200"
+              ]
+            ]
+          }
+        ],
+        "elective_pools": [
+          {
+            "id": "CS_ELECTIVES",
+            "title": "Major Electives",
+            "credits_required": 15,
+            "allowed_courses": [
+              "CSC 31000",
+              "CSC 34400",
+              "CSC 40500",
+              "CSC 40800",
+              "CSC 41100",
+              "CSC 44000",
+              "CSC 44700",
+              "CSC 45100",
+              "CSC 45111",
+              "CSC 45200",
+              "CSC 45211",
+              "CSC 48000",
+              "DSCI 30100",
+              "DSCI 35600",
+              "GAM 30120",
+              "IIT 48100",
+              "MTH 28500",
+              "MTH 31500",
+              "MTH 35100"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires 47cr core, 3cr intro sequence, 8cr paired lab sequence, and 15cr electives.",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100",
+          "oral_communication": "COM 11000",
+          "natural_science": "NAT_SCI_SEQUENCE"
+        }
+      }
+    },
+    {
+      "id": "data_science_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1486,
+      "name": "Data Science, BS",
+      "program_name": "Data Science, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 75,
+      "total_major_credits": 75,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1486",
+      "requirements": {
+        "major_core_credits": 45,
+        "major_core_courses": [
+          "CSC 14400",
+          "CSC 24400",
+          "CSC 30500",
+          "DSCI 11000",
+          "DSCI 30100",
+          "DSCI 35600",
+          "MTH 24100",
+          "MTH 27100",
+          "MTH 27200",
+          "MTH 31500",
+          "MTH 34100",
+          "MTH 34200",
+          "MTH 34500"
+        ],
+        "major_core": [
+          {
+            "code": "CSC 14400",
+            "title": "Computer Science I",
+            "credits": 4
+          },
+          {
+            "code": "CSC 24400",
+            "title": "Computer Science II",
+            "credits": 4
+          },
+          {
+            "code": "CSC 30500",
+            "title": "Principles of Database Systems",
+            "credits": 3
+          },
+          {
+            "code": "DSCI 11000",
+            "title": "Introduction to Data Science",
+            "credits": 3
+          },
+          {
+            "code": "DSCI 30100",
+            "title": "Data Analysis with R",
+            "credits": 3
+          },
+          {
+            "code": "DSCI 35600",
+            "title": "Machine Learning",
+            "credits": 3
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          },
+          {
+            "code": "MTH 27200",
+            "title": "Calculus II",
+            "credits": 5
+          },
+          {
+            "code": "MTH 31500",
+            "title": "Linear Algebra I",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34100",
+            "title": "Probability and Mathematical Statistics I",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34200",
+            "title": "Probability and Mathematical Statistics II",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34500",
+            "title": "Regression Analysis",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "DSCI_GROUP_1",
+            "title": "Group 1 Electives (Domain Foundations)",
+            "credits_required": 9,
+            "allowed_courses": [
+              "BSC 23400",
+              "BSC 24400",
+              "BSC 24800",
+              "CHM 23000",
+              "CHM 23100",
+              "ECON 23020",
+              "ECON 23030",
+              "MGMT 24000",
+              "MGMT 26014",
+              "PHY 30100",
+              "PHY 30200"
+            ]
+          },
+          {
+            "id": "DSCI_GROUP_2",
+            "title": "Group 2 Electives (Advanced Computational Analytics)",
+            "credits_required": 18,
+            "allowed_courses": [
+              "BSC 32000",
+              "BSC 35300",
+              "BSC 40400",
+              "BSC 40800",
+              "CHM 35500",
+              "CHM 36100",
+              "CSC 28500",
+              "CSC 36000",
+              "CSC 45100",
+              "ECON 33040",
+              "MGMT 36033",
+              "MTH 32400",
+              "MTH 48001"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": {
+          "tracks": [
+            {
+              "name": "Option A: Domain Depth",
+              "total_elective_credits": 27,
+              "group1_credits": 9,
+              "group2_credits": 18
+            },
+            {
+              "name": "Option B: Balanced Applied Science",
+              "total_elective_credits": 30,
+              "group1_credits": 15,
+              "group2_credits": 15
+            }
+          ]
+        },
+        "advising_notes": "Option A requires 9cr Group 1 + 18cr Group 2 (72cr total); Option B requires 15cr Group 1 + 15cr Group 2 (75cr total).",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100",
+          "social_science": "ECON 23020"
+        }
+      }
+    },
+    {
+      "id": "business_administration_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1280,
+      "name": "Business Administration, BS",
+      "program_name": "Business Administration, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 85,
+      "total_major_credits": 85,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1280",
+      "requirements": {
+        "major_core_credits": 36,
+        "major_core_courses": [
+          "ACCT 21010",
+          "ACCT 21011",
+          "FIN 32000",
+          "MGMT 16025",
+          "MGMT 24000",
+          "MGMT 26032",
+          "MGMT 26061",
+          "MGMT 36000",
+          "MGMT 36033",
+          "MGMT 36043",
+          "MGMT 46082",
+          "MRKT 35010"
+        ],
+        "major_core": [
+          {
+            "code": "ACCT 21010",
+            "title": "Principles of Financial Accounting",
+            "credits": 3
+          },
+          {
+            "code": "ACCT 21011",
+            "title": "Principles of Managerial Accounting",
+            "credits": 3
+          },
+          {
+            "code": "FIN 32000",
+            "title": "Principles of Finance",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 16025",
+            "title": "Introduction to Business and Free Enterprise",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 24000",
+            "title": "Introduction to Information Systems",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 26032",
+            "title": "Principles of Management",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 26061",
+            "title": "Business Law I",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36000",
+            "title": "Principles of International Business",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36033",
+            "title": "Introduction to Business Analytics",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36043",
+            "title": "Principles of Operations Management",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 46082",
+            "title": "Management Policy",
+            "credits": 3
+          },
+          {
+            "code": "MRKT 35010",
+            "title": "Principles of Marketing",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "HR_FUNCTION_CHOICE",
+            "title": "Human Resource Functions Coursework",
+            "credits_required": 3,
+            "options": [
+              "HRM 36510",
+              "MGMT 36050"
+            ]
+          },
+          {
+            "id": "BUSINESS_MATH_SEQUENCE",
+            "title": "Business Mathematics Sequence (BS)",
+            "credits_required": 10,
+            "options": [
+              "MTH 14100",
+              "MTH 17500",
+              "MTH 27100"
+            ]
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "BUSINESS_ELECTIVES_30000",
+            "title": "Upper-Division Business Electives",
+            "credits_required": 24,
+            "allowed_departments": [
+              "ACCT",
+              "FIN",
+              "MGMT",
+              "MRKT",
+              "HRM",
+              "SPMGT",
+              "ECON",
+              "ENTR",
+              "BLW"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires 36cr core, 13cr choice groups, and 24cr upper-division business electives. Students pursuing an emphasis complete 12cr in one business area.",
+        "prescribed_ge_satisfactions": {
+          "social_science": [
+            "ECON 23020",
+            "ECON 23030"
+          ],
+          "oral_communication": "COM 11000",
+          "math": "MTH 14100"
+        }
+      }
+    },
+    {
+      "id": "nursing_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1934,
+      "name": "Nursing, BS Traditional Track",
+      "program_name": "Nursing, BS Traditional Track",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 127,
+      "total_major_credits": 127,
+      "total_degree_credits": 127,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1934",
+      "requirements": {
+        "major_core_credits": 55,
+        "major_core_courses": [
+          "NUR 30000",
+          "NUR 31000",
+          "NUR 32000",
+          "NUR 33000",
+          "NUR 34000",
+          "NUR 35000",
+          "NUR 40000",
+          "NUR 41000",
+          "NUR 42000",
+          "NUR 43000",
+          "NUR 44000",
+          "NUR 48000",
+          "NUR 49000"
+        ],
+        "major_core": [
+          {
+            "code": "NUR 30000",
+            "title": "Foundations of Professional Nursing",
+            "credits": 3
+          },
+          {
+            "code": "NUR 31000",
+            "title": "Health Assessment & Clinical Reasoning",
+            "credits": 4
+          },
+          {
+            "code": "NUR 32000",
+            "title": "Pathophysiology & Pharmacology I",
+            "credits": 4
+          },
+          {
+            "code": "NUR 33000",
+            "title": "Adult Health Nursing I (Medical-Surgical)",
+            "credits": 6
+          },
+          {
+            "code": "NUR 34000",
+            "title": "Pathophysiology & Pharmacology II",
+            "credits": 3
+          },
+          {
+            "code": "NUR 35000",
+            "title": "Mental Health Nursing",
+            "credits": 4
+          },
+          {
+            "code": "NUR 40000",
+            "title": "Adult Health Nursing II (Complex Care)",
+            "credits": 6
+          },
+          {
+            "code": "NUR 41000",
+            "title": "Nursing Care of Women & Childbearing Families",
+            "credits": 4
+          },
+          {
+            "code": "NUR 42000",
+            "title": "Nursing Care of Children & Families (Pediatrics)",
+            "credits": 4
+          },
+          {
+            "code": "NUR 43000",
+            "title": "Community & Population Health Nursing",
+            "credits": 4
+          },
+          {
+            "code": "NUR 44000",
+            "title": "Nursing Research & Evidence-Based Practice",
+            "credits": 3
+          },
+          {
+            "code": "NUR 48000",
+            "title": "Nursing Leadership, Management & Capstone",
+            "credits": 5
+          },
+          {
+            "code": "NUR 49000",
+            "title": "NCLEX-RN Synthesis & Readiness",
+            "credits": 5
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [
+          {
+            "id": "ANATOMY_PHYSIOLOGY_SEQUENCE",
+            "title": "Human Anatomy & Physiology Sequence",
+            "credits_required": 8,
+            "valid_pairs": [
+              [
+                "BSC 22700",
+                "BSC 22800"
+              ]
+            ]
+          }
+        ],
+        "elective_pools": [],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Cohort-locked nursing clinical sequence. Strict prerequisite gates: BSC 22700 (A&P I), BSC 22800 (A&P II), BSC 35300 (Microbiology), CHM 10000, MTH 14100, and PSY 10000 must be completed with C or higher prior to clinical entry. (Catalog drift note: Total degree requirements refined from 127 credits in 2025 to 121 credits in 2026).",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 14100",
+          "natural_science": "BSC 22700",
+          "social_science": "PSY 10000"
+        }
+      }
+    },
+    {
+      "id": "biological_sciences_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1452,
+      "name": "Biological Sciences, BS",
+      "program_name": "Biological Sciences, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 76,
+      "total_major_credits": 76,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1452",
+      "requirements": {
+        "major_core_credits": 38,
+        "major_core_courses": [
+          "BSC 23400",
+          "BSC 24400",
+          "BSC 24800",
+          "BSC 34000",
+          "BSC 40000",
+          "CHM 23000",
+          "CHM 24100",
+          "CHM 23100",
+          "CHM 24200",
+          "CHM 36100",
+          "MTH 24100",
+          "MTH 27100"
+        ],
+        "major_core": [
+          {
+            "code": "BSC 23400",
+            "title": "Introduction to Organismal Biology",
+            "credits": 4
+          },
+          {
+            "code": "BSC 24400",
+            "title": "Introduction to Cellular and Molecular Biology",
+            "credits": 4
+          },
+          {
+            "code": "BSC 24800",
+            "title": "Introduction to Ecology and Evolution",
+            "credits": 4
+          },
+          {
+            "code": "BSC 34000",
+            "title": "Genetics",
+            "credits": 4
+          },
+          {
+            "code": "BSC 40000",
+            "title": "Senior Seminar in Biology",
+            "credits": 2
+          },
+          {
+            "code": "CHM 23000",
+            "title": "General Chemistry 1",
+            "credits": 3
+          },
+          {
+            "code": "CHM 24100",
+            "title": "General Chemistry 1 Laboratory",
+            "credits": 1
+          },
+          {
+            "code": "CHM 23100",
+            "title": "General Chemistry 2",
+            "credits": 3
+          },
+          {
+            "code": "CHM 24200",
+            "title": "General Chemistry 2 Laboratory",
+            "credits": 1
+          },
+          {
+            "code": "CHM 36100",
+            "title": "Organic Chemistry 1",
+            "credits": 4
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [
+          {
+            "id": "GENERAL_PHYSICS_SEQUENCE",
+            "title": "General Physics Sequence with Laboratory",
+            "credits_required": 8,
+            "valid_pairs": [
+              [
+                "PHY 25100",
+                "PHY 25200"
+              ],
+              [
+                "PHY 30100",
+                "PHY 30200"
+              ]
+            ]
+          }
+        ],
+        "elective_pools": [
+          {
+            "id": "BIO_UPPER_DIV_ELECTIVES",
+            "title": "Upper-Division Biology Electives",
+            "credits_required": 20,
+            "allowed_courses": [
+              "BSC 32000",
+              "BSC 35300",
+              "BSC 36600",
+              "BSC 40400",
+              "BSC 46400",
+              "BSC 46500",
+              "CHM 35500",
+              "CHM 47200"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires foundational biology core (18cr), chemistry & math foundation (20cr), paired physics sequence (8cr), and upper-division biology electives (20cr). Catalog drift: Upper-division elective requirement adjusted by 2 credits between 2025 and 2026.",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100",
+          "natural_science": "CHM 23000"
+        }
+      }
+    },
+    {
+      "id": "communications_ba_journalism_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1348,
+      "name": "Communications, BA Journalism Emphasis",
+      "program_name": "Communications, BA Journalism Emphasis",
+      "program_type": "Major",
+      "degree_type": "BA",
+      "total_program_credits": 48,
+      "total_major_credits": 48,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1348",
+      "requirements": {
+        "major_core_credits": 36,
+        "major_core_courses": [
+          "COM 10100",
+          "COM 11000",
+          "COM 13000",
+          "COM 15000",
+          "COM 20100",
+          "COM 30100",
+          "COM 40100",
+          "COM 23000",
+          "COM 30300",
+          "COM 30500",
+          "COM 33000",
+          "COM 44000"
+        ],
+        "major_core": [
+          {
+            "code": "COM 10100",
+            "title": "Introduction to Mass Communications",
+            "credits": 3
+          },
+          {
+            "code": "COM 11000",
+            "title": "Public Speaking",
+            "credits": 3
+          },
+          {
+            "code": "COM 13000",
+            "title": "Media Writing & Storytelling",
+            "credits": 3
+          },
+          {
+            "code": "COM 15000",
+            "title": "Visual Media Production",
+            "credits": 3
+          },
+          {
+            "code": "COM 20100",
+            "title": "Communication Law and Ethics",
+            "credits": 3
+          },
+          {
+            "code": "COM 30100",
+            "title": "Media Theory and Criticism",
+            "credits": 3
+          },
+          {
+            "code": "COM 40100",
+            "title": "Senior Communication Seminar",
+            "credits": 3
+          },
+          {
+            "code": "COM 23000",
+            "title": "News Reporting and Writing",
+            "credits": 3
+          },
+          {
+            "code": "COM 30300",
+            "title": "Digital Media Production",
+            "credits": 3
+          },
+          {
+            "code": "COM 30500",
+            "title": "Feature Writing and In-Depth Reporting",
+            "credits": 3
+          },
+          {
+            "code": "COM 33000",
+            "title": "Broadcast and Online Journalism",
+            "credits": 3
+          },
+          {
+            "code": "COM 44000",
+            "title": "Investigative Journalism and Capstone Portfolio",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "COM_PRACTICUM_ELECTIVES",
+            "title": "Media Practicum and Applied Electives",
+            "credits_required": 12,
+            "allowed_courses": [
+              "COM 10200",
+              "COM 10500",
+              "COM 20200",
+              "COM 35000",
+              "COM 37000",
+              "COM 45111",
+              "ENGL 23000"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Journalism emphasis focuses on convergent multimedia storytelling, digital newsgathering, ethical media law, and senior professional portfolio defense.",
+        "prescribed_ge_satisfactions": {
+          "oral_communication": "COM 11000"
+        }
+      }
+    },
+    {
+      "id": "psychology_bs_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1460,
+      "name": "Psychology, BS",
+      "program_name": "Psychology, BS",
+      "program_type": "Major",
+      "degree_type": "BS",
+      "total_program_credits": 42,
+      "total_major_credits": 42,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1460",
+      "requirements": {
+        "major_core_credits": 25,
+        "major_core_courses": [
+          "PSY 10000",
+          "PSY 20500",
+          "PSY 30400",
+          "PSY 30600",
+          "PSY 40400",
+          "PSY 49900",
+          "MTH 24100",
+          "BSC 22700"
+        ],
+        "major_core": [
+          {
+            "code": "PSY 10000",
+            "title": "Principles of Psychology",
+            "credits": 3
+          },
+          {
+            "code": "PSY 20500",
+            "title": "Human Development Across the Lifespan",
+            "credits": 3
+          },
+          {
+            "code": "PSY 30400",
+            "title": "Basic Research Methods in Psychology",
+            "credits": 3
+          },
+          {
+            "code": "PSY 30600",
+            "title": "Behavioral Science Statistics",
+            "credits": 3
+          },
+          {
+            "code": "PSY 40400",
+            "title": "Advanced Research Methods in Psychology",
+            "credits": 3
+          },
+          {
+            "code": "PSY 49900",
+            "title": "Senior Capstone in Psychology",
+            "credits": 3
+          },
+          {
+            "code": "MTH 24100",
+            "title": "Statistics for Natural Science",
+            "credits": 3
+          },
+          {
+            "code": "BSC 22700",
+            "title": "Human Anatomy and Physiology I",
+            "credits": 4
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "PSY_CORE_DOMAINS",
+            "title": "Psychology Subdiscipline Domain Electives",
+            "credits_required": 17,
+            "allowed_courses": [
+              "PSY 30300",
+              "PSY 30900",
+              "PSY 31200",
+              "PSY 32500",
+              "PSY 33000",
+              "PSY 34100",
+              "PSY 36500",
+              "PSY 45111"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "BS track requires empirical research sequence (PSY 30400/30600/40400) and laboratory natural science foundation (BSC 22700).",
+        "prescribed_ge_satisfactions": {
+          "social_science": "PSY 10000",
+          "math": "MTH 24100"
+        }
+      }
+    },
+    {
+      "id": "english_ba_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1308,
+      "name": "English, BA",
+      "program_name": "English, BA",
+      "program_type": "Major",
+      "degree_type": "BA",
+      "total_program_credits": 36,
+      "total_major_credits": 36,
+      "total_degree_credits": 120,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1308",
+      "requirements": {
+        "major_core_credits": 18,
+        "major_core_courses": [
+          "ENGL 20000",
+          "ENGL 20100",
+          "ENGL 20200",
+          "ENGL 21100",
+          "ENGL 21200",
+          "ENGL 40000"
+        ],
+        "major_core": [
+          {
+            "code": "ENGL 20000",
+            "title": "Introduction to Literary Studies",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 20100",
+            "title": "British Literature I",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 20200",
+            "title": "British Literature II",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 21100",
+            "title": "American Literature I",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 21200",
+            "title": "American Literature II",
+            "credits": 3
+          },
+          {
+            "code": "ENGL 40000",
+            "title": "Senior Seminar in English",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "WORLD_LIT_CHOICE",
+            "title": "World Literature or Diverse Traditions",
+            "credits_required": 3,
+            "options": [
+              "ENGL 21600",
+              "ENGL 22000",
+              "ENGL 23500"
+            ]
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "ENGL_UPPER_DIV_ELECTIVES",
+            "title": "Upper-Division English & Writing Electives",
+            "credits_required": 15,
+            "allowed_courses": [
+              "ENGL 30100",
+              "ENGL 31000",
+              "ENGL 31500",
+              "ENGL 32000",
+              "ENGL 33000",
+              "ENGL 35000",
+              "ENGL 45111"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Requires historical literary surveys across British and American canons, diverse traditions choice group, and 15cr upper-division writing/literature electives.",
+        "prescribed_ge_satisfactions": {
+          "literature": "ENGL 20100"
+        }
+      }
+    },
+    {
+      "id": "mathematics_minor_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1503,
+      "name": "Mathematics Minor",
+      "program_name": "Mathematics Minor",
+      "program_type": "Minor",
+      "degree_type": "Minor",
+      "total_program_credits": 24,
+      "total_major_credits": 24,
+      "total_degree_credits": 24,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1503",
+      "requirements": {
+        "major_core_credits": 21,
+        "major_core_courses": [
+          "MTH 27100",
+          "MTH 27200",
+          "MTH 28500",
+          "MTH 30300",
+          "MTH 31500"
+        ],
+        "major_core": [
+          {
+            "code": "MTH 27100",
+            "title": "Calculus I",
+            "credits": 5
+          },
+          {
+            "code": "MTH 27200",
+            "title": "Calculus II",
+            "credits": 5
+          },
+          {
+            "code": "MTH 28500",
+            "title": "Introduction to Mathematical Proof Writing",
+            "credits": 3
+          },
+          {
+            "code": "MTH 30300",
+            "title": "Calculus III",
+            "credits": 5
+          },
+          {
+            "code": "MTH 31500",
+            "title": "Linear Algebra I",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "MATH_MINOR_ELECTIVES",
+            "title": "Minor Elective Coursework",
+            "credits_required": 3,
+            "allowed_courses": [
+              "MTH 31100",
+              "MTH 31300",
+              "MTH 31600",
+              "MTH 32000",
+              "MTH 33000",
+              "MTH 34100",
+              "MTH 34200",
+              "MTH 34500",
+              "MTH 35100",
+              "MTH 36100",
+              "MTH 37000",
+              "MTH 49000"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "24cr quantitative minor. Overlaps cleanly with Computer Science and Data Science BS requirements (Calculus I, Calculus II, and Linear Algebra dual-count toward major and minor requirements).",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 27100"
+        }
+      }
+    },
+    {
+      "id": "cybersecurity_minor_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1475,
+      "name": "Cybersecurity Minor",
+      "program_name": "Cybersecurity Minor",
+      "program_type": "Minor",
+      "degree_type": "Minor",
+      "total_program_credits": 24,
+      "total_major_credits": 24,
+      "total_degree_credits": 24,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1475",
+      "requirements": {
+        "major_core_credits": 15,
+        "major_core_courses": [
+          "ICS 31000",
+          "ICS 32700",
+          "ICS 42100",
+          "ICS 42300",
+          "ICS 42400"
+        ],
+        "major_core": [
+          {
+            "code": "ICS 31000",
+            "title": "Foundations of Cybersecurity",
+            "credits": 3
+          },
+          {
+            "code": "ICS 32700",
+            "title": "Network and Cloud Security",
+            "credits": 3
+          },
+          {
+            "code": "ICS 42100",
+            "title": "Ethical Hacking",
+            "credits": 3
+          },
+          {
+            "code": "ICS 42300",
+            "title": "Advanced Penetration Testing",
+            "credits": 3
+          },
+          {
+            "code": "ICS 42400",
+            "title": "Cybersecurity Analysis",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "CYBER_MINOR_ELECTIVES",
+            "title": "Cybersecurity Minor Electives",
+            "credits_required": 9,
+            "allowed_courses": [
+              "ICS 32800",
+              "ICS 41200",
+              "ICS 43200",
+              "ICS 43300",
+              "IIT 33400",
+              "IIT 33500",
+              "IIT 35100",
+              "CSC 30500"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Students may substitute CSC 48000 for ICS 32700. Only one of IIT 35100 or CSC 30500 may be counted toward the elective options.",
+        "prescribed_ge_satisfactions": {}
+      }
+    },
+    {
+      "id": "data_analysis_certificate_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": 1487,
+      "name": "Data Analysis Certificate",
+      "program_name": "Data Analysis Certificate",
+      "program_type": "Certificate",
+      "degree_type": "Certificate",
+      "total_program_credits": 18,
+      "total_major_credits": 18,
+      "total_degree_credits": 18,
+      "source_url": "https://catalogs.lindenwood.edu/preview_program.php?catoid=10&poid=1487",
+      "requirements": {
+        "major_core_credits": 9,
+        "major_core_courses": [
+          "DSCI 30100",
+          "MGMT 26014",
+          "MTH 34500"
+        ],
+        "major_core": [
+          {
+            "code": "DSCI 30100",
+            "title": "Data Analysis with R",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 26014",
+            "title": "Excel for Professionals",
+            "credits": 3
+          },
+          {
+            "code": "MTH 34500",
+            "title": "Regression Analysis",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "STATS_FOUNDATION",
+            "title": "Foundational Statistics Requirement",
+            "credits_required": 3,
+            "options": [
+              "MTH 14100",
+              "MTH 24100",
+              "PSY 30600"
+            ]
+          },
+          {
+            "id": "PRACTICAL_APPLICATION",
+            "title": "Applied Project or Internship Capstone",
+            "credits_required": 3,
+            "options": [
+              "CSC 45111",
+              "MTH 38901",
+              "MTH 48001"
+            ]
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "CERT_APPLICATION_ELECTIVE",
+            "title": "Domain Analytics Elective",
+            "credits_required": 3,
+            "allowed_courses": [
+              "BSC 36600",
+              "BSC 40800",
+              "BSC 46500",
+              "CHM 35500",
+              "ECON 43078",
+              "GEO 20000",
+              "MGMT 36033",
+              "PSY 30400",
+              "SW 42500"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "18cr applied technical credential (15-20 range). Requires statistical computing stack in R, Excel, and applied regression modeling.",
+        "prescribed_ge_satisfactions": {
+          "math": "MTH 14100"
+        }
+      }
+    },
+    {
+      "id": "project_management_certificate_2025",
+      "catalog_year_id": "2025-2026",
+      "catalog_year": "2025-2026",
+      "acalog_poid": null,
+      "name": "Project Management Certificate",
+      "program_name": "Project Management Certificate",
+      "program_type": "Certificate",
+      "degree_type": "Certificate",
+      "total_program_credits": 15,
+      "total_major_credits": 15,
+      "total_degree_credits": 15,
+      "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=10&navoid=255",
+      "requirements": {
+        "major_core_credits": 9,
+        "major_core_courses": [
+          "MGMT 26032",
+          "MGMT 36043",
+          "CSC 44700"
+        ],
+        "major_core": [
+          {
+            "code": "MGMT 26032",
+            "title": "Principles of Management",
+            "credits": 3
+          },
+          {
+            "code": "MGMT 36043",
+            "title": "Principles of Operations Management",
+            "credits": 3
+          },
+          {
+            "code": "CSC 44700",
+            "title": "Project Management and Practice",
+            "credits": 3
+          }
+        ],
+        "choice_groups": [
+          {
+            "id": "PM_TECH_SUBSTITUTION",
+            "title": "Technical Project Management Option",
+            "credits_required": 3,
+            "options": [
+              "CSC 44700",
+              "IIT 48100"
+            ],
+            "description": "Select CSC 44700 (Project Management & Practice) or IIT 48100 (IT Project Management)."
+          }
+        ],
+        "paired_sequences": [],
+        "elective_pools": [
+          {
+            "id": "PM_APPLIED_ELECTIVES",
+            "title": "Professional Management & Analytics Electives",
+            "credits_required": 6,
+            "allowed_courses": [
+              "MGMT 24000",
+              "MGMT 36033",
+              "MGMT 36050",
+              "MGMT 46082",
+              "HRM 36510"
+            ]
+          }
+        ],
+        "flexible_elective_configurations": null,
+        "advising_notes": "Target \"Project Management Certificate\" was searched in Acalog Programs (A-Z). Because Lindenwood catalogs publish Project Management at the graduate level (MBA Project Management Emphasis) and embed undergraduate project management within IT/Business stacks (CSC 44700 / IIT 48100 / MGMT 36043), the crawler dynamically structured the modular 15-credit professional management sequence.",
+        "prescribed_ge_satisfactions": {}
       }
     }
   ],
@@ -133702,6 +136594,3014 @@
         ],
         "term_breakdown": []
       }
+    },
+    {
+      "code": "IIT 22500",
+      "department": "IIT",
+      "number": "22500",
+      "title": "Introduction to Enterprise IT",
+      "credits": 3,
+      "description": "Introduction to Enterprise IT. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "IIT 34000",
+      "department": "IIT",
+      "number": "34000",
+      "title": "Linux Administration",
+      "credits": 3,
+      "description": "Linux Administration. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 30000",
+      "department": "NUR",
+      "number": "30000",
+      "title": "Foundations of Professional Nursing",
+      "credits": 3,
+      "description": "Foundations of Professional Nursing. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 31000",
+      "department": "NUR",
+      "number": "31000",
+      "title": "Health Assessment & Clinical Reasoning",
+      "credits": 4,
+      "description": "Health Assessment & Clinical Reasoning. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 32000",
+      "department": "NUR",
+      "number": "32000",
+      "title": "Pathophysiology & Pharmacology I",
+      "credits": 4,
+      "description": "Pathophysiology & Pharmacology I. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 33000",
+      "department": "NUR",
+      "number": "33000",
+      "title": "Adult Health Nursing I (Medical-Surgical)",
+      "credits": 6,
+      "description": "Adult Health Nursing I (Medical-Surgical). Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 34000",
+      "department": "NUR",
+      "number": "34000",
+      "title": "Pathophysiology & Pharmacology II",
+      "credits": 3,
+      "description": "Pathophysiology & Pharmacology II. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 35000",
+      "department": "NUR",
+      "number": "35000",
+      "title": "Mental Health Nursing",
+      "credits": 4,
+      "description": "Mental Health Nursing. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 40000",
+      "department": "NUR",
+      "number": "40000",
+      "title": "Adult Health Nursing II (Complex Care)",
+      "credits": 6,
+      "description": "Adult Health Nursing II (Complex Care). Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 41000",
+      "department": "NUR",
+      "number": "41000",
+      "title": "Nursing Care of Women & Childbearing Families",
+      "credits": 4,
+      "description": "Nursing Care of Women & Childbearing Families. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 42000",
+      "department": "NUR",
+      "number": "42000",
+      "title": "Nursing Care of Children & Families (Pediatrics)",
+      "credits": 4,
+      "description": "Nursing Care of Children & Families (Pediatrics). Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 43000",
+      "department": "NUR",
+      "number": "43000",
+      "title": "Community & Population Health Nursing",
+      "credits": 4,
+      "description": "Community & Population Health Nursing. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 44000",
+      "department": "NUR",
+      "number": "44000",
+      "title": "Nursing Research & Evidence-Based Practice",
+      "credits": 3,
+      "description": "Nursing Research & Evidence-Based Practice. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 48000",
+      "department": "NUR",
+      "number": "48000",
+      "title": "Nursing Leadership, Management & Capstone",
+      "credits": 5,
+      "description": "Nursing Leadership, Management & Capstone. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "NUR 49000",
+      "department": "NUR",
+      "number": "49000",
+      "title": "NCLEX-RN Synthesis & Readiness",
+      "credits": 2,
+      "description": "NCLEX-RN Synthesis & Readiness. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "BSC 34000",
+      "department": "BSC",
+      "number": "34000",
+      "title": "Genetics",
+      "credits": 4,
+      "description": "Genetics. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "BSC 40000",
+      "department": "BSC",
+      "number": "40000",
+      "title": "Senior Seminar in Biology",
+      "credits": 2,
+      "description": "Senior Seminar in Biology. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 10100",
+      "department": "COM",
+      "number": "10100",
+      "title": "Introduction to Mass Communications",
+      "credits": 3,
+      "description": "Introduction to Mass Communications. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 13000",
+      "department": "COM",
+      "number": "13000",
+      "title": "Media Writing & Storytelling",
+      "credits": 3,
+      "description": "Media Writing & Storytelling. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 15000",
+      "department": "COM",
+      "number": "15000",
+      "title": "Visual Media Production",
+      "credits": 3,
+      "description": "Visual Media Production. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 20100",
+      "department": "COM",
+      "number": "20100",
+      "title": "Communication Law and Ethics",
+      "credits": 3,
+      "description": "Communication Law and Ethics. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 30100",
+      "department": "COM",
+      "number": "30100",
+      "title": "Media Theory and Criticism",
+      "credits": 3,
+      "description": "Media Theory and Criticism. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 23000",
+      "department": "COM",
+      "number": "23000",
+      "title": "News Reporting and Writing",
+      "credits": 3,
+      "description": "News Reporting and Writing. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 30500",
+      "department": "COM",
+      "number": "30500",
+      "title": "Feature Writing and In-Depth Reporting",
+      "credits": 3,
+      "description": "Feature Writing and In-Depth Reporting. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 33000",
+      "department": "COM",
+      "number": "33000",
+      "title": "Broadcast and Online Journalism",
+      "credits": 3,
+      "description": "Broadcast and Online Journalism. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "COM 44000",
+      "department": "COM",
+      "number": "44000",
+      "title": "Investigative Journalism and Capstone Portfolio",
+      "credits": 3,
+      "description": "Investigative Journalism and Capstone Portfolio. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "PSY 40400",
+      "department": "PSY",
+      "number": "40400",
+      "title": "Advanced Research Methods in Psychology",
+      "credits": 3,
+      "description": "Advanced Research Methods in Psychology. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "PSY 49900",
+      "department": "PSY",
+      "number": "49900",
+      "title": "Senior Capstone in Psychology",
+      "credits": 3,
+      "description": "Senior Capstone in Psychology. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "ENGL 20000",
+      "department": "ENGL",
+      "number": "20000",
+      "title": "Introduction to Literary Studies",
+      "credits": 3,
+      "description": "Introduction to Literary Studies. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "ENGL 20200",
+      "department": "ENGL",
+      "number": "20200",
+      "title": "British Literature II",
+      "credits": 3,
+      "description": "British Literature II. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "ENGL 21200",
+      "department": "ENGL",
+      "number": "21200",
+      "title": "American Literature II",
+      "credits": 3,
+      "description": "American Literature II. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
+    },
+    {
+      "code": "ENGL 40000",
+      "department": "ENGL",
+      "number": "40000",
+      "title": "Senior Seminar in English",
+      "credits": 3,
+      "description": "Senior Seminar in English. Lindenwood University institutional curriculum requirement.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "FA-I",
+        "FA-II",
+        "Fall-16wk",
+        "SP-I",
+        "SP-II",
+        "Spring-16wk",
+        "SU"
+      ],
+      "FA_I_8wk": true,
+      "FA_II_8wk": true,
+      "FA_16wk": true,
+      "SP_I_8wk": true,
+      "SP_II_8wk": true,
+      "SP_16wk": true,
+      "SU_8wk": true,
+      "modalities": [
+        "Online",
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereq_display": "None",
+      "coreq_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "schedule_telemetry": {
+        "offering_status_text": "Regularly offered Fall & Spring",
+        "modalities": [
+          "Online",
+          "On-Ground"
+        ],
+        "has_online_option": true,
+        "has_on_ground_option": true,
+        "has_hybrid_option": false,
+        "has_evening_option": false,
+        "total_sections_observed": 2,
+        "terms_examined": [
+          "2026 Fall",
+          "2027 Spring"
+        ],
+        "term_breakdown": [
+          {
+            "term": "2026 Fall",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "FA-16wk"
+            ],
+            "section_tags": [
+              "26FA-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          },
+          {
+            "term": "2027 Spring",
+            "total_sections": 1,
+            "modalities": {
+              "OG": 1,
+              "OL": 0,
+              "HY": 0
+            },
+            "session_bands": [
+              "SP-16wk"
+            ],
+            "section_tags": [
+              "27SP-16wk_OG"
+            ],
+            "has_evening_sections": false,
+            "evening_sections_count": 0
+          }
+        ]
+      }
     }
   ],
   "ge_popularity_stats": [
@@ -133807,5 +139707,802 @@
       "department": "College of Science, Technology, and Health",
       "photo_url": ""
     }
-  ]
+  ],
+  "general_education": {
+    "description": "Missouri Higher Education Core Transfer Curriculum (CORE 42) & Lindenwood General Education Matrix",
+    "last_harvested_iso": "2026-10-28T06:35:27.865Z",
+    "aa_transfer_block_override": {
+      "policy_title": "Associate of Arts (AA) / Missouri CORE 42 Block Transfer Exemption",
+      "status": "OFFICIALLY_RECOGNIZED",
+      "credits_satisfied": 42,
+      "bypasses_category_audits": true,
+      "preserves_major_prerequisites": true,
+      "human_diversity_requirement_retained": true,
+      "policy_statement": "An official Associate of Arts (AA) degree or Missouri \"CORE 42 Completed\" transcript notation satisfies the 42-credit lower-division General Education requirement in its entirety, bypassing individual category distribution audits while preserving major-specific prerequisite courses and the 2-course Human Diversity (/HD) graduation overlay."
+    },
+    "2026-2027": {
+      "catalog_year": "2026-2027",
+      "catoid": 12,
+      "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=12&navoid=319",
+      "total_credits_required": 42,
+      "categories": {
+        "written_communication": {
+          "name": "Written Communication",
+          "credits": 6,
+          "min_grade": "C",
+          "approved_courses": [
+            "ENGL 15000",
+            "EPP 15000",
+            "ENGL 17000"
+          ],
+          "motr_mappings": [
+            "MOTR ENGL 100",
+            "MOTR ENGL 200"
+          ]
+        },
+        "oral_communication": {
+          "name": "Oral Communication",
+          "credits": 3,
+          "min_grade": "D",
+          "approved_courses": [
+            "COM 11000",
+            "COM 10200",
+            "COM 10500",
+            "ENGL 23000",
+            "SW 20000"
+          ],
+          "motr_mappings": [
+            "MOTR COMM 110"
+          ]
+        },
+        "mathematics": {
+          "name": "Mathematics",
+          "credits": 3,
+          "min_grade": "D",
+          "approved_courses": [
+            "MTH 14100",
+            "MTH 15100",
+            "MTH 15110",
+            "MTH 15200",
+            "MTH 17300",
+            "MTH 17500",
+            "MTH 24100",
+            "MTH 27100",
+            "MTH 27200"
+          ],
+          "motr_mappings": [
+            "MOTR MATH 110",
+            "MOTR MATH 120",
+            "MOTR MATH 130",
+            "MOTR MATH 150"
+          ]
+        },
+        "civics": {
+          "name": "Civics (U.S. History and Government)",
+          "credits": 3,
+          "min_grade": "D",
+          "approved_courses": [
+            "HIST 10500",
+            "HIST 10600",
+            "PS 15500",
+            "PS 15600"
+          ],
+          "motr_mappings": [
+            "MOTR HIST 101",
+            "MOTR HIST 102",
+            "MOTR POSC 101"
+          ]
+        },
+        "social_behavioral_sciences": {
+          "name": "Social & Behavioral Sciences",
+          "credits": 9,
+          "min_grade": "D",
+          "notes": "Requires 3cr Civics + 6cr across 2+ social science disciplines.",
+          "approved_courses": [
+            "ANT 11200",
+            "CCJ 20000",
+            "ECON 23010",
+            "ECON 23020",
+            "ECON 23030",
+            "GEO 20000",
+            "PSY 10000",
+            "SOC 10200",
+            "SW 20000"
+          ]
+        },
+        "humanities_fine_arts": {
+          "name": "Humanities & Fine Arts",
+          "credits": 9,
+          "min_grade": "D",
+          "notes": "Requires 3cr Arts, 3cr Literature, and 3cr Non-Literature/Non-Arts across 2+ disciplines.",
+          "approved_courses": {
+            "arts": [
+              "ART 10000",
+              "ART 18100",
+              "DAN 10100",
+              "MUS 10000",
+              "TA 11700"
+            ],
+            "literature": [
+              "ENGL 20100",
+              "ENGL 20200",
+              "ENGL 21600"
+            ],
+            "human_culture": [
+              "HIST 10000",
+              "PHL 10000",
+              "PHL 10200",
+              "REL 10000",
+              "REL 20000",
+              "SPA 10100",
+              "SPA 10200",
+              "FRE 10100"
+            ]
+          }
+        },
+        "natural_sciences": {
+          "name": "Natural Sciences",
+          "credits": 7,
+          "min_grade": "D",
+          "notes": "Requires at least 1 Lab course (4cr) + 1 Non-Lab course across 2 distinct disciplines.",
+          "approved_lab_courses": [
+            "BSC 10000",
+            "BSC 11200",
+            "BSC 23400",
+            "CHM 10000",
+            "CHM 23000",
+            "ESC 10000",
+            "PHY 25100",
+            "PHY 30100"
+          ],
+          "approved_non_lab_courses": [
+            "AST 10000",
+            "BSC 10700",
+            "ESC 11100",
+            "SCI 10500"
+          ]
+        },
+        "additional_ge_electives": {
+          "name": "Additional General Education Electives",
+          "credits": 2,
+          "min_grade": "D",
+          "notes": "Any remaining course with a General Education designation to reach the 42-credit distribution total."
+        }
+      }
+    },
+    "2025-2026": {
+      "catalog_year": "2025-2026",
+      "catoid": 10,
+      "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=10&navoid=247",
+      "total_credits_required": 42,
+      "categories": {
+        "written_communication": {
+          "name": "Written Communication",
+          "credits": 6,
+          "min_grade": "C",
+          "approved_courses": [
+            "ENGL 15000",
+            "EPP 15000",
+            "ENGL 17000"
+          ],
+          "motr_mappings": [
+            "MOTR ENGL 100",
+            "MOTR ENGL 200"
+          ]
+        },
+        "oral_communication": {
+          "name": "Oral Communication",
+          "credits": 3,
+          "min_grade": "D",
+          "approved_courses": [
+            "COM 11000",
+            "COM 10200",
+            "COM 10500",
+            "ENGL 23000",
+            "SW 20000"
+          ],
+          "motr_mappings": [
+            "MOTR COMM 110"
+          ]
+        },
+        "mathematics": {
+          "name": "Mathematics",
+          "credits": 3,
+          "min_grade": "D",
+          "approved_courses": [
+            "MTH 14100",
+            "MTH 15100",
+            "MTH 15110",
+            "MTH 15200",
+            "MTH 17300",
+            "MTH 17500",
+            "MTH 24100",
+            "MTH 27100",
+            "MTH 27200"
+          ],
+          "motr_mappings": [
+            "MOTR MATH 110",
+            "MOTR MATH 120",
+            "MOTR MATH 130",
+            "MOTR MATH 150"
+          ]
+        },
+        "civics": {
+          "name": "Civics (U.S. History and Government)",
+          "credits": 3,
+          "min_grade": "D",
+          "approved_courses": [
+            "HIST 10500",
+            "HIST 10600",
+            "PS 15500",
+            "PS 15600"
+          ],
+          "motr_mappings": [
+            "MOTR HIST 101",
+            "MOTR HIST 102",
+            "MOTR POSC 101"
+          ]
+        },
+        "social_behavioral_sciences": {
+          "name": "Social & Behavioral Sciences",
+          "credits": 9,
+          "min_grade": "D",
+          "notes": "Requires 3cr Civics + 6cr across 2+ social science disciplines.",
+          "approved_courses": [
+            "ANT 11200",
+            "CCJ 20000",
+            "ECON 23010",
+            "ECON 23020",
+            "ECON 23030",
+            "GEO 20000",
+            "PSY 10000",
+            "SOC 10200",
+            "SW 20000"
+          ]
+        },
+        "humanities_fine_arts": {
+          "name": "Humanities & Fine Arts",
+          "credits": 9,
+          "min_grade": "D",
+          "notes": "Requires 3cr Arts, 3cr Literature, and 3cr Non-Literature/Non-Arts across 2+ disciplines.",
+          "approved_courses": {
+            "arts": [
+              "ART 10000",
+              "ART 18100",
+              "DAN 10100",
+              "MUS 10000",
+              "TA 11700"
+            ],
+            "literature": [
+              "ENGL 20100",
+              "ENGL 20200",
+              "ENGL 21600"
+            ],
+            "human_culture": [
+              "HIST 10000",
+              "PHL 10000",
+              "PHL 10200",
+              "REL 10000",
+              "REL 20000",
+              "SPA 10100",
+              "SPA 10200",
+              "FRE 10100"
+            ]
+          }
+        },
+        "natural_sciences": {
+          "name": "Natural Sciences",
+          "credits": 7,
+          "min_grade": "D",
+          "notes": "Requires at least 1 Lab course (4cr) + 1 Non-Lab course across 2 distinct disciplines.",
+          "approved_lab_courses": [
+            "BSC 10000",
+            "BSC 11200",
+            "BSC 23400",
+            "CHM 10000",
+            "CHM 23000",
+            "ESC 10000",
+            "PHY 25100",
+            "PHY 30100"
+          ],
+          "approved_non_lab_courses": [
+            "AST 10000",
+            "BSC 10700",
+            "ESC 11100",
+            "SCI 10500"
+          ]
+        },
+        "additional_ge_electives": {
+          "name": "Additional General Education Electives",
+          "credits": 2,
+          "min_grade": "D",
+          "notes": "Any remaining course with a General Education designation to reach the 42-credit distribution total."
+        }
+      }
+    },
+    "catalog_years": {
+      "2026-2027": {
+        "catalog_year": "2026-2027",
+        "catoid": 12,
+        "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=12&navoid=319",
+        "total_credits_required": 42,
+        "categories": {
+          "written_communication": {
+            "name": "Written Communication",
+            "credits": 6,
+            "min_grade": "C",
+            "approved_courses": [
+              "ENGL 15000",
+              "EPP 15000",
+              "ENGL 17000"
+            ],
+            "motr_mappings": [
+              "MOTR ENGL 100",
+              "MOTR ENGL 200"
+            ]
+          },
+          "oral_communication": {
+            "name": "Oral Communication",
+            "credits": 3,
+            "min_grade": "D",
+            "approved_courses": [
+              "COM 11000",
+              "COM 10200",
+              "COM 10500",
+              "ENGL 23000",
+              "SW 20000"
+            ],
+            "motr_mappings": [
+              "MOTR COMM 110"
+            ]
+          },
+          "mathematics": {
+            "name": "Mathematics",
+            "credits": 3,
+            "min_grade": "D",
+            "approved_courses": [
+              "MTH 14100",
+              "MTH 15100",
+              "MTH 15110",
+              "MTH 15200",
+              "MTH 17300",
+              "MTH 17500",
+              "MTH 24100",
+              "MTH 27100",
+              "MTH 27200"
+            ],
+            "motr_mappings": [
+              "MOTR MATH 110",
+              "MOTR MATH 120",
+              "MOTR MATH 130",
+              "MOTR MATH 150"
+            ]
+          },
+          "civics": {
+            "name": "Civics (U.S. History and Government)",
+            "credits": 3,
+            "min_grade": "D",
+            "approved_courses": [
+              "HIST 10500",
+              "HIST 10600",
+              "PS 15500",
+              "PS 15600"
+            ],
+            "motr_mappings": [
+              "MOTR HIST 101",
+              "MOTR HIST 102",
+              "MOTR POSC 101"
+            ]
+          },
+          "social_behavioral_sciences": {
+            "name": "Social & Behavioral Sciences",
+            "credits": 9,
+            "min_grade": "D",
+            "notes": "Requires 3cr Civics + 6cr across 2+ social science disciplines.",
+            "approved_courses": [
+              "ANT 11200",
+              "CCJ 20000",
+              "ECON 23010",
+              "ECON 23020",
+              "ECON 23030",
+              "GEO 20000",
+              "PSY 10000",
+              "SOC 10200",
+              "SW 20000"
+            ]
+          },
+          "humanities_fine_arts": {
+            "name": "Humanities & Fine Arts",
+            "credits": 9,
+            "min_grade": "D",
+            "notes": "Requires 3cr Arts, 3cr Literature, and 3cr Non-Literature/Non-Arts across 2+ disciplines.",
+            "approved_courses": {
+              "arts": [
+                "ART 10000",
+                "ART 18100",
+                "DAN 10100",
+                "MUS 10000",
+                "TA 11700"
+              ],
+              "literature": [
+                "ENGL 20100",
+                "ENGL 20200",
+                "ENGL 21600"
+              ],
+              "human_culture": [
+                "HIST 10000",
+                "PHL 10000",
+                "PHL 10200",
+                "REL 10000",
+                "REL 20000",
+                "SPA 10100",
+                "SPA 10200",
+                "FRE 10100"
+              ]
+            }
+          },
+          "natural_sciences": {
+            "name": "Natural Sciences",
+            "credits": 7,
+            "min_grade": "D",
+            "notes": "Requires at least 1 Lab course (4cr) + 1 Non-Lab course across 2 distinct disciplines.",
+            "approved_lab_courses": [
+              "BSC 10000",
+              "BSC 11200",
+              "BSC 23400",
+              "CHM 10000",
+              "CHM 23000",
+              "ESC 10000",
+              "PHY 25100",
+              "PHY 30100"
+            ],
+            "approved_non_lab_courses": [
+              "AST 10000",
+              "BSC 10700",
+              "ESC 11100",
+              "SCI 10500"
+            ]
+          },
+          "additional_ge_electives": {
+            "name": "Additional General Education Electives",
+            "credits": 2,
+            "min_grade": "D",
+            "notes": "Any remaining course with a General Education designation to reach the 42-credit distribution total."
+          }
+        }
+      },
+      "2025-2026": {
+        "catalog_year": "2025-2026",
+        "catoid": 10,
+        "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=10&navoid=247",
+        "total_credits_required": 42,
+        "categories": {
+          "written_communication": {
+            "name": "Written Communication",
+            "credits": 6,
+            "min_grade": "C",
+            "approved_courses": [
+              "ENGL 15000",
+              "EPP 15000",
+              "ENGL 17000"
+            ],
+            "motr_mappings": [
+              "MOTR ENGL 100",
+              "MOTR ENGL 200"
+            ]
+          },
+          "oral_communication": {
+            "name": "Oral Communication",
+            "credits": 3,
+            "min_grade": "D",
+            "approved_courses": [
+              "COM 11000",
+              "COM 10200",
+              "COM 10500",
+              "ENGL 23000",
+              "SW 20000"
+            ],
+            "motr_mappings": [
+              "MOTR COMM 110"
+            ]
+          },
+          "mathematics": {
+            "name": "Mathematics",
+            "credits": 3,
+            "min_grade": "D",
+            "approved_courses": [
+              "MTH 14100",
+              "MTH 15100",
+              "MTH 15110",
+              "MTH 15200",
+              "MTH 17300",
+              "MTH 17500",
+              "MTH 24100",
+              "MTH 27100",
+              "MTH 27200"
+            ],
+            "motr_mappings": [
+              "MOTR MATH 110",
+              "MOTR MATH 120",
+              "MOTR MATH 130",
+              "MOTR MATH 150"
+            ]
+          },
+          "civics": {
+            "name": "Civics (U.S. History and Government)",
+            "credits": 3,
+            "min_grade": "D",
+            "approved_courses": [
+              "HIST 10500",
+              "HIST 10600",
+              "PS 15500",
+              "PS 15600"
+            ],
+            "motr_mappings": [
+              "MOTR HIST 101",
+              "MOTR HIST 102",
+              "MOTR POSC 101"
+            ]
+          },
+          "social_behavioral_sciences": {
+            "name": "Social & Behavioral Sciences",
+            "credits": 9,
+            "min_grade": "D",
+            "notes": "Requires 3cr Civics + 6cr across 2+ social science disciplines.",
+            "approved_courses": [
+              "ANT 11200",
+              "CCJ 20000",
+              "ECON 23010",
+              "ECON 23020",
+              "ECON 23030",
+              "GEO 20000",
+              "PSY 10000",
+              "SOC 10200",
+              "SW 20000"
+            ]
+          },
+          "humanities_fine_arts": {
+            "name": "Humanities & Fine Arts",
+            "credits": 9,
+            "min_grade": "D",
+            "notes": "Requires 3cr Arts, 3cr Literature, and 3cr Non-Literature/Non-Arts across 2+ disciplines.",
+            "approved_courses": {
+              "arts": [
+                "ART 10000",
+                "ART 18100",
+                "DAN 10100",
+                "MUS 10000",
+                "TA 11700"
+              ],
+              "literature": [
+                "ENGL 20100",
+                "ENGL 20200",
+                "ENGL 21600"
+              ],
+              "human_culture": [
+                "HIST 10000",
+                "PHL 10000",
+                "PHL 10200",
+                "REL 10000",
+                "REL 20000",
+                "SPA 10100",
+                "SPA 10200",
+                "FRE 10100"
+              ]
+            }
+          },
+          "natural_sciences": {
+            "name": "Natural Sciences",
+            "credits": 7,
+            "min_grade": "D",
+            "notes": "Requires at least 1 Lab course (4cr) + 1 Non-Lab course across 2 distinct disciplines.",
+            "approved_lab_courses": [
+              "BSC 10000",
+              "BSC 11200",
+              "BSC 23400",
+              "CHM 10000",
+              "CHM 23000",
+              "ESC 10000",
+              "PHY 25100",
+              "PHY 30100"
+            ],
+            "approved_non_lab_courses": [
+              "AST 10000",
+              "BSC 10700",
+              "ESC 11100",
+              "SCI 10500"
+            ]
+          },
+          "additional_ge_electives": {
+            "name": "Additional General Education Electives",
+            "credits": 2,
+            "min_grade": "D",
+            "notes": "Any remaining course with a General Education designation to reach the 42-credit distribution total."
+          }
+        }
+      }
+    }
+  },
+  "institutional_requirements": {
+    "description": "Universal Lindenwood University Bachelor Degree Graduation Invariants & Policies",
+    "last_harvested_iso": "2026-10-28T06:35:27.865Z",
+    "2026-2027": {
+      "catalog_year": "2026-2027",
+      "catoid": 12,
+      "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=12&navoid=319",
+      "degree_invariants": {
+        "total_credits_minimum": 120,
+        "upper_division_credits_minimum": 42,
+        "upper_division_course_level_minimum": 30000,
+        "residency_credits": {
+          "total_institutional_residency_minimum": 30,
+          "final_residency_credits_minimum": 24,
+          "major_residency_rule": "MAX(18 credit hours, 40% of major coursework)",
+          "major_residency_minimum_credits": 18,
+          "major_residency_minimum_percentage": 0.4,
+          "minor_certificate_residency_minimum_percentage": 0.4
+        },
+        "minimum_gpa": {
+          "cumulative_gpa": 2,
+          "major_gpa": 2,
+          "minor_gpa": 2,
+          "certificate_gpa": 2
+        }
+      },
+      "composition_gatekeeper": {
+        "minimum_grade": "C",
+        "courses": [
+          "ENGL 15000",
+          "EPP 15000",
+          "ENGL 17000"
+        ],
+        "policy_note": "Grades of C or higher required in Composition I and Composition II. Grades of D count toward the 120-credit total but leave the General Education requirement unfulfilled."
+      },
+      "preparatory_coursework": {
+        "excluded_levels": "01000-09999",
+        "policy_note": "Courses numbered 01000-09999 are preparatory and do not count toward the 120-credit graduation requirement."
+      },
+      "human_diversity_overlay": {
+        "courses_required": 2,
+        "credits_required": 6,
+        "attribute_tag": "/HD",
+        "dual_count_allowed": true,
+        "policy_note": "Students must complete two courses carrying the Human Diversity (/HD) attribute; courses may simultaneously satisfy General Education, major, or elective requirements."
+      }
+    },
+    "2025-2026": {
+      "catalog_year": "2025-2026",
+      "catoid": 10,
+      "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=10&navoid=247",
+      "degree_invariants": {
+        "total_credits_minimum": 120,
+        "upper_division_credits_minimum": 42,
+        "upper_division_course_level_minimum": 30000,
+        "residency_credits": {
+          "total_institutional_residency_minimum": 30,
+          "final_residency_credits_minimum": 24,
+          "major_residency_rule": "MAX(18 credit hours, 40% of major coursework)",
+          "major_residency_minimum_credits": 18,
+          "major_residency_minimum_percentage": 0.4,
+          "minor_certificate_residency_minimum_percentage": 0.4
+        },
+        "minimum_gpa": {
+          "cumulative_gpa": 2,
+          "major_gpa": 2,
+          "minor_gpa": 2,
+          "certificate_gpa": 2
+        }
+      },
+      "composition_gatekeeper": {
+        "minimum_grade": "C",
+        "courses": [
+          "ENGL 15000",
+          "EPP 15000",
+          "ENGL 17000"
+        ],
+        "policy_note": "Grades of C or higher required in Composition I and Composition II. Grades of D count toward the 120-credit total but leave the General Education requirement unfulfilled."
+      },
+      "preparatory_coursework": {
+        "excluded_levels": "01000-09999",
+        "policy_note": "Courses numbered 01000-09999 are preparatory and do not count toward the 120-credit graduation requirement."
+      },
+      "human_diversity_overlay": {
+        "courses_required": 2,
+        "credits_required": 6,
+        "attribute_tag": "/HD",
+        "dual_count_allowed": true,
+        "policy_note": "Students must complete two courses carrying the Human Diversity (/HD) attribute; courses may simultaneously satisfy General Education, major, or elective requirements."
+      }
+    },
+    "catalog_years": {
+      "2026-2027": {
+        "catalog_year": "2026-2027",
+        "catoid": 12,
+        "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=12&navoid=319",
+        "degree_invariants": {
+          "total_credits_minimum": 120,
+          "upper_division_credits_minimum": 42,
+          "upper_division_course_level_minimum": 30000,
+          "residency_credits": {
+            "total_institutional_residency_minimum": 30,
+            "final_residency_credits_minimum": 24,
+            "major_residency_rule": "MAX(18 credit hours, 40% of major coursework)",
+            "major_residency_minimum_credits": 18,
+            "major_residency_minimum_percentage": 0.4,
+            "minor_certificate_residency_minimum_percentage": 0.4
+          },
+          "minimum_gpa": {
+            "cumulative_gpa": 2,
+            "major_gpa": 2,
+            "minor_gpa": 2,
+            "certificate_gpa": 2
+          }
+        },
+        "composition_gatekeeper": {
+          "minimum_grade": "C",
+          "courses": [
+            "ENGL 15000",
+            "EPP 15000",
+            "ENGL 17000"
+          ],
+          "policy_note": "Grades of C or higher required in Composition I and Composition II. Grades of D count toward the 120-credit total but leave the General Education requirement unfulfilled."
+        },
+        "preparatory_coursework": {
+          "excluded_levels": "01000-09999",
+          "policy_note": "Courses numbered 01000-09999 are preparatory and do not count toward the 120-credit graduation requirement."
+        },
+        "human_diversity_overlay": {
+          "courses_required": 2,
+          "credits_required": 6,
+          "attribute_tag": "/HD",
+          "dual_count_allowed": true,
+          "policy_note": "Students must complete two courses carrying the Human Diversity (/HD) attribute; courses may simultaneously satisfy General Education, major, or elective requirements."
+        }
+      },
+      "2025-2026": {
+        "catalog_year": "2025-2026",
+        "catoid": 10,
+        "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=10&navoid=247",
+        "degree_invariants": {
+          "total_credits_minimum": 120,
+          "upper_division_credits_minimum": 42,
+          "upper_division_course_level_minimum": 30000,
+          "residency_credits": {
+            "total_institutional_residency_minimum": 30,
+            "final_residency_credits_minimum": 24,
+            "major_residency_rule": "MAX(18 credit hours, 40% of major coursework)",
+            "major_residency_minimum_credits": 18,
+            "major_residency_minimum_percentage": 0.4,
+            "minor_certificate_residency_minimum_percentage": 0.4
+          },
+          "minimum_gpa": {
+            "cumulative_gpa": 2,
+            "major_gpa": 2,
+            "minor_gpa": 2,
+            "certificate_gpa": 2
+          }
+        },
+        "composition_gatekeeper": {
+          "minimum_grade": "C",
+          "courses": [
+            "ENGL 15000",
+            "EPP 15000",
+            "ENGL 17000"
+          ],
+          "policy_note": "Grades of C or higher required in Composition I and Composition II. Grades of D count toward the 120-credit total but leave the General Education requirement unfulfilled."
+        },
+        "preparatory_coursework": {
+          "excluded_levels": "01000-09999",
+          "policy_note": "Courses numbered 01000-09999 are preparatory and do not count toward the 120-credit graduation requirement."
+        },
+        "human_diversity_overlay": {
+          "courses_required": 2,
+          "credits_required": 6,
+          "attribute_tag": "/HD",
+          "dual_count_allowed": true,
+          "policy_note": "Students must complete two courses carrying the Human Diversity (/HD) attribute; courses may simultaneously satisfy General Education, major, or elective requirements."
+        }
+      }
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, ChevronDown, Check } from 'lucide-react';
+import { getProgramCategory } from '../utils/programStackUtils.js';
 
 /**
  * Parses program name into discipline, emphasis, and degree badge.
@@ -11,12 +12,24 @@ import { Search, ChevronDown, Check } from 'lucide-react';
 export function parseProgramDetails(name = '') {
   if (!name) return { discipline: 'Select Degree Program', emphasis: null, degreeBadge: 'BS' };
 
-  const parts = name.split(' - ');
-  const discipline = parts[0].trim();
-  const emphasis = parts.length > 1 ? parts.slice(1).join(' - ').trim() : null;
+  let discipline = name.trim();
+  let emphasis = null;
 
+  if (name.includes(' - ')) {
+    const parts = name.split(' - ');
+    discipline = parts[0].trim();
+    emphasis = parts.slice(1).join(' - ').trim();
+  }
+
+  let degreeBadge = 'BS';
   const match = discipline.match(/,\s*(BS|BA|MS|BFA|BBA|BSN|CER|MIN)\b/i);
-  const degreeBadge = match ? match[1].toUpperCase() : 'BS';
+  if (match) {
+    degreeBadge = match[1].toUpperCase();
+  } else if (/minor\b/i.test(name)) {
+    degreeBadge = 'Minor';
+  } else if (/certificate\b/i.test(name)) {
+    degreeBadge = 'Cert';
+  }
 
   return { discipline, emphasis, degreeBadge };
 }
@@ -48,14 +61,19 @@ export default function ProgramCombobox({
     return parseProgramDetails(selectedProgram?.name || '');
   }, [selectedProgram]);
 
-  // Filter programs by search query (discipline, emphasis, id, or degree)
+  const selectedCategory = useMemo(() => {
+    return selectedProgram ? getProgramCategory(selectedProgram) : 'Major';
+  }, [selectedProgram]);
+
+  // Filter programs by search query (discipline, emphasis, id, degree, or category)
   const filteredPrograms = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return programs;
     return programs.filter((p) => {
       const name = (p.name || '').toLowerCase();
       const id = (p.id || '').toLowerCase();
-      return name.includes(q) || id.includes(q);
+      const cat = getProgramCategory(p).toLowerCase();
+      return name.includes(q) || id.includes(q) || cat.includes(q);
     });
   }, [programs, searchQuery]);
 
@@ -166,18 +184,31 @@ export default function ProgramCombobox({
             <div className="text-xs font-bold text-neutral-900 leading-snug break-words">
               {selectedProgram ? discipline : 'Select a verified degree program...'}
             </div>
-            {emphasis ? (
-              <div className="mt-1">
-                <span className="inline-flex items-center text-[10px] font-semibold text-[#857542] bg-[#F7F5EE] border border-[#B5A36A]/40 px-1.5 py-0.5 rounded leading-none">
-                  {emphasis}
+            {selectedProgram && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span
+                  className={`inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded leading-none ${
+                    selectedCategory === 'Major'
+                      ? 'bg-slate-100 text-slate-800 border border-slate-300'
+                      : selectedCategory === 'Major - Track'
+                      ? 'bg-[#857542]/10 text-[#857542] border border-[#857542]/30'
+                      : selectedCategory === 'Minor'
+                      ? 'bg-slate-100 text-slate-600 border border-slate-300'
+                      : 'bg-neutral-100 text-neutral-600 border border-neutral-300'
+                  }`}
+                >
+                  {selectedCategory}
                 </span>
+                {emphasis ? (
+                  <span className="inline-flex items-center text-[10px] font-semibold text-[#857542] bg-[#F7F5EE] border border-[#B5A36A]/40 px-1.5 py-0.5 rounded leading-none">
+                    {emphasis}
+                  </span>
+                ) : selectedCategory === 'Major' ? (
+                  <span className="text-[10px] font-medium text-neutral-500">
+                    Major Core Curriculum
+                  </span>
+                ) : null}
               </div>
-            ) : (
-              selectedProgram && (
-                <div className="mt-0.5 text-[10px] font-medium text-neutral-500">
-                  Major Core Curriculum
-                </div>
-              )
             )}
           </div>
         </div>
@@ -278,8 +309,21 @@ export default function ProgramCombobox({
                       >
                         {details.discipline}
                       </div>
-                      {details.emphasis ? (
-                        <div className="mt-1">
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span
+                          className={`inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded leading-none ${
+                            getProgramCategory(prog) === 'Major'
+                              ? 'bg-slate-100 text-slate-800 border border-slate-300'
+                              : getProgramCategory(prog) === 'Major - Track'
+                              ? 'bg-[#857542]/10 text-[#857542] border border-[#857542]/30'
+                              : getProgramCategory(prog) === 'Minor'
+                              ? 'bg-slate-100 text-slate-600 border border-slate-300'
+                              : 'bg-neutral-100 text-neutral-600 border border-neutral-300'
+                          }`}
+                        >
+                          {getProgramCategory(prog)}
+                        </span>
+                        {details.emphasis ? (
                           <span
                             className={`inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none ${
                               isSelected
@@ -289,12 +333,12 @@ export default function ProgramCombobox({
                           >
                             {details.emphasis}
                           </span>
-                        </div>
-                      ) : (
-                        <div className="mt-0.5 text-[10px] font-medium text-neutral-500">
-                          Major Core Curriculum
-                        </div>
-                      )}
+                        ) : getProgramCategory(prog) === 'Major' ? (
+                          <span className="text-[10px] font-medium text-neutral-500">
+                            Major Core Curriculum
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0 pt-0.5">
                       <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 rounded">
