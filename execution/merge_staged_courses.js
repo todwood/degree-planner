@@ -160,23 +160,25 @@ export function mergeStagedCourses({
         existing.credits = Number(staged.credits);
       }
 
-      // Prerequisites updates
-      if (Array.isArray(staged.prereqs)) {
+      // Prerequisites & corequisites updates: preserve verified existing logic if staged has empty values
+      if (Array.isArray(staged.prereqs) && staged.prereqs.length > 0) {
         existing.prereqs = staged.prereqs;
       }
-      if (staged.prereq_display) {
-        existing.prereq_display = staged.prereq_display;
+      if (staged.prereq_display && typeof staged.prereq_display === 'string' && staged.prereq_display.trim()) {
+        existing.prereq_display = staged.prereq_display.trim();
       }
-      if (staged.prereq_logic !== undefined) {
+      if (staged.prereq_logic) {
         existing.prereq_logic = staged.prereq_logic;
       }
-      if (Array.isArray(staged.coreqs)) {
+      if (Array.isArray(staged.coreqs) && staged.coreqs.length > 0) {
         existing.coreq_codes = staged.coreqs;
+      } else if (Array.isArray(staged.coreq_codes) && staged.coreq_codes.length > 0) {
+        existing.coreq_codes = staged.coreq_codes;
       }
-      if (Array.isArray(staged.grade_prereq_rules)) {
+      if (Array.isArray(staged.grade_prereq_rules) && staged.grade_prereq_rules.length > 0) {
         existing.grade_prereq_rules = staged.grade_prereq_rules;
       }
-      if (Array.isArray(staged.cross_listed_codes)) {
+      if (Array.isArray(staged.cross_listed_codes) && staged.cross_listed_codes.length > 0) {
         existing.cross_listed_codes = staged.cross_listed_codes;
       }
 

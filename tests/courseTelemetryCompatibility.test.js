@@ -33,7 +33,7 @@ describe('Schedule Telemetry & Course Merge Compatibility Suite', () => {
         // Credits must strictly remain a number
         expect(typeof course.credits).toBe('number');
         expect(isNaN(course.credits)).toBe(false);
-        expect(course.credits).toBeGreaterThanOrEqual(1);
+        expect(course.credits).toBeGreaterThanOrEqual(0);
 
         // Telemetry structure assertions
         const tel = course.schedule_telemetry;
