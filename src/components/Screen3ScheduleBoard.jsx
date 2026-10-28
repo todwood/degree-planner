@@ -15,6 +15,7 @@ import {
 import { exportDegreePlanPdf } from '../engine/pdfExporter.js';
 import { validateScheduleMove } from '../engine/scheduler.js';
 import { isTransferPlaceholder } from '../engine/transcriptParser.js';
+import { computeRetakeNetCredits } from '../engine/waterfallAudit.js';
 import dbAdapter from '../data/dbAdapter.js';
 import CourseDetailModal from './modals/CourseDetailModal.jsx';
 
@@ -507,6 +508,15 @@ export default function Screen3ScheduleBoard({
   const [movingCourseInfo, setMovingCourseInfo] = useState(null); // { course, sourceSemId, sourceSlotKey, targetSemId, targetSlotKey }
   const [moveFeedback, setMoveFeedback] = useState(null); // { message, type: 'success' | 'warning' }
   const moveFeedbackTimeoutRef = useRef(null);
+
+  const historicalCourses = useMemo(() => {
+    return (
+      auditResult?.normalizedHistory ||
+      auditResult?.allStudentCourses ||
+      parsedTranscript?.validCourses ||
+      []
+    );
+  }, [auditResult, parsedTranscript]);
 
   useEffect(() => {
     return () => {
@@ -1235,6 +1245,7 @@ export default function Screen3ScheduleBoard({
                 slotLabel="SU • Summer 8-Week Session"
                 courses={sem.lanes.SU || []}
                 totalCredits={(sem.lanes.SU || []).reduce((s, c) => s + c.credits, 0)}
+                historicalCourses={historicalCourses}
                 onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
                 onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
                 onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
@@ -1247,6 +1258,7 @@ export default function Screen3ScheduleBoard({
 
               <SemesterFooter
                 sem={sem}
+                historicalCourses={historicalCourses}
                 addingNoteSemId={addingNoteSemId}
                 newNoteText={newNoteText}
                 setNewNoteText={setNewNoteText}
@@ -1356,6 +1368,7 @@ export default function Screen3ScheduleBoard({
             slotLabel={slot16Label}
             courses={sem.lanes[slot16Key] || []}
             totalCredits={(sem.lanes[slot16Key] || []).reduce((s, c) => s + c.credits, 0)}
+            historicalCourses={historicalCourses}
             onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
             onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
             onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
@@ -1373,6 +1386,7 @@ export default function Screen3ScheduleBoard({
             slotLabel={slot1Label}
             courses={sem.lanes[slot1Key] || []}
             totalCredits={(sem.lanes[slot1Key] || []).reduce((s, c) => s + c.credits, 0)}
+            historicalCourses={historicalCourses}
             onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
             onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
             onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
@@ -1390,6 +1404,7 @@ export default function Screen3ScheduleBoard({
             slotLabel={slot2Label}
             courses={sem.lanes[slot2Key] || []}
             totalCredits={(sem.lanes[slot2Key] || []).reduce((s, c) => s + c.credits, 0)}
+            historicalCourses={historicalCourses}
             onOpenDrawer={(c) => setSelectedCourseForDrawer(c)}
             onToggleLock={(sId, sKey, cCode) => toggleCourseLock(sId, sKey, cCode)}
             onMoveCourse={(c, sId, sKey) => handleMoveCoursePrompt(c, sId, sKey)}
@@ -1404,6 +1419,7 @@ export default function Screen3ScheduleBoard({
         {/* Registration notice, graduation deadline, and notes */}
         <SemesterFooter
           sem={sem}
+          historicalCourses={historicalCourses}
           addingNoteSemId={addingNoteSemId}
           newNoteText={newNoteText}
           setNewNoteText={setNewNoteText}
@@ -2260,6 +2276,7 @@ function SemesterBand({
   slotLabel,
   courses = [],
   totalCredits = 0,
+  historicalCourses = [],
   onOpenDrawer,
   onToggleLock,
   onMoveCourse,
@@ -2342,6 +2359,7 @@ function SemesterBand({
             course={course}
             semId={semId}
             slotKey={slotKey}
+            historicalCourses={historicalCourses}
             masterDb={masterDb}
             onOpenDrawer={() => onOpenDrawer(course)}
             onToggleLock={() => onToggleLock(semId, slotKey, course.code)}
@@ -2376,6 +2394,7 @@ function CourseCard({
   course,
   semId,
   slotKey,
+  historicalCourses = [],
   masterDb,
   onOpenDrawer,
   onToggleLock,
@@ -2386,6 +2405,10 @@ function CourseCard({
 }) {
   const [conflictMenuOpen, setConflictMenuOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const retakeInfo = computeRetakeNetCredits(course, historicalCourses);
+  const isRetake = Boolean(course.isRetake || course.isPlannedRetake || retakeInfo.isRetake);
+  const priorGrade = course.priorGrade || retakeInfo.priorGrade;
+  const isPriorGradeD = priorGrade === 'D' || (typeof priorGrade === 'string' && priorGrade.startsWith('D'));
   const isEnrolled = Boolean(course.isCurrentEnrolled || course.state === 'Current' || course.state === 'Scheduled');
   const isPlaceholder = Boolean(
     course.type === 'placeholder' ||
@@ -2465,15 +2488,23 @@ function CourseCard({
           >
             [{categoryBadge}]
           </span>
-          {course.isPlannedRetake && (
+          {isRetake && isPriorGradeD ? (
             <span
               data-testid={`retake-badge-${course.code}`}
-              className="px-1 py-0.2 rounded text-[8.5px] font-bold bg-slate-200 text-slate-800 border border-slate-300 tracking-tight select-none"
-              title={`Planned retake of active course from ${course.retakeOfTerm || 'previous term'}`}
+              className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-amber-100 text-amber-900 border border-amber-300 tracking-tight select-none flex items-center gap-0.5"
+              title={`Retake of prior attempt with grade ${priorGrade}: 0 Net Cr / ${retakeInfo.enrolledCredits || course.credits || 3} Enrolled Cr`}
             >
-              Retake
+              🔁 Retake (0 Net Cr / {retakeInfo.enrolledCredits || course.credits || 3} Enrolled Cr)
             </span>
-          )}
+          ) : isRetake ? (
+            <span
+              data-testid={`retake-badge-${course.code}`}
+              className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-slate-200 text-slate-800 border border-slate-300 tracking-tight select-none flex items-center gap-0.5"
+              title={retakeInfo.badgeLabel || `Planned retake: ${retakeInfo.netCredits} Net Cr / ${retakeInfo.enrolledCredits} Enrolled Cr`}
+            >
+              {retakeInfo.badgeLabel || `🔁 Retake (${retakeInfo.netCredits} Net Cr / ${retakeInfo.enrolledCredits} Enrolled Cr)`}
+            </span>
+          ) : null}
           <span className="font-mono text-[11px] font-bold tracking-tight truncate">
             {course.code}
           </span>
@@ -2645,6 +2676,7 @@ function CourseCard({
 // Sub-component: Semester Footer (Registration date banner, dynamic overload/grad badges & ordered notes)
 function SemesterFooter({
   sem,
+  historicalCourses = [],
   addingNoteSemId,
   newNoteText,
   setNewNoteText,
@@ -2661,8 +2693,32 @@ function SemesterFooter({
     (n.text || '').toLowerCase().includes('overload')
   );
 
+  const semesterCourses = sem.lanes
+    ? Object.values(sem.lanes).flat().filter(Boolean)
+    : (sem.courses || []);
+
+  const enrolledCredits = semesterCourses.reduce(
+    (sum, c) => sum + (Number(c.credits) || 0),
+    0
+  );
+
+  const netCredits = semesterCourses.reduce((sum, c) => {
+    const info = computeRetakeNetCredits(c, historicalCourses);
+    const net = info.isRetake ? info.netCredits : (Number(c.credits) || 0);
+    return sum + Number(net);
+  }, 0);
+
   return (
     <div className="pt-2 border-t border-neutral-100 space-y-1.5 text-xs">
+      {/* Semester Summary Metrics */}
+      <div
+        data-testid={`semester-metrics-${sem.id}`}
+        className="py-1 px-2 rounded bg-neutral-100 text-neutral-700 font-mono text-[11px] font-semibold flex items-center justify-between border border-neutral-200/80 mb-1"
+      >
+        <span>Enrolled: <strong className="text-neutral-900">{enrolledCredits}</strong> cr</span>
+        <span className="text-neutral-300">|</span>
+        <span>Net Toward Degree: <strong className="text-neutral-900">{netCredits}</strong> cr</span>
+      </div>
       {/* Priority Registration Opening Date Callout */}
       {sem.registrationNotice?.bannerText && (
         <div className="p-2 rounded bg-neutral-100 text-neutral-800 text-[11px] font-bold flex items-center space-x-2">

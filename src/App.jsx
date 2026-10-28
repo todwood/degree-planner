@@ -10,7 +10,7 @@ import Footer from './components/Footer.jsx';
 
 import masterDb from './data/masterDatabase.json' with { type: 'json' };
 import dbAdapter from './data/dbAdapter.js';
-import { runWaterfallAudit } from './engine/waterfallAudit.js';
+import { runWaterfallAudit, runDegreeAudit } from './engine/waterfallAudit.js';
 import { generateOptimalSchedule } from './engine/scheduler.js';
 import { processRawCourseRecords } from './engine/transcriptParser.js';
 
@@ -80,6 +80,7 @@ export default function App() {
     parsedTranscript: parsed,
     selectedProgramId: progId,
     additionalPrograms: addProgs,
+    core42Completed: c42,
     constraints: c,
     directToSchedule = false
   }) => {
@@ -91,10 +92,20 @@ export default function App() {
       setCatalogYear(parsed.studentMetadata.catalogYear);
     }
 
-    // Run deterministic Waterfall Audit
-    const audit = runWaterfallAudit(parsed, progId, masterDb, {
-      mathPlacementMet: true
+    const isCore42 = Boolean(c42 ?? parsed?.studentMetadata?.core42Completed ?? c?.core42Completed);
+
+    // Run deterministic Waterfall & Multi-Program Degree Audit
+    const declared = [progId, ...(addProgs || [])];
+    const audit = runDegreeAudit({
+      studentRecord: parsed,
+      declaredPrograms: declared,
+      catalogDb: masterDb,
+      auditOptions: {
+        mathPlacementMet: true,
+        core42Completed: isCore42
+      }
     });
+    audit.programLedgers = audit.programAudits;
     setAuditResult(audit);
 
     // Pre-generate schedule immediately so Screen 3 is ready without roadblocks
@@ -126,12 +137,17 @@ export default function App() {
     // If newer Anthology/Transcript records were uploaded in Option A, run full audit & schedule on them
     if (extractedState.parsedTranscript) {
       setParsedTranscript(extractedState.parsedTranscript);
-      const updatedAudit = runWaterfallAudit(
-        extractedState.parsedTranscript,
-        targetProgId,
-        masterDb,
-        { mathPlacementMet: true }
-      );
+      const declared = [targetProgId, ...(additionalPrograms || [])];
+      const updatedAudit = runDegreeAudit({
+        studentRecord: extractedState.parsedTranscript,
+        declaredPrograms: declared,
+        catalogDb: masterDb,
+        auditOptions: {
+          mathPlacementMet: true,
+          core42Completed: Boolean(extractedState.parsedTranscript?.studentMetadata?.core42Completed)
+        }
+      });
+      updatedAudit.programLedgers = updatedAudit.programAudits;
       setAuditResult(updatedAudit);
       try {
         const updatedSched = generateOptimalSchedule(
@@ -187,12 +203,14 @@ export default function App() {
       }
     };
     setAuditOptions(mergedOptions);
-    const updatedAudit = runWaterfallAudit(
-      parsedTranscript,
-      selectedProgramId,
-      masterDb,
-      mergedOptions
-    );
+    const declared = [selectedProgramId, ...(additionalPrograms || [])];
+    const updatedAudit = runDegreeAudit({
+      studentRecord: parsedTranscript,
+      declaredPrograms: declared,
+      catalogDb: masterDb,
+      auditOptions: mergedOptions
+    });
+    updatedAudit.programLedgers = updatedAudit.programAudits;
     updatedAudit.incomingTransfers = mergedOptions.incomingTransfers || [];
     updatedAudit.advisorOverrides = mergedOptions.advisorOverrides || {};
     updatedAudit.requirementNotes = mergedOptions.requirementNotes || {};
@@ -314,6 +332,7 @@ export default function App() {
           auditResult ? (
             <Screen2Audit
               auditResult={auditResult}
+              auditOptions={auditOptions}
               parsedTranscript={parsedTranscript}
               masterDb={masterDb}
               onUpdateAuditOptions={handleUpdateAuditOptions}

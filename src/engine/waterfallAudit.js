@@ -359,6 +359,17 @@ export function runWaterfallAudit(
     for (const code of prog.requirements?.emphasis_courses || []) {
       if (!emphasisCodes.includes(code)) emphasisCodes.push(code);
     }
+    for (const rawPrescribed of Object.values(prog.requirements?.prescribed_ge_satisfactions || {})) {
+      const norm = normalizeCourseCode(rawPrescribed);
+      if (
+        norm &&
+        catalogByCompact.has(norm.compact) &&
+        !majorCoreCodes.some((c) => normalizeCourseCode(c)?.compact === norm.compact) &&
+        !emphasisCodes.some((c) => normalizeCourseCode(c)?.compact === norm.compact)
+      ) {
+        majorCoreCodes.push(catalogByCompact.get(norm.compact)?.code || rawPrescribed);
+      }
+    }
   }
 
   // Build Legacy Substitution Map: e.g. ICS 41500 <- ICS 41100, ICS 41700 <- ICS 41400
@@ -506,14 +517,17 @@ export function runWaterfallAudit(
         compositionGatekeeperWarnings.push(...bucketWarnings);
       }
 
+      // Missouri CORE 42 / AA Transfer Block clears the Composition buckets in their entirety
+      const compWaivedByCore42 = !matched && Boolean(options.core42Completed);
+
       geBucketsResult.push({
         ...bucket,
-        fulfilled: Boolean(matched),
-        status: matched ? 'MET' : 'UNMET',
-        waived: false,
+        fulfilled: Boolean(matched || compWaivedByCore42),
+        status: matched ? 'MET' : compWaivedByCore42 ? 'WAIVED' : 'UNMET',
+        waived: compWaivedByCore42,
         matchedCourse: matched,
         claimed_courses: matched ? [matched] : [],
-        state: matched ? matched.state : 'Remaining'
+        state: matched ? matched.state : compWaivedByCore42 ? 'Waived (CORE 42)' : 'Remaining'
       });
       continue;
     }
@@ -1126,5 +1140,649 @@ export function runWaterfallAudit(
           compositionGatekeeperWarnings.length === 0
       }
     }
+  };
+}
+
+// ===========================================================================
+// MULTI-PROGRAM DEGREE AUDIT LAYER (Pure, Side-Effect Free)
+// ---------------------------------------------------------------------------
+// Wraps the baseline runWaterfallAudit() (which continues to feed the
+// Critical-Path Scheduler unchanged) and augments it with:
+//   A. Per-credential audit ledgers + cross-counting registry
+//   B. Missouri CORE 42 / AA Transfer Block 8-category GE audit
+//   C. Institutional policy gates (42 Upper-Division, Composition C-Gate)
+//   D. Retake net-credit accounting helpers
+//   E. Curricular track bifurcation (flexible_elective_configurations)
+// No input object is mutated; every function returns new structures.
+// ===========================================================================
+
+export const CORE42_CLEARANCE_REASON = 'Cleared via Missouri CORE 42 / AA Transfer Block';
+export const COMPOSITION_RETAKE_WARNING =
+  'Grade of C or higher required to satisfy Composition GE. Course eligible for retake.';
+export const UPPER_DIVISION_REQUIRED_CREDITS = 42;
+
+const NON_EARNING_GRADES = new Set([
+  'F', 'W', 'AF', 'WF', 'INC', 'I', 'NP', 'NC', 'U', 'DROPPED', 'DROPPED-W', 'DROP',
+  'WITHDRAWN', 'AUDIT', 'AU', 'NG'
+]);
+const D_RANGE_GRADES = new Set(['D+', 'D', 'D-', 'DH']);
+const IN_PROGRESS_STATES = new Set(['Current', 'Scheduled']);
+const COMPLETED_STATES = new Set(['Completed', 'Complete', 'TR', 'Transfer']);
+
+const PRESCRIBED_GE_KEY_MAP = {
+  math: 'mathematics',
+  mathematics: 'mathematics',
+  oral_communication: 'oral_communication',
+  written_communication: 'written_communication',
+  natural_science: 'natural_sciences',
+  natural_sciences: 'natural_sciences',
+  social_science: 'social_behavioral_sciences',
+  social_behavioral_sciences: 'social_behavioral_sciences',
+  civics: 'civics',
+  humanities: 'humanities_fine_arts',
+  humanities_fine_arts: 'humanities_fine_arts'
+};
+
+const CATEGORY_RANK = { Major: 0, 'Major - Track': 0, Minor: 1, Certificate: 2 };
+
+function toCompact(code) {
+  const norm = normalizeCourseCode(code);
+  return norm ? norm.compact : String(code || '').replace(/\s+/g, '').toUpperCase();
+}
+
+function upperGrade(grade) {
+  return String(grade || '').trim().toUpperCase();
+}
+
+/** Credential category (kept local to avoid an engine -> utils dependency). */
+export function classifyCredential(program) {
+  if (!program) return 'Major';
+  const type = program.program_type || '';
+  const name = program.name || program.program_name || '';
+  if (type === 'Minor' || /minor/i.test(name)) return 'Minor';
+  if (type === 'Certificate' || /certificate/i.test(name)) return 'Certificate';
+  if (name.includes('Emphasis') || name.includes(' - ')) return 'Major - Track';
+  return 'Major';
+}
+
+/** True when a course attempt earns graduation credit (completed with a non-failing grade). */
+export function isEarningAttempt(course) {
+  if (!course) return false;
+  if (IN_PROGRESS_STATES.has(course.state)) return false;
+  const g = upperGrade(course.grade);
+  if (NON_EARNING_GRADES.has(g)) return false;
+  return COMPLETED_STATES.has(course.state) || Boolean(g);
+}
+
+/** True when a course is applied to the graduation record (earned or in progress). */
+export function isAppliedToGraduation(course) {
+  if (!course) return false;
+  if (IN_PROGRESS_STATES.has(course.state)) return true;
+  return isEarningAttempt(course);
+}
+
+/**
+ * Orders declared programs: Primary Major first, then Secondary Majors, Minors, Certificates.
+ * Accepts program objects or IDs (resolved against catalogDb). Returns a new array.
+ */
+export function orderDeclaredPrograms(declaredPrograms = [], catalogDb = masterDbDefault, primaryProgramId = null) {
+  const db = catalogDb || masterDbDefault;
+  const resolved = [];
+  const seen = new Set();
+  for (const entry of declaredPrograms || []) {
+    const prog =
+      typeof entry === 'string' ? (db.programs || []).find((p) => p.id === entry) : entry;
+    if (prog && prog.id && !seen.has(prog.id)) {
+      seen.add(prog.id);
+      resolved.push(prog);
+    }
+  }
+  const primaryId =
+    primaryProgramId && resolved.some((p) => p.id === primaryProgramId)
+      ? primaryProgramId
+      : resolved.find((p) => CATEGORY_RANK[classifyCredential(p)] === 0)?.id || resolved[0]?.id;
+
+  return resolved
+    .map((p, idx) => ({ p, idx }))
+    .sort((a, b) => {
+      if (a.p.id === primaryId) return -1;
+      if (b.p.id === primaryId) return 1;
+      const ra = CATEGORY_RANK[classifyCredential(a.p)] ?? 3;
+      const rb = CATEGORY_RANK[classifyCredential(b.p)] ?? 3;
+      return ra !== rb ? ra - rb : a.idx - b.idx;
+    })
+    .map(({ p }) => p);
+}
+
+/**
+ * E. Curricular Track Bifurcation.
+ * Resolves flexible_elective_configurations tracks into stable ids (option_a, option_b, ...)
+ * and reconfigures elective pool targets for the active track.
+ */
+export function resolveTrackConfiguration(program, activeTrackId = null) {
+  const pools = program?.requirements?.elective_pools || [];
+  const rawTracks = program?.requirements?.flexible_elective_configurations?.tracks || [];
+
+  if (!Array.isArray(rawTracks) || rawTracks.length === 0) {
+    return {
+      hasTracks: false,
+      tracks: [],
+      activeTrackId: null,
+      activeTrack: null,
+      electivePoolTargets: pools.map((pool) => ({
+        poolId: pool.id,
+        title: pool.title,
+        creditsRequired: Number(pool.credits_required) || 0
+      })),
+      totalElectiveCredits: pools.reduce((s, pool) => s + (Number(pool.credits_required) || 0), 0),
+      adjustedProgramCredits: Number(program?.total_program_credits || program?.total_major_credits || 0)
+    };
+  }
+
+  const tracks = rawTracks.map((t, idx) => {
+    const letter = String.fromCharCode(97 + idx); // a, b, c...
+    const group1 = Number(t.group1_credits) || 0;
+    const group2 = Number(t.group2_credits) || 0;
+    return {
+      id: `option_${letter}`,
+      name: t.name || `Option ${letter.toUpperCase()}`,
+      group1Credits: group1,
+      group2Credits: group2,
+      totalElectiveCredits: Number(t.total_elective_credits) || group1 + group2
+    };
+  });
+
+  const activeTrack = tracks.find((t) => t.id === activeTrackId) || tracks[0];
+  const groupTargets = [activeTrack.group1Credits, activeTrack.group2Credits];
+  const electivePoolTargets = pools.map((pool, idx) => ({
+    poolId: pool.id,
+    title: pool.title,
+    creditsRequired: idx < groupTargets.length ? groupTargets[idx] : Number(pool.credits_required) || 0
+  }));
+
+  // Catalog total_program_credits reflects the largest track; re-base it on the active track.
+  const baseTotal = Number(program?.total_program_credits || program?.total_major_credits || 0);
+  const maxTrackTotal = Math.max(...tracks.map((t) => t.totalElectiveCredits));
+  const adjustedProgramCredits = Math.max(0, baseTotal - maxTrackTotal + activeTrack.totalElectiveCredits);
+
+  return {
+    hasTracks: true,
+    tracks,
+    activeTrackId: activeTrack.id,
+    activeTrack,
+    electivePoolTargets,
+    totalElectiveCredits: activeTrack.totalElectiveCredits,
+    adjustedProgramCredits
+  };
+}
+
+/** True when a course is upper-division (30000+ level). */
+export function isUpperDivisionCourse(course) {
+  if (!course) return false;
+  const num = Number(course.level || course.number);
+  if (Number.isFinite(num) && num > 0) return num >= 30000;
+  const m = String(course.code || '').match(/\b([3-5]\d{4})\b/);
+  return Boolean(m);
+}
+
+/** C. 42 Upper-Division Credit Gate across all courses applied to graduation. */
+export function computeUpperDivisionGate(courses = [], required = UPPER_DIVISION_REQUIRED_CREDITS) {
+  const applied = (courses || []).filter((c) => isAppliedToGraduation(c) && isUpperDivisionCourse(c));
+  const completed = applied.reduce((s, c) => s + (Number(c.credits) || 0), 0);
+  return {
+    required,
+    completed,
+    remaining: Math.max(0, required - completed),
+    isSatisfied: completed >= required,
+    courses: applied.map((c) => c.code)
+  };
+}
+
+/** C. Composition C-Grade Gatekeeper for ENGL 15000 / EPP 15000 and ENGL 17000. */
+export function evaluateCompositionGatekeeper(courses = []) {
+  const slots = [
+    { id: 'comp_1', label: 'Composition I', codes: ['ENGL15000', 'EPP15000'] },
+    { id: 'comp_2', label: 'Composition II', codes: ['ENGL17000'] }
+  ];
+  const warnings = [];
+  const slotResults = slots.map((slot) => {
+    const attempts = (courses || []).filter((c) => slot.codes.includes(c.compactCode || toCompact(c.code)));
+    const satisfying = attempts.find(
+      (c) => IN_PROGRESS_STATES.has(c.state) || isGradeCOrHigher(c.grade)
+    );
+    if (!satisfying) {
+      for (const a of attempts) {
+        if (D_RANGE_GRADES.has(upperGrade(a.grade))) {
+          warnings.push({
+            slotId: slot.id,
+            courseCode: a.code,
+            grade: a.grade,
+            creditsRetained: Number(a.credits) || 3,
+            retakeEligible: true,
+            message: COMPOSITION_RETAKE_WARNING
+          });
+        }
+      }
+    }
+    return { ...slot, satisfied: Boolean(satisfying), satisfyingCourse: satisfying?.code || null };
+  });
+
+  return {
+    writtenCommunicationSatisfied: slotResults.every((s) => s.satisfied),
+    slots: slotResults,
+    warnings
+  };
+}
+
+function flattenApproved(category) {
+  const out = [];
+  const push = (list) => (Array.isArray(list) ? list.forEach((c) => out.push(toCompact(c))) : null);
+  const ac = category?.approved_courses;
+  if (Array.isArray(ac)) push(ac);
+  else if (ac && typeof ac === 'object') Object.values(ac).forEach(push);
+  push(category?.approved_lab_courses);
+  push(category?.approved_non_lab_courses);
+  return out;
+}
+
+/**
+ * B. 8-Category Missouri CORE 42 General Education Audit.
+ * - core42Completed === true  -> all categories cleared, 0 remaining GE credits.
+ * - core42Completed === false -> distribution audit using catalogDb.general_education[catalogYear],
+ *   with prescribed_ge_satisfactions from declared programs auto-applied.
+ */
+export function auditGeneralEducationCategories({
+  courses = [],
+  catalogDb = masterDbDefault,
+  catalogYear = '2026-2027',
+  programs = [],
+  core42Completed = false
+} = {}) {
+  const db = catalogDb || masterDbDefault;
+  const geRoot = db.general_education || {};
+  const yearSchema = geRoot[catalogYear] || geRoot['2026-2027'] || null;
+  const categoriesSchema = yearSchema?.categories || {};
+  const totalRequired = Number(yearSchema?.total_credits_required) || 42;
+  const catalogByCompact = new Map((db.courses || []).map((c) => [toCompact(c.code), c]));
+
+  if (core42Completed) {
+    const categories = Object.entries(categoriesSchema).map(([id, cat]) => ({
+      id,
+      name: cat.name,
+      credits: Number(cat.credits) || 0,
+      earnedCredits: Number(cat.credits) || 0,
+      remainingCredits: 0,
+      satisfied: true,
+      waived: true,
+      reason: CORE42_CLEARANCE_REASON,
+      appliedCourses: [],
+      prescribedCourses: []
+    }));
+    return {
+      catalogYear,
+      core42Active: true,
+      bannerText: 'Missouri CORE 42 / AA Transfer Block Active',
+      totalRequired,
+      earnedCredits: totalRequired,
+      remainingCredits: 0,
+      categories
+    };
+  }
+
+  // Prescribed GE satisfactions declared by any program in the stack
+  const prescribedByCategory = {};
+  for (const prog of programs || []) {
+    for (const [key, code] of Object.entries(prog?.requirements?.prescribed_ge_satisfactions || {})) {
+      const catId = PRESCRIBED_GE_KEY_MAP[key];
+      const norm = normalizeCourseCode(code);
+      if (!catId || !norm) continue;
+      if (!prescribedByCategory[catId]) prescribedByCategory[catId] = [];
+      if (!prescribedByCategory[catId].includes(norm.compact)) prescribedByCategory[catId].push(norm.compact);
+    }
+  }
+
+  const usable = (courses || []).filter((c) => isAppliedToGraduation(c));
+  const used = new Set();
+  const keyOf = (c, i) => `${c.compactCode || toCompact(c.code)}#${i}`;
+  const indexed = usable.map((c, i) => ({ c, key: keyOf(c, i), compact: c.compactCode || toCompact(c.code) }));
+
+  const categories = [];
+  for (const [id, cat] of Object.entries(categoriesSchema)) {
+    const credits = Number(cat.credits) || 0;
+    const applied = [];
+    let earned = 0;
+
+    if (id === 'written_communication') {
+      const gate = evaluateCompositionGatekeeper(usable);
+      for (const slot of gate.slots) {
+        if (!slot.satisfied) continue;
+        const hit = indexed.find((x) => !used.has(x.key) && x.c.code === slot.satisfyingCourse);
+        if (hit) {
+          used.add(hit.key);
+          applied.push(hit.c.code);
+          earned += Number(hit.c.credits) || 3;
+        }
+      }
+      categories.push({
+        id,
+        name: cat.name,
+        credits,
+        earnedCredits: earned,
+        remainingCredits: Math.max(0, credits - earned),
+        satisfied: gate.writtenCommunicationSatisfied,
+        waived: false,
+        reason: gate.writtenCommunicationSatisfied ? 'Composition I & II completed with C or higher' : null,
+        appliedCourses: applied,
+        prescribedCourses: [],
+        gatekeeperWarnings: gate.warnings
+      });
+      continue;
+    }
+
+    const prescribed = prescribedByCategory[id] || [];
+    const approved = new Set([...flattenApproved(cat), ...prescribed]);
+    const isOpenElective = approved.size === 0;
+    const pendingPrescribed = [];
+
+    // Prescribed courses first, then approved list / open GE electives
+    const ordered = [
+      ...indexed.filter((x) => prescribed.includes(x.compact)),
+      ...indexed.filter((x) => !prescribed.includes(x.compact))
+    ];
+    for (const x of ordered) {
+      if (earned >= credits) break;
+      if (used.has(x.key)) continue;
+      const eligible = isOpenElective
+        ? GE_DEPARTMENTS.has(x.c.department || x.compact.replace(/\d.*$/, '')) && !isUpperDivisionCourse(x.c)
+        : approved.has(x.compact);
+      if (!eligible) continue;
+      used.add(x.key);
+      applied.push(x.c.code);
+      earned += Number(x.c.credits) || 3;
+    }
+
+    let projected = earned;
+    for (const compact of prescribed) {
+      if (indexed.some((x) => x.compact === compact && applied.includes(x.c.code))) continue;
+      const catCourse = catalogByCompact.get(compact);
+      pendingPrescribed.push(catCourse?.code || compact);
+      projected += Number(catCourse?.credits) || 3;
+    }
+
+    const satisfied = earned >= credits;
+    categories.push({
+      id,
+      name: cat.name,
+      credits,
+      earnedCredits: earned,
+      projectedCredits: projected,
+      remainingCredits: Math.max(0, credits - projected),
+      satisfied,
+      projectedSatisfied: projected >= credits,
+      waived: false,
+      reason: satisfied
+        ? 'Distribution requirement met'
+        : projected >= credits
+        ? 'Will be satisfied by prescribed major coursework'
+        : null,
+      appliedCourses: applied,
+      prescribedCourses: prescribed.map((c) => catalogByCompact.get(c)?.code || c),
+      pendingPrescribedCourses: pendingPrescribed
+    });
+  }
+
+  const earnedCredits = categories.reduce((s, c) => s + Math.min(c.credits, c.earnedCredits), 0);
+  const remainingCredits = categories.reduce((s, c) => s + c.remainingCredits, 0);
+  return {
+    catalogYear,
+    core42Active: false,
+    bannerText: null,
+    totalRequired,
+    earnedCredits,
+    remainingCredits,
+    categories
+  };
+}
+
+/**
+ * D. Retake Net Credit Accounting.
+ * - Semester enrolled load always counts full course credits (billing / full-time pacing).
+ * - Graduation pool delta: prior F/W (0 earned) -> full credits; prior D (already earned) -> 0 net.
+ */
+export function computeRetakeNetCredits(plannedCourse, historicalCourses = []) {
+  const enrolledCredits = Number(plannedCourse?.credits) || 0;
+  const compact = plannedCourse?.compactCode || toCompact(plannedCourse?.code);
+  const priorAttempts = (historicalCourses || []).filter(
+    (h) =>
+      h &&
+      h !== plannedCourse &&
+      !h.isPlannedRetake &&
+      (h.compactCode || toCompact(h.code)) === compact &&
+      (COMPLETED_STATES.has(h.state) || (h.grade && !IN_PROGRESS_STATES.has(h.state)))
+  );
+
+  if (priorAttempts.length === 0) {
+    return { isRetake: false, priorGrade: null, priorEarnedCredits: 0, enrolledCredits, netCredits: enrolledCredits, badgeLabel: null };
+  }
+
+  const earningAttempts = priorAttempts.filter((a) => isEarningAttempt(a));
+  const priorEarnedCredits = earningAttempts.reduce((m, a) => Math.max(m, Number(a.credits) || 0), 0);
+  const bestAttempt = earningAttempts[0] || priorAttempts[priorAttempts.length - 1];
+  const netCredits = Math.max(0, enrolledCredits - priorEarnedCredits);
+
+  return {
+    isRetake: true,
+    priorGrade: bestAttempt?.grade || null,
+    priorEarnedCredits,
+    enrolledCredits,
+    netCredits,
+    badgeLabel: `🔁 Retake (${netCredits} Net Cr / ${enrolledCredits} Enrolled Cr)`
+  };
+}
+
+/**
+ * A. Per-credential audit ledgers with a global cross-counting registry.
+ * Shared required courses are marked satisfied in every credential that lists them,
+ * but contribute to the unique applied-credit pool exactly once.
+ */
+export function buildProgramAuditLedgers(orderedPrograms = [], courses = [], catalogDb = masterDbDefault, activeTrackId = null) {
+  const db = catalogDb || masterDbDefault;
+  const catalogByCompact = new Map((db.courses || []).map((c) => [toCompact(c.code), c]));
+  const studentByCompact = new Map();
+  for (const c of courses || []) {
+    if (!isAppliedToGraduation(c)) continue;
+    const compact = c.compactCode || toCompact(c.code);
+    if (!studentByCompact.has(compact)) studentByCompact.set(compact, c);
+  }
+
+  const appliedCourseCodes = new Map(); // compact -> { programId, programName }
+  const sharedEntries = new Map(); // compact -> { code, credits, programs: [] }
+  let uniqueAppliedCredits = 0;
+  let grossRequiredCredits = 0;
+  let crossCountedCredits = 0;
+
+  const programAudits = orderedPrograms.map((prog, idx) => {
+    const category = classifyCredential(prog);
+    const track = resolveTrackConfiguration(prog, activeTrackId);
+    const requiredCredits = track.adjustedProgramCredits;
+    grossRequiredCredits += requiredCredits;
+
+    let satisfiedCredits = 0;
+    let programCrossCounted = 0;
+
+    const coreCompactSet = new Set((prog.requirements?.major_core_courses || []).map(toCompact));
+    const prescribedFoundationCodes = Object.values(prog.requirements?.prescribed_ge_satisfactions || {}).filter((code) => {
+      const norm = normalizeCourseCode(code);
+      return norm && catalogByCompact.has(norm.compact) && !coreCompactSet.has(norm.compact);
+    });
+    const allProgramCourseCodes = [
+      ...(prog.requirements?.major_core_courses || []),
+      ...prescribedFoundationCodes
+    ];
+
+    const requirements = allProgramCourseCodes.map((rawCode) => {
+      const compact = toCompact(rawCode);
+      const catCourse = catalogByCompact.get(compact);
+      const credits = Number(catCourse?.credits) || 3;
+      const match = studentByCompact.get(compact) || null;
+      const prior = appliedCourseCodes.get(compact);
+      const isCrossCounted = Boolean(prior);
+      const satisfied = Boolean(match);
+
+      if (isCrossCounted) {
+        programCrossCounted += credits;
+        crossCountedCredits += credits;
+        const entry = sharedEntries.get(compact) || { code: catCourse?.code || rawCode, credits, programs: [prior.programId] };
+        entry.programs = [...entry.programs, prog.id];
+        sharedEntries.set(compact, entry);
+      } else {
+        appliedCourseCodes.set(compact, { programId: prog.id, programName: prog.name });
+        if (satisfied) uniqueAppliedCredits += credits;
+      }
+      if (satisfied) satisfiedCredits += credits;
+
+      return {
+        code: catCourse?.code || rawCode,
+        compactCode: compact,
+        title: catCourse?.title || rawCode,
+        credits,
+        satisfied,
+        state: match ? match.state : 'Remaining',
+        grade: match?.grade || null,
+        isCrossCounted,
+        sharedWithProgramId: prior?.programId || null,
+        sharedWithProgramName: prior?.programName || null
+      };
+    });
+
+    // Elective pools with active-track targets (courses not already applied to a requirement)
+    const electivePools = track.electivePoolTargets.map((target) => {
+      const pool = (prog.requirements?.elective_pools || []).find((p) => p.id === target.poolId) || {};
+      const allowed = new Set((pool.allowed_courses || []).map(toCompact));
+      const applied = [];
+      let creditsApplied = 0;
+      for (const [compact, c] of studentByCompact.entries()) {
+        if (creditsApplied >= target.creditsRequired) break;
+        if (!allowed.has(compact) || requirements.some((r) => r.compactCode === compact)) continue;
+        applied.push(c.code);
+        creditsApplied += Number(c.credits) || 3;
+      }
+      return {
+        ...target,
+        creditsApplied,
+        remainingCredits: Math.max(0, target.creditsRequired - creditsApplied),
+        appliedCourses: applied
+      };
+    });
+
+    return {
+      programId: prog.id,
+      name: prog.name,
+      category,
+      role:
+        idx === 0 && CATEGORY_RANK[category] === 0
+          ? 'Primary Major'
+          : CATEGORY_RANK[category] === 0
+          ? 'Secondary Major'
+          : category,
+      isPrimary: idx === 0,
+      requiredCredits,
+      satisfiedCredits,
+      crossCountedCredits: programCrossCounted,
+      requirements,
+      electivePools,
+      track
+    };
+  });
+
+  return {
+    programAudits,
+    crossCountingLedger: {
+      entries: Array.from(sharedEntries.values()),
+      grossRequiredCredits,
+      crossCountedCredits,
+      netRequiredCredits: Math.max(0, grossRequiredCredits - crossCountedCredits),
+      uniqueAppliedCredits,
+      appliedCourseCodes: Array.from(appliedCourseCodes.keys())
+    }
+  };
+}
+
+/**
+ * Multi-Program Degree Audit entry point.
+ * @param {object} args
+ * @param {object} args.studentRecord - parsed transcript ({ validCourses, excludedCourses, studentMetadata })
+ * @param {Array<string|object>} args.declaredPrograms - program IDs or objects (primary first preferred)
+ * @param {object} args.catalogDb - master database
+ * @param {object} args.auditOptions - { core42Completed, activeTrackId, primaryProgramId, catalogYear, ...runWaterfallAudit options }
+ * @returns {object} baseline runWaterfallAudit result augmented with multi-program ledgers and policy gates
+ */
+export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], catalogDb = masterDbDefault, auditOptions = {} } = {}) {
+  const db = catalogDb || masterDbDefault;
+  const options = { ...(auditOptions || {}) };
+  const ordered = orderDeclaredPrograms(declaredPrograms, db, options.primaryProgramId);
+  const orderedIds = ordered.length > 0 ? ordered.map((p) => p.id) : ['cybersecurity_bs_2026'];
+
+  // Baseline engine (unchanged contract) continues to drive Screen 2 legacy tables + Screen 3 scheduler
+  const baseline = runWaterfallAudit(studentRecord, orderedIds, db, options);
+  const programs = ordered.length > 0 ? ordered : baseline.selectedPrograms;
+
+  const courses = studentRecord?.validCourses || [];
+  const catalogYear =
+    options.catalogYear ||
+    studentRecord?.studentMetadata?.catalogYear ||
+    programs[0]?.catalog_year_id ||
+    '2026-2027';
+
+  const trackHost = programs.find((p) => resolveTrackConfiguration(p).hasTracks) || null;
+  const trackConfiguration = trackHost ? resolveTrackConfiguration(trackHost, options.activeTrackId) : null;
+
+  const { programAudits, crossCountingLedger } = buildProgramAuditLedgers(
+    programs,
+    courses,
+    db,
+    trackConfiguration?.activeTrackId || options.activeTrackId || null
+  );
+
+  const generalEducationAudit = auditGeneralEducationCategories({
+    courses,
+    catalogDb: db,
+    catalogYear,
+    programs,
+    core42Completed: Boolean(options.core42Completed)
+  });
+
+  const upperDivisionGate = computeUpperDivisionGate(courses);
+  const compositionGatekeeperAudit = evaluateCompositionGatekeeper(courses);
+
+  const advisingWarnings = [
+    ...compositionGatekeeperAudit.warnings.map((w) => ({
+      type: 'COMPOSITION_GATE',
+      courseCode: w.courseCode,
+      message: `${w.courseCode} (${w.grade}): ${w.message}`
+    })),
+    ...(upperDivisionGate.isSatisfied
+      ? []
+      : [
+          {
+            type: 'UPPER_DIVISION_GATE',
+            message: `${upperDivisionGate.remaining} upper-division (30000+) credits still required (${upperDivisionGate.completed} / ${upperDivisionGate.required} earned or in progress).`
+          }
+        ])
+  ];
+
+  return {
+    ...baseline,
+    totalEarnedAndEnrolledCredits: baseline.policyChecklist?.totalCredits?.EarnedPlusEnrolled ?? 0,
+    declaredProgramsOrdered: programs.map((p) => p.id),
+    programAudits,
+    crossCountingLedger,
+    generalEducationAudit,
+    upperDivisionGate,
+    compositionGatekeeperAudit,
+    advisingWarnings,
+    trackConfiguration,
+    activeTrackId: trackConfiguration?.activeTrackId || null,
+    flags: { ...baseline.flags, core42Completed: Boolean(options.core42Completed) }
   };
 }

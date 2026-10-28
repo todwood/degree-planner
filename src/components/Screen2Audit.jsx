@@ -18,9 +18,19 @@ import {
   Phone,
   Calendar
 } from 'lucide-react';
+import {
+  buildProgramAuditLedgers,
+  auditGeneralEducationCategories,
+  computeUpperDivisionGate,
+  evaluateCompositionGatekeeper,
+  resolveTrackConfiguration,
+  orderDeclaredPrograms,
+  CORE42_CLEARANCE_REASON
+} from '../engine/waterfallAudit.js';
 
 export default function Screen2Audit({
   auditResult,
+  auditOptions,
   onUpdateAuditOptions,
   onProceedToSchedule,
   onBackToIntake,
@@ -58,6 +68,157 @@ export default function Screen2Audit({
   const [rowNotes, setRowNotes] = useState({});
   const [rowOverrides, setRowOverrides] = useState({});
   const [missingSessionInputs, setMissingSessionInputs] = useState({});
+
+  // Curricular Track Bifurcation (Option A vs Option B) local state
+  const [activeTrackId, setActiveTrackId] = useState(
+    auditResult?.activeTrackId || auditOptions?.activeTrackId || 'option_a'
+  );
+
+  // Multi-Program accordion expansion states (default expanded: true)
+  const [expandedPrograms, setExpandedPrograms] = useState({});
+
+  const toggleProgramAccordion = (progId) => {
+    setExpandedPrograms((prev) => ({
+      ...prev,
+      [progId]: prev[progId] === undefined ? false : !prev[progId]
+    }));
+  };
+
+  const handleSelectTrack = (trackId) => {
+    setActiveTrackId(trackId);
+    if (onUpdateAuditOptions) {
+      onUpdateAuditOptions({ activeTrackId: trackId });
+    }
+  };
+
+  const core42Completed = Boolean(
+    auditOptions?.core42Completed ??
+    auditResult?.flags?.core42Completed ??
+    auditResult?.generalEducationAudit?.core42Active ??
+    parsedTranscript?.studentMetadata?.core42Completed
+  );
+
+  const currentProgram = useMemo(() => {
+    const progId =
+      propSelectedProgramId ||
+      auditResult?.primaryProgram?.id ||
+      'cybersecurity_bs_2026';
+    return (
+      (masterDb?.programs || []).find((p) => p.id === progId) ||
+      auditResult?.primaryProgram ||
+      null
+    );
+  }, [masterDb, propSelectedProgramId, auditResult]);
+
+  const hasFlexibleElectives = Boolean(
+    currentProgram?.flexible_elective_configurations ||
+    currentProgram?.requirements?.flexible_elective_configurations
+  );
+
+  const trackConfig = useMemo(() => {
+    return currentProgram ? resolveTrackConfiguration(currentProgram, activeTrackId) : null;
+  }, [currentProgram, activeTrackId]);
+
+  const programLedgers = useMemo(() => {
+    if (
+      (auditResult?.programLedgers || auditResult?.programAudits) &&
+      (!auditResult.activeTrackId || auditResult.activeTrackId === activeTrackId)
+    ) {
+      return auditResult.programLedgers || auditResult.programAudits;
+    }
+    const courses =
+      parsedTranscript?.validCourses ||
+      auditResult?.normalizedHistory ||
+      auditResult?.allStudentCourses ||
+      [];
+    const declaredList = [
+      propSelectedProgramId || auditResult?.primaryProgram?.id || 'cybersecurity_bs_2026',
+      ...(propAdditionalPrograms || [])
+    ];
+    const ordered = orderDeclaredPrograms(
+      declaredList,
+      masterDb,
+      propSelectedProgramId || auditResult?.primaryProgram?.id
+    );
+    const { programAudits } = buildProgramAuditLedgers(
+      ordered,
+      courses,
+      masterDb,
+      activeTrackId
+    );
+    return programAudits;
+  }, [
+    auditResult,
+    parsedTranscript,
+    propSelectedProgramId,
+    propAdditionalPrograms,
+    masterDb,
+    activeTrackId
+  ]);
+
+  const upperDivisionGate = useMemo(() => {
+    if (auditResult?.upperDivisionGate) return auditResult.upperDivisionGate;
+    const courses =
+      parsedTranscript?.validCourses ||
+      auditResult?.normalizedHistory ||
+      auditResult?.allStudentCourses ||
+      [];
+    return computeUpperDivisionGate(courses);
+  }, [auditResult, parsedTranscript]);
+
+  const compositionGatekeeper = useMemo(() => {
+    const raw =
+      auditResult?.compositionGatekeeperAudit ||
+      auditResult?.compositionGatekeeper ||
+      evaluateCompositionGatekeeper(
+        parsedTranscript?.validCourses ||
+        auditResult?.normalizedHistory ||
+        auditResult?.allStudentCourses ||
+        []
+      );
+    return {
+      ...raw,
+      hasWarning: Boolean(raw?.hasWarning ?? raw?.warnings?.length > 0)
+    };
+  }, [auditResult, parsedTranscript]);
+
+  const geAudit = useMemo(() => {
+    if (
+      auditResult?.generalEducationAudit &&
+      Boolean(auditResult.generalEducationAudit.core42Active) === core42Completed
+    ) {
+      return auditResult.generalEducationAudit;
+    }
+    const courses =
+      parsedTranscript?.validCourses ||
+      auditResult?.normalizedHistory ||
+      auditResult?.allStudentCourses ||
+      [];
+    const declaredList = [
+      propSelectedProgramId || auditResult?.primaryProgram?.id || 'cybersecurity_bs_2026',
+      ...(propAdditionalPrograms || [])
+    ];
+    const ordered = orderDeclaredPrograms(
+      declaredList,
+      masterDb,
+      propSelectedProgramId || auditResult?.primaryProgram?.id
+    );
+    return auditGeneralEducationCategories({
+      courses,
+      catalogDb: masterDb,
+      catalogYear: propCatalogYear || '2026-2027',
+      programs: ordered,
+      core42Completed
+    });
+  }, [
+    auditResult,
+    parsedTranscript,
+    propSelectedProgramId,
+    propAdditionalPrograms,
+    masterDb,
+    propCatalogYear,
+    core42Completed
+  ]);
 
   const studentCourseOptions = (auditResult?.normalizedHistory || []).filter(
     (c) => c.state === 'Complete' || c.state === 'Transfer' || c.state === 'Current' || c.state === 'Scheduled'
@@ -455,6 +616,42 @@ export default function Screen2Audit({
           </div>
         </div>
 
+        {/* Institutional 42 Upper-Division Meter Widget */}
+        <div
+          data-testid="upper-division-meter"
+          className="mt-4 p-3.5 bg-neutral-50 rounded-lg border border-neutral-200 text-xs space-y-2"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-bold text-neutral-900 text-xs">
+              42 Upper-Division Hours: <strong className="font-mono text-neutral-950">{upperDivisionGate.completed}</strong> / 42 credits
+            </span>
+            {upperDivisionGate.isSatisfied ? (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                ✓ 42cr Upper-Division Satisfied
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                ⚠️ Deficient by {upperDivisionGate.remaining} cr
+              </span>
+            )}
+          </div>
+          <div className="w-full h-2.5 bg-neutral-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 ${
+                upperDivisionGate.isSatisfied ? 'bg-emerald-600' : 'bg-amber-500'
+              }`}
+              style={{
+                width: `${Math.min(100, Math.max(0, (upperDivisionGate.completed / 42) * 100))}%`
+              }}
+            />
+          </div>
+          <div className="flex justify-between text-[10px] font-mono text-neutral-500">
+            <span>0 cr</span>
+            <span>{upperDivisionGate.completed} cr completed (30000+ level)</span>
+            <span>42 cr Required</span>
+          </div>
+        </div>
+
         {/* Structured Policy Checklist Grid */}
         <div className="mt-4 pt-4 border-t border-neutral-100 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           {/* Row 1: Total Credits */}
@@ -475,12 +672,15 @@ export default function Screen2Audit({
 
           {/* Row 2: Upper-Level (30000+) Credits */}
           <div className="flex items-start space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${upperDivisionGate.isSatisfied ? 'text-emerald-600' : 'text-amber-500'}`} />
             <div>
-              <span className="font-bold text-neutral-900">Upper-Level (30000+) Requirement:</span>{' '}
-              <span className="font-mono">{(upper.earnedAndEnrolled || 0).toFixed(1)} completed</span> +{' '}
-              <span className="font-mono">{((upper.remainingRequired || 0) + (upper.generatedUpperLevelElectiveCredits || 0)).toFixed(1)} planned</span> ={' '}
-              <strong className="font-mono text-neutral-950">{(upper.projectedTotal || 42).toFixed(1)} / 42 Minimum</strong>
+              <span className="font-bold text-neutral-900">42 Upper-Division Hours:</span>{' '}
+              <span className="font-mono">{upperDivisionGate.completed} / 42 credits</span>
+              {!upperDivisionGate.isSatisfied && (
+                <span className="ml-2 px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  ⚠️ Deficient by {upperDivisionGate.remaining} cr
+                </span>
+              )}
             </div>
           </div>
 
@@ -555,6 +755,221 @@ export default function Screen2Audit({
       </div>
 
       {/* =========================================================================
+          MULTI-PROGRAM AUDIT ACCORDIONS
+      ========================================================================= */}
+      <div className="space-y-4" data-testid="multi-program-accordions">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-bold text-neutral-900 tracking-tight">
+              Multi-Program Audit Ledgers
+            </h2>
+            <p className="text-xs text-neutral-500">
+              Deterministic credential progression with global cross-counting registry
+            </p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 border border-neutral-200 self-start sm:self-auto">
+            {programLedgers.length} Credential{programLedgers.length > 1 ? 's' : ''} Declared
+          </span>
+        </div>
+
+        {programLedgers.map((ledger) => {
+          const isExpanded = expandedPrograms[ledger.programId] !== false;
+          const roleBadge = (() => {
+            if (ledger.role === 'Primary Major') {
+              return { label: '🎓 Primary Major', color: 'bg-amber-100 text-amber-900 border-amber-300' };
+            }
+            if (ledger.role === 'Secondary Major') {
+              return { label: '🎓 Secondary Major', color: 'bg-sky-100 text-sky-900 border-sky-300' };
+            }
+            if (ledger.category === 'Minor' || ledger.role === 'Minor') {
+              return { label: '📘 Minor', color: 'bg-blue-100 text-blue-900 border-blue-300' };
+            }
+            if (ledger.category === 'Certificate' || ledger.role === 'Certificate') {
+              return { label: '📜 Certificate', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' };
+            }
+            return { label: `🎓 ${ledger.role}`, color: 'bg-amber-100 text-amber-900 border-amber-300' };
+          })();
+
+          const progTracks = ledger.track?.hasTracks ? ledger.track : null;
+
+          return (
+            <div
+              key={ledger.programId}
+              data-testid={`program-accordion-${ledger.programId}`}
+              className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden"
+            >
+              {/* Accordion Header */}
+              <div
+                onClick={() => toggleProgramAccordion(ledger.programId)}
+                className="px-6 py-4 bg-neutral-50/80 hover:bg-neutral-100/70 border-b border-neutral-200 flex flex-wrap items-center justify-between gap-3 cursor-pointer select-none transition"
+              >
+                <div className="flex items-center space-x-3">
+                  <span className={`px-2.5 py-1 rounded text-xs font-bold border ${roleBadge.color}`}>
+                    {roleBadge.label}
+                  </span>
+                  <h3 className="text-base font-bold text-neutral-900">{ledger.name}</h3>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-xs font-mono font-semibold text-neutral-700">
+                    <strong className="text-neutral-900">{ledger.satisfiedCredits}</strong> / {ledger.requiredCredits} cr
+                  </span>
+                  {ledger.crossCountedCredits > 0 && (
+                    <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                      {ledger.crossCountedCredits} cr shared
+                    </span>
+                  )}
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-neutral-500" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-neutral-500" />
+                  )}
+                </div>
+              </div>
+
+              {/* Accordion Body */}
+              {isExpanded && (
+                <div className="p-6 space-y-5">
+                  {/* Curricular Track Bifurcation Pills (Data Science BS) */}
+                  {progTracks && (
+                    <div className="p-3.5 rounded-lg bg-neutral-50 border border-neutral-200 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-neutral-600 uppercase tracking-wider">
+                          Curricular Track Option
+                        </span>
+                        <span className="text-[11px] font-mono text-neutral-500">
+                          {activeTrackId === 'option_a' ? 'Option A: 9cr Group 1 + 18cr Group 2 = 27cr' : 'Option B: 15cr Group 1 + 15cr Group 2 = 30cr'}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          data-testid="track-pill-option_a"
+                          onClick={() => handleSelectTrack('option_a')}
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center space-x-1.5 border cursor-pointer ${
+                            activeTrackId === 'option_a'
+                              ? 'bg-[#857542] text-white border-[#857542] shadow-xs'
+                              : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100'
+                          }`}
+                        >
+                          <span>{activeTrackId === 'option_a' ? '◉' : '○'}</span>
+                          <span>Option A: Domain Depth (9/18)</span>
+                        </button>
+                        <button
+                          type="button"
+                          data-testid="track-pill-option_b"
+                          onClick={() => handleSelectTrack('option_b')}
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center space-x-1.5 border cursor-pointer ${
+                            activeTrackId === 'option_b'
+                              ? 'bg-[#857542] text-white border-[#857542] shadow-xs'
+                              : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100'
+                          }`}
+                        >
+                          <span>{activeTrackId === 'option_b' ? '◉' : '○'}</span>
+                          <span>Option B: Balanced Applied Science (15/15)</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Elective Pools Progress Bars */}
+                  {(ledger.electivePools || []).length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
+                        Program Elective Pools
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {ledger.electivePools.map((pool) => {
+                          const pct = Math.min(100, Math.max(0, (pool.creditsApplied / pool.creditsRequired) * 100));
+                          const isMet = pool.creditsApplied >= pool.creditsRequired;
+                          return (
+                            <div
+                              key={pool.poolId}
+                              data-testid={`elective-pool-${pool.poolId}`}
+                              className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 text-xs space-y-1.5"
+                            >
+                              <div className="flex items-center justify-between font-bold">
+                                <span className="text-neutral-900 truncate">{pool.title}</span>
+                                <span className="font-mono text-neutral-700 shrink-0 ml-2">
+                                  {pool.creditsApplied} / {pool.creditsRequired} cr
+                                </span>
+                              </div>
+                              <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full transition-all duration-300 ${isMet ? 'bg-emerald-600' : 'bg-[#857542]'}`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                              <div className="flex justify-between items-center text-[10px] text-neutral-500">
+                                <span>
+                                  {isMet ? '✓ Requirement Met' : `${pool.remainingCredits} cr remaining`}
+                                </span>
+                                {pool.appliedCourses?.length > 0 && (
+                                  <span className="font-mono text-neutral-700">
+                                    Applied: {pool.appliedCourses.join(', ')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Program Requirements Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
+                          <th className="py-2 px-3">Course Code & Title</th>
+                          <th className="py-2 px-2 text-center">Cr</th>
+                          <th className="py-2 px-3">Status</th>
+                          <th className="py-2 px-3">Cross-Counting / Credential Sharing</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {ledger.requirements.map((req) => (
+                          <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
+                            <td className="py-2 px-3">
+                              <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
+                              <span className="text-neutral-700">{req.title}</span>
+                            </td>
+                            <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
+                            <td className="py-2 px-3">
+                              {req.satisfied ? (
+                                <span className="inline-flex items-center space-x-1 text-emerald-700 font-bold">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>{req.grade ? `Completed (${req.grade})` : 'Satisfied'}</span>
+                                </span>
+                              ) : (
+                                <span className="text-amber-700 font-bold text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                  Remaining Required
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 px-3">
+                              {req.isCrossCounted && (
+                                <span
+                                  data-testid={`cross-counted-${req.compactCode}`}
+                                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
+                                >
+                                  [Shared with {req.sharedWithProgramName || 'Declared Program'}]
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* =========================================================================
           MIDDLE CARD: Requirement Matching & Advisor Override Controls
       ========================================================================= */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
@@ -593,6 +1008,91 @@ export default function Screen2Audit({
           </button>
         </div>
 
+        {/* Missouri CORE 42 / AA Transfer Block Banner */}
+        {core42Completed && (
+          <div
+            data-testid="core42-transfer-banner"
+            className="p-3.5 mx-6 mt-4 rounded-lg bg-emerald-50 border-l-4 border-emerald-500 text-emerald-900 shadow-2xs flex items-center justify-between text-xs font-bold"
+          >
+            <div className="flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>✓ Missouri CORE 42 / AA Transfer Block Active — 42 Lower-Division GE Credits Cleared</span>
+            </div>
+            <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
+              42 / 42 cr Met
+            </span>
+          </div>
+        )}
+
+        {/* 8 Missouri CORE 42 / General Education Categories */}
+        {(activeTab === 'ALL' || activeTab === 'GE') && (
+          <div className="px-6 py-4 border-b border-neutral-200 space-y-3" data-testid="ge-categories-section">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-neutral-900">
+                General Education Distribution (42 Credits)
+              </h3>
+              <span className="text-xs font-mono font-semibold text-neutral-600">
+                {geAudit.earnedCredits} / {geAudit.totalRequired} cr Satisfied
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {geAudit.categories.map((cat) => {
+                const isCatSatisfied = cat.satisfied;
+                const isWritten = cat.id === 'written_communication';
+                const hasCompWarning = isWritten && (compositionGatekeeper.hasWarning || comp.warnings?.length > 0);
+
+                return (
+                  <div
+                    key={cat.id}
+                    data-testid={`ge-category-${cat.id}`}
+                    className={`p-2.5 rounded-lg border text-xs space-y-1 ${
+                      isCatSatisfied
+                        ? 'bg-emerald-50/50 border-emerald-200'
+                        : hasCompWarning
+                        ? 'bg-amber-50/50 border-amber-300'
+                        : 'bg-neutral-50 border-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold">
+                      <span className="text-neutral-900 truncate">{cat.name}</span>
+                      <span className="font-mono text-[11px] text-neutral-600 shrink-0 ml-1">
+                        {cat.credits}cr
+                      </span>
+                    </div>
+
+                    {core42Completed ? (
+                      <div className="flex items-center space-x-1 text-emerald-700 font-semibold text-[11px] pt-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span>Cleared via CORE 42 Transfer Block</span>
+                      </div>
+                    ) : isCatSatisfied ? (
+                      <div className="flex items-center space-x-1 text-emerald-700 font-semibold text-[11px] pt-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span>Distribution requirement met</span>
+                      </div>
+                    ) : (
+                      <div className="text-amber-800 font-semibold text-[11px] pt-1">
+                        {cat.remainingCredits} cr remaining
+                      </div>
+                    )}
+
+                    {/* Composition Gatekeeper Alert on Written Communication block */}
+                    {hasCompWarning && (
+                      <div
+                        data-testid="composition-gatekeeper-alert"
+                        className="mt-1.5 p-2 rounded bg-amber-100 border border-amber-400 text-amber-950 text-[10.5px] leading-snug font-bold"
+                      >
+                        Grade of C or higher required to satisfy Composition GE. Course eligible for retake.
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Requirements Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
@@ -630,7 +1130,12 @@ export default function Screen2Audit({
                       </td>
                       <td className="py-2.5 px-3 font-mono text-neutral-600">{b.required_credits}cr</td>
                       <td className="py-2.5 px-4">
-                        {b.fulfilled || activeOverride ? (
+                        {core42Completed ? (
+                          <span className="inline-flex items-center space-x-1 text-emerald-700 font-bold">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Cleared via CORE 42 Transfer Block</span>
+                          </span>
+                        ) : b.fulfilled || activeOverride ? (
                           <span className="inline-flex items-center space-x-1 text-emerald-700 font-bold">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             <span>
@@ -638,7 +1143,7 @@ export default function Screen2Audit({
                                 ? activeOverride
                                 : b.matchedCourse
                                 ? `${b.matchedCourse.code} (${b.matchedCourse.grade || b.matchedCourse.state})`
-                                : 'Waived (CORE 42)'}
+                                : 'Waived'}
                             </span>
                           </span>
                         ) : (
@@ -655,7 +1160,9 @@ export default function Screen2Audit({
                           className="px-2 py-1 text-[11px] border border-neutral-300 rounded bg-white text-neutral-800 font-medium max-w-[230px]"
                         >
                           <option value="">
-                            {b.matchedCourse
+                            {core42Completed
+                              ? 'Cleared via CORE 42 Transfer Block'
+                              : b.matchedCourse
                               ? `Default: ${b.matchedCourse.code}`
                               : 'Auto-Match / Standard Rule'}
                           </option>
@@ -929,6 +1436,43 @@ export default function Screen2Audit({
               {/* Free Electives & Generated Placeholders */}
               {(activeTab === 'ALL' || activeTab === 'ELECTIVE') && (
                 <>
+                  {hasFlexibleElectives && (
+                    <tr className="bg-neutral-50/90 border-b border-neutral-200">
+                      <td colSpan="6" className="p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold text-neutral-600 uppercase tracking-wider">
+                            Curricular Track Bifurcation:
+                          </span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleSelectTrack('option_a')}
+                              className={`px-3 py-1 rounded-full text-xs font-bold transition flex items-center space-x-1.5 border cursor-pointer ${
+                                activeTrackId === 'option_a'
+                                  ? 'bg-[#857542] text-white border-[#857542] shadow-xs'
+                                  : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100'
+                              }`}
+                            >
+                              <span>{activeTrackId === 'option_a' ? '◉' : '○'}</span>
+                              <span>Option A: Domain Depth (9/18)</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSelectTrack('option_b')}
+                              className={`px-3 py-1 rounded-full text-xs font-bold transition flex items-center space-x-1.5 border cursor-pointer ${
+                                activeTrackId === 'option_b'
+                                  ? 'bg-[#857542] text-white border-[#857542] shadow-xs'
+                                  : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100'
+                              }`}
+                            >
+                              <span>{activeTrackId === 'option_b' ? '◉' : '○'}</span>
+                              <span>Option B: Balanced Applied Science (15/15)</span>
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                   {auditResult.freeElectives?.map((fe, idx) => {
                     const reqKey = `ELECTIVE:${fe.code}:${fe.grade || ''}:${idx}`;
                     const activeNote = rowNotes[reqKey] || '';
