@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo, useId } from 'react';
 import {
   FileText,
-  UploadCloud,
   FileSpreadsheet,
   CheckCircle2,
   AlertCircle,
   AlertTriangle,
-  HelpCircle,
   Plus,
   ArrowRight,
   ExternalLink,
@@ -17,24 +15,22 @@ import {
   RotateCcw,
   ChevronDown,
   Search,
-  Check,
   Trash2,
-  Lock
+  Lock,
+  Edit3,
+  Calendar,
+  Clock,
+  ShieldCheck
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import {
   parseAnthologySpreadsheet,
   parseTranscriptPdf,
   verifyAnthologySpreadsheet,
-  STANDARD_ANTHOLOGY_HEADERS,
   verifyTranscriptText,
-  parseTranscriptText,
   parseCombinedStudentRecords,
   extractStateFromDegreePlanPdf,
-  processRawCourseRecords,
   extractTextFromPdf,
-  verifyDocumentCurrency,
-  getCurrentAcademicSemester
+  verifyDocumentCurrency
 } from '../engine/transcriptParser.js';
 import { calculateStartingSemester } from '../engine/scheduler.js';
 import dbAdapter from '../data/dbAdapter.js';
@@ -46,6 +42,22 @@ import {
   calculateStackOverlap,
   remapStackForCatalogYear
 } from '../utils/programStackUtils.js';
+import {
+  formatParsedTelemetrySummary,
+  computeParsedTelemetryTotals,
+  evaluateActiveTermEnrollment,
+  parseAdvisorEmailUsername,
+  formatFullAdvisorEmail,
+  resolveRegistrationStartTerm,
+  computePriorityRegistrationWindow,
+  getPacingConstraintOptions,
+  extractPlanPayloadFromPdfText,
+  DEFAULT_ACTIVE_TERM_ID,
+  DEFAULT_REFERENCE_DATE,
+  MODALITY_PREFERENCE_OPTIONS,
+  SUMMER_AVAILABILITY_OPTIONS,
+  doesCourseMatchSemester
+} from '../utils/intakeHelpers.js';
 
 export const ANTHOLOGY_SOP_GUIDE_URL =
   'https://scribehow.com/shared/Export_Student_Course_Schedules_All_Results_from_Anthology';
@@ -53,18 +65,7 @@ export const TRANSCRIPT_SOP_GUIDE_URL =
   'https://scribehow.com/shared/Export_Unofficial_Student_Transcript_PDF_from_Anthology';
 
 /**
- * Generate a friendly fallback student name:
- * e.g. "Student 4821"
- */
-function generateDefaultStudentName() {
-  const randomNum = Math.floor(1000 + Math.random() * 9000);
-  return `Student ${randomNum}`;
-}
-
-/**
  * Reusable, strictly validated student record dropzone component.
- * Validates file extensions on both drag-and-drop and manual file picker selection,
- * strictly enforces maxFiles = 1, and displays file info with a remove button.
  */
 function StudentRecordDropzone({
   id,
@@ -135,12 +136,12 @@ function StudentRecordDropzone({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={() => !file && inputRef.current?.click()}
-      className={`relative border-2 rounded-lg p-3.5 text-center transition select-none ${
+      className={`relative border-2 rounded-xl p-4 text-center transition select-none ${
         file
           ? 'border-[#857542] bg-[#F7F5EE]/60'
           : isDragOver
           ? 'border-[#857542] bg-[#F7F5EE] ring-2 ring-[#857542]/30 cursor-copy'
-          : 'border-dashed border-neutral-300 hover:border-[#857542] bg-neutral-50/50 hover:bg-neutral-50 cursor-pointer'
+          : 'border-dashed border-neutral-300 hover:border-[#857542] bg-neutral-50/50 hover:bg-neutral-50 cursor-pointer shadow-2xs'
       }`}
     >
       <input
@@ -156,7 +157,7 @@ function StudentRecordDropzone({
       {file ? (
         <div className="flex items-center justify-between space-x-2 text-left">
           <div className="flex items-center space-x-2.5 truncate">
-            <div className="p-1.5 bg-[#857542] text-white rounded">
+            <div className="p-2 bg-[#857542] text-white rounded-lg">
               <Icon className="w-4 h-4" />
             </div>
             <div className="truncate">
@@ -170,18 +171,18 @@ function StudentRecordDropzone({
             type="button"
             onClick={handleRemove}
             title="Remove file"
-            className="p-1 text-neutral-400 hover:text-red-600 rounded hover:bg-neutral-200/50 transition flex-shrink-0"
+            className="p-1 text-neutral-400 hover:text-red-600 rounded-md hover:bg-neutral-200/50 transition flex-shrink-0 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       ) : (
         <>
-          <Icon className="w-6 h-6 text-[#857542] mx-auto mb-1" />
-          <p className="text-xs font-semibold text-neutral-800">{title}</p>
+          <Icon className="w-6 h-6 text-[#857542] mx-auto mb-1.5" />
+          <p className="text-xs font-bold text-neutral-800">{title}</p>
           <p className="text-[10px] text-neutral-500 font-mono mt-0.5">{subtitle}</p>
           {badgeText && (
-            <span className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider text-neutral-600 bg-neutral-200/70 px-1.5 py-0.5 rounded">
+            <span className="inline-block mt-1.5 text-[9px] font-bold uppercase tracking-wider text-neutral-600 bg-neutral-200/70 px-1.5 py-0.5 rounded">
               {badgeText}
             </span>
           )}
@@ -189,6 +190,21 @@ function StudentRecordDropzone({
       )}
     </div>
   );
+}
+
+/**
+ * Determine display session band label for an active semester course.
+ */
+function getCourseSessionBandLabel(course) {
+  if (course.sessionBand) return course.sessionBand;
+  const rawTerm = String(course.session || course.term || course.semester || course.termId || '').toUpperCase();
+  if (/_II\b|SESSION\s*II|8-?WK\s*II|FA-II|SP-II/i.test(rawTerm)) {
+    return 'Session II 8-Week';
+  }
+  if (/_I\b|SESSION\s*I\b|8-?WK\s*I\b|FA-I|SP-I/i.test(rawTerm)) {
+    return 'Session I 8-Week';
+  }
+  return 'Full 16-Week';
 }
 
 export default function Screen1Intake({
@@ -210,32 +226,13 @@ export default function Screen1Intake({
   onUpdateIntakeFiles,
   onClearActiveRecord
 }) {
-  // Option A files
-  const [activeOption, setActiveOptionState] = useState(intakeFiles?.activeOption || 'B');
-  const [degreePlanFile, setDegreePlanFileState] = useState(intakeFiles?.degreePlanFile || null);
-  const [optionAAnthologyFile, setOptionAAnthologyFileState] = useState(intakeFiles?.optionAAnthologyFile || null);
-  const [optionATranscriptFile, setOptionATranscriptFileState] = useState(intakeFiles?.optionATranscriptFile || null);
-
-  // Option B files
+  // ---------------------------------------------------------------------------
+  // 1. Files & Ingestion Channels (Card 1)
+  // ---------------------------------------------------------------------------
   const [anthologyFile, setAnthologyFileState] = useState(intakeFiles?.anthologyFile || null);
   const [transcriptFile, setTranscriptFileState] = useState(intakeFiles?.transcriptFile || null);
+  const [degreePlanFile, setDegreePlanFileState] = useState(intakeFiles?.degreePlanFile || null);
 
-  const setActiveOption = (opt) => {
-    setActiveOptionState(opt);
-    onUpdateIntakeFiles?.((prev) => ({ ...prev, activeOption: opt }));
-  };
-  const setDegreePlanFile = (f) => {
-    setDegreePlanFileState(f);
-    onUpdateIntakeFiles?.((prev) => ({ ...prev, degreePlanFile: f }));
-  };
-  const setOptionAAnthologyFile = (f) => {
-    setOptionAAnthologyFileState(f);
-    onUpdateIntakeFiles?.((prev) => ({ ...prev, optionAAnthologyFile: f }));
-  };
-  const setOptionATranscriptFile = (f) => {
-    setOptionATranscriptFileState(f);
-    onUpdateIntakeFiles?.((prev) => ({ ...prev, optionATranscriptFile: f }));
-  };
   const setAnthologyFile = (f) => {
     setAnthologyFileState(f);
     onUpdateIntakeFiles?.((prev) => ({ ...prev, anthologyFile: f }));
@@ -244,62 +241,37 @@ export default function Screen1Intake({
     setTranscriptFileState(f);
     onUpdateIntakeFiles?.((prev) => ({ ...prev, transcriptFile: f }));
   };
+  const setDegreePlanFile = (f) => {
+    setDegreePlanFileState(f);
+    onUpdateIntakeFiles?.((prev) => ({ ...prev, degreePlanFile: f }));
+  };
 
   useEffect(() => {
     if (intakeFiles) {
       if (intakeFiles.anthologyFile !== undefined) setAnthologyFileState(intakeFiles.anthologyFile);
       if (intakeFiles.transcriptFile !== undefined) setTranscriptFileState(intakeFiles.transcriptFile);
       if (intakeFiles.degreePlanFile !== undefined) setDegreePlanFileState(intakeFiles.degreePlanFile);
-      if (intakeFiles.optionAAnthologyFile !== undefined) setOptionAAnthologyFileState(intakeFiles.optionAAnthologyFile);
-      if (intakeFiles.optionATranscriptFile !== undefined) setOptionATranscriptFileState(intakeFiles.optionATranscriptFile);
-      if (intakeFiles.activeOption !== undefined) setActiveOptionState(intakeFiles.activeOption);
     }
   }, [intakeFiles]);
 
-  // Workflow B: Currently Enrolled Courses Quick-Add Tray State
-  const [isEnrolledTrayOpen, setIsEnrolledTrayOpen] = useState(false);
-  const [activeEnrolledCourses, setActiveEnrolledCourses] = useState([]);
-  const [dbPlaceholders, setDbPlaceholders] = useState([]);
-  const [traySearch, setTraySearch] = useState('');
-  const [trayTab, setTrayTab] = useState('all'); // 'all', 'major', 'ge'
-  const [isDragOverTray, setIsDragOverTray] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    dbAdapter
-      .getPlaceholders()
-      .then((phs) => {
-        if (isMounted && phs && phs.length > 0) {
-          setDbPlaceholders(phs);
-        }
-      })
-      .catch((err) => console.warn('Failed to load placeholders from dbAdapter:', err));
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Zero-Upload Support Modal (New Student / Clean Degree Plan Setup)
-  const [zeroUploadModalOpen, setZeroUploadModalOpen] = useState(false);
-  const zeroUploadDialogRef = useRef(null);
-  const zeroUploadDialogTitleId = useId();
-
-  // Student Advising Info (manual entry or auto-fill with smart defaults)
+  // ---------------------------------------------------------------------------
+  // 2. Identity Row (4 Inputs — All start empty with zero hardcoded sample names)
+  // ---------------------------------------------------------------------------
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [advisorName, setAdvisorName] = useState('');
-  const [studentEmail, setStudentEmail] = useState('');
-  const [studentPhone, setStudentPhone] = useState('');
+  const [advisorUsername, setAdvisorUsername] = useState('');
   const [detectedGpa, setDetectedGpa] = useState('');
 
-  // Program selection (Separate Catalog Year, CORE 42 Waiver, and Multi-Program Stack)
+  // ---------------------------------------------------------------------------
+  // 3. Card 2: Degree Curriculum & Credential Roster State
+  // ---------------------------------------------------------------------------
   const [catalogYear, setCatalogYearState] = useState(propCatalogYear || '2026-2027');
   const [minCatalogYearStart, setMinCatalogYearStart] = useState(2024);
   const [selectedProgramId, setSelectedProgramIdState] = useState(propProgramId || 'cybersecurity_bs_2026');
   const [primaryProgramId, setPrimaryProgramId] = useState(propProgramId || 'cybersecurity_bs_2026');
-  const [additionalPrograms, setAdditionalProgramsState] = useState(propAdditionalPrograms || []);
-  const [core42TransferBlock, setCore42TransferBlock] = useState(false);
   const [stagedComboboxProgramId, setStagedComboboxProgramId] = useState(propProgramId || 'cybersecurity_bs_2026');
+  const [core42TransferBlock, setCore42TransferBlock] = useState(false);
   const [declaredProgramIds, setDeclaredProgramIds] = useState(() => {
     if (Array.isArray(propAdditionalPrograms) && propAdditionalPrograms.length > 0) {
       const initial = propProgramId ? [propProgramId] : [];
@@ -311,7 +283,7 @@ export default function Screen1Intake({
     if (parsedTranscript && propProgramId) {
       return [propProgramId];
     }
-    return [];
+    return propProgramId ? [propProgramId] : ['cybersecurity_bs_2026'];
   });
 
   const setCatalogYear = (cy) => {
@@ -328,18 +300,6 @@ export default function Screen1Intake({
       return prev;
     });
   };
-  const setAdditionalPrograms = (progsOrFn) => {
-    if (typeof progsOrFn === 'function') {
-      setAdditionalProgramsState((prev) => {
-        const next = progsOrFn(prev);
-        onUpdateAdditionalPrograms?.(next);
-        return next;
-      });
-    } else {
-      setAdditionalProgramsState(progsOrFn);
-      onUpdateAdditionalPrograms?.(progsOrFn);
-    }
-  };
 
   useEffect(() => {
     if (propProgramId && parsedTranscript) {
@@ -347,9 +307,7 @@ export default function Screen1Intake({
       setPrimaryProgramId(propProgramId);
       setStagedComboboxProgramId(propProgramId);
       setDeclaredProgramIds((prev) => {
-        if (!prev.includes(propProgramId)) {
-          return [propProgramId, ...prev];
-        }
+        if (!prev.includes(propProgramId)) return [propProgramId, ...prev];
         return prev;
       });
     }
@@ -358,10 +316,6 @@ export default function Screen1Intake({
   useEffect(() => {
     if (propCatalogYear) setCatalogYearState(propCatalogYear);
   }, [propCatalogYear]);
-
-  useEffect(() => {
-    if (propAdditionalPrograms) setAdditionalProgramsState(propAdditionalPrograms);
-  }, [propAdditionalPrograms]);
 
   const declaredPrograms = useMemo(() => {
     const list = masterDb?.programs || [];
@@ -406,7 +360,7 @@ export default function Screen1Intake({
         setSelectedProgramIdState(progId);
         onSelectProgramId?.(progId);
       }
-      setAdditionalProgramsState((prev) => [...prev, addedProg.name]);
+      onUpdateAdditionalPrograms?.((prev) => [...(prev || []), addedProg.name]);
     }
   };
 
@@ -432,7 +386,7 @@ export default function Screen1Intake({
     });
     const removedProg = (masterDb?.programs || []).find((p) => p.id === progId);
     if (removedProg) {
-      setAdditionalProgramsState((prev) => prev.filter((n) => n !== removedProg.name));
+      onUpdateAdditionalPrograms?.((prev) => (prev || []).filter((n) => n !== removedProg.name));
     }
   };
 
@@ -452,84 +406,270 @@ export default function Screen1Intake({
     }
   };
 
-  // Scheduling Constraints
+  // ---------------------------------------------------------------------------
+  // 4. Card 3: Scheduling Constraints State
+  // ---------------------------------------------------------------------------
+  const [pacingMode, setPacingModeState] = useState(
+    propConstraints?.pacingMode || 'Full-Time'
+  );
+  const [min16wkCredits, setMin16wkCreditsState] = useState(
+    propConstraints?.min16wkCredits !== undefined
+      ? propConstraints.min16wkCredits
+      : propConstraints?.pacingMode === 'Part-Time'
+      ? 6
+      : 12
+  );
+  const [max16wkCredits, setMax16wkCreditsState] = useState(
+    propConstraints?.max16wkCredits !== undefined
+      ? propConstraints.max16wkCredits
+      : propConstraints?.pacingMode === 'Part-Time'
+      ? 11
+      : 15
+  );
   const [modalityPreference, setModalityPreferenceState] = useState(
-    propConstraints?.modalityPreference || 'No Preference (Flexible)'
+    propConstraints?.modalityPreference || 'No Preference (Default)'
+  );
+  const [max8wkCredits, setMax8wkCreditsState] = useState(
+    propConstraints?.max8wkCredits !== undefined ? propConstraints.max8wkCredits : 9
   );
   const [summerAvailability, setSummerAvailabilityState] = useState(
-    propConstraints?.summerAvailability || 'No Summer'
+    propConstraints?.summerAvailability || 'No Summer (Default)'
   );
   const [maxSummerCredits, setMaxSummerCreditsState] = useState(
     propConstraints?.maxSummerCredits !== undefined ? propConstraints.maxSummerCredits : 6
   );
 
-  // Pacing Mode & Contrasting Session Caps
-  const [pacingMode, setPacingModeState] = useState(
-    propConstraints?.pacingMode || 'Full-Time'
-  );
-  const [max8wkCredits, setMax8wkCreditsState] = useState(
-    propConstraints?.max8wkCredits !== undefined ? propConstraints.max8wkCredits : 9
-  );
-  const [max16wkCredits, setMax16wkCreditsState] = useState(
-    propConstraints?.max16wkCredits !== undefined ? propConstraints.max16wkCredits : 18
-  );
-
-  const setModalityPreference = (v) => {
-    setModalityPreferenceState(v);
-    onUpdateConstraints?.((prev) => ({ ...prev, modalityPreference: v }));
-  };
-  const setSummerAvailability = (v) => {
-    setSummerAvailabilityState(v);
-    onUpdateConstraints?.((prev) => ({ ...prev, summerAvailability: v }));
-  };
-  const setMaxSummerCredits = (vOrFn) => {
-    if (typeof vOrFn === 'function') {
-      setMaxSummerCreditsState((prev) => {
-        const next = vOrFn(prev);
-        onUpdateConstraints?.((c) => ({ ...c, maxSummerCredits: next }));
-        return next;
-      });
+  const setPacingMode = (mode) => {
+    setPacingModeState(mode);
+    if (mode === 'Part-Time') {
+      setMin16wkCreditsState(6);
+      setMax16wkCreditsState(11);
+      setMax8wkCreditsState(6);
+      onUpdateConstraints?.((prev) => ({
+        ...prev,
+        pacingMode: mode,
+        min16wkCredits: 6,
+        max16wkCredits: 11,
+        max8wkCredits: 6
+      }));
     } else {
-      setMaxSummerCreditsState(vOrFn);
-      onUpdateConstraints?.((prev) => ({ ...prev, maxSummerCredits: vOrFn }));
+      setMin16wkCreditsState(12);
+      setMax16wkCreditsState(15);
+      setMax8wkCreditsState(9);
+      onUpdateConstraints?.((prev) => ({
+        ...prev,
+        pacingMode: mode,
+        min16wkCredits: 12,
+        max16wkCredits: 15,
+        max8wkCredits: 9
+      }));
     }
   };
-  const setPacingMode = (v) => {
-    setPacingModeState(v);
-    onUpdateConstraints?.((prev) => ({ ...prev, pacingMode: v }));
+
+  const setMin16wkCredits = (val) => {
+    const num = Number(val);
+    setMin16wkCreditsState(num);
+    if (max16wkCredits < num) {
+      setMax16wkCreditsState(num);
+      onUpdateConstraints?.((prev) => ({ ...prev, min16wkCredits: num, max16wkCredits: num }));
+    } else {
+      onUpdateConstraints?.((prev) => ({ ...prev, min16wkCredits: num }));
+    }
   };
-  const setMax8wkCredits = (v) => {
-    setMax8wkCreditsState(v);
-    onUpdateConstraints?.((prev) => ({ ...prev, max8wkCredits: v }));
+
+  const setMax16wkCredits = (val) => {
+    const num = Number(val);
+    setMax16wkCreditsState(num);
+    onUpdateConstraints?.((prev) => ({ ...prev, max16wkCredits: num }));
   };
-  const setMax16wkCredits = (v) => {
-    setMax16wkCreditsState(v);
-    onUpdateConstraints?.((prev) => ({ ...prev, max16wkCredits: v }));
+
+  const setModalityPreference = (val) => {
+    setModalityPreferenceState(val);
+    onUpdateConstraints?.((prev) => ({ ...prev, modalityPreference: val }));
   };
+
+  const setMax8wkCredits = (val) => {
+    const num = Number(val);
+    setMax8wkCreditsState(num);
+    onUpdateConstraints?.((prev) => ({ ...prev, max8wkCredits: num }));
+  };
+
+  const setSummerAvailability = (val) => {
+    setSummerAvailabilityState(val);
+    onUpdateConstraints?.((prev) => ({ ...prev, summerAvailability: val }));
+  };
+
+  const setMaxSummerCredits = (val) => {
+    const num = Number(val);
+    setMaxSummerCreditsState(num);
+    onUpdateConstraints?.((prev) => ({ ...prev, maxSummerCredits: num }));
+  };
+
+  const pacingOptions = useMemo(() => {
+    return getPacingConstraintOptions(
+      pacingMode === 'Part-Time' ? 'PART_TIME' : 'FULL_TIME',
+      min16wkCredits,
+      max16wkCredits,
+      summerAvailability
+    );
+  }, [pacingMode, min16wkCredits, max16wkCredits, summerAvailability]);
+
+  // ---------------------------------------------------------------------------
+  // 5. Parsed Records & Cache State
+  // ---------------------------------------------------------------------------
+  const [cachedParsedTranscript, setCachedParsedTranscript] = useState(parsedTranscript || null);
+  const [isDataExtracted, setIsDataExtracted] = useState(Boolean(parsedTranscript));
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [parsingError, setParsingError] = useState('');
+
+  const currentCourses = useMemo(() => {
+    if (cachedParsedTranscript?.validCourses) return cachedParsedTranscript.validCourses;
+    if (parsedTranscript?.validCourses) return parsedTranscript.validCourses;
+    return [];
+  }, [cachedParsedTranscript, parsedTranscript]);
+
+  const activeTermEnrollment = useMemo(() => {
+    return evaluateActiveTermEnrollment(
+      currentCourses,
+      DEFAULT_ACTIVE_TERM_ID,
+      pacingMode === 'Part-Time' ? 'PART_TIME' : 'FULL_TIME'
+    );
+  }, [currentCourses, pacingMode]);
+
+  // ---------------------------------------------------------------------------
+  // 6. Hydration from parsedTranscript props (e.g. back navigation)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!parsedTranscript) return;
+    const meta = parsedTranscript.studentMetadata || {};
+    if (meta.name || meta.student_name) setStudentName(meta.name || meta.student_name);
+    if (meta.studentId || meta.student_id) setStudentId(meta.studentId || meta.student_id);
+    if (meta.advisor || meta.advisor_name) setAdvisorName(meta.advisor || meta.advisor_name);
+    const em = meta.email || meta.student_email || meta.advisorEmail || meta.advisor_email || '';
+    if (em) setAdvisorUsername(parseAdvisorEmailUsername(em));
+    if (meta.gpa !== undefined && meta.gpa !== null && meta.gpa !== '') setDetectedGpa(String(meta.gpa));
+    if (meta.catalogYear || meta.catalog_year) setCatalogYear(meta.catalogYear || meta.catalog_year);
+    if (meta.core42Completed !== undefined) setCore42TransferBlock(Boolean(meta.core42Completed));
+
+    setCachedParsedTranscript(parsedTranscript);
+    setIsDataExtracted(true);
+  }, [parsedTranscript]);
+
+  // ---------------------------------------------------------------------------
+  // 7. Modals State
+  // ---------------------------------------------------------------------------
+  // Modal A: Active Term Course Editor
+  const [editActiveTermModalOpen, setEditActiveTermModalOpen] = useState(false);
+  const [activeTermWorkingList, setActiveTermWorkingList] = useState([]);
+  const [activeTermSearchQuery, setActiveTermSearchQuery] = useState('');
+  const [newCourseSessionBand, setNewCourseSessionBand] = useState('Full 16-Week');
+  const [newCourseStatus, setNewCourseStatus] = useState('In-Progress');
 
   useEffect(() => {
-    if (!propConstraints) return;
-    if (propConstraints.modalityPreference) setModalityPreferenceState(propConstraints.modalityPreference);
-    if (propConstraints.summerAvailability) setSummerAvailabilityState(propConstraints.summerAvailability);
-    if (propConstraints.maxSummerCredits !== undefined) setMaxSummerCreditsState(propConstraints.maxSummerCredits);
-    if (propConstraints.pacingMode) setPacingModeState(propConstraints.pacingMode);
-    if (propConstraints.max8wkCredits !== undefined) setMax8wkCreditsState(propConstraints.max8wkCredits);
-    if (propConstraints.max16wkCredits !== undefined) setMax16wkCreditsState(propConstraints.max16wkCredits);
-    if (propConstraints.startSemester) setCalculatedStartSemester(propConstraints.startSemester);
-  }, [propConstraints]);
+    if (editActiveTermModalOpen) {
+      setActiveTermWorkingList(
+        activeTermEnrollment.activeCourses.map((c) => ({
+          ...c,
+          sessionBand: getCourseSessionBandLabel(c),
+          status: c.status || (c.state === 'Completed' ? 'Completed' : c.state === 'Scheduled' ? 'Scheduled' : 'In-Progress')
+        }))
+      );
+      setActiveTermSearchQuery('');
+    }
+  }, [editActiveTermModalOpen, activeTermEnrollment.activeCourses]);
 
-  const [parsingError, setParsingError] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const activeTermSearchResults = useMemo(() => {
+    const q = activeTermSearchQuery.trim().toLowerCase();
+    if (!q || q.length < 2) return [];
+    const all = masterDb?.courses || [];
+    const matched = [];
+    for (const c of all) {
+      if (
+        c.code.toLowerCase().includes(q) ||
+        (c.title && c.title.toLowerCase().includes(q))
+      ) {
+        matched.push(c);
+        if (matched.length >= 25) break;
+      }
+    }
+    return matched;
+  }, [activeTermSearchQuery, masterDb]);
 
-  // Explicit Extraction State & Deterministic Calculated Start Term
-  const [isDataExtracted, setIsDataExtracted] = useState(false);
-  const [extractedSummary, setExtractedSummary] = useState(null);
-  const [calculatedStartSemester, setCalculatedStartSemester] = useState(
-    propConstraints?.startSemester || 'Fall 2026'
-  );
-  const [cachedParsedTranscript, setCachedParsedTranscript] = useState(null);
+  const handleAddCourseToActiveWorking = (catalogCourse) => {
+    const compact = catalogCourse.code.replace(/\s+/g, '').toUpperCase();
+    if (activeTermWorkingList.some((c) => (c.compactCode || c.code.replace(/\s+/g, '').toUpperCase()) === compact)) {
+      return;
+    }
+    const newCourseObj = {
+      code: catalogCourse.code,
+      compactCode: compact,
+      title: catalogCourse.title || catalogCourse.code,
+      credits: Number(catalogCourse.credits) || 3.0,
+      term: newCourseSessionBand === 'Session II 8-Week'
+        ? 'Fall 2026 II 8wk'
+        : newCourseSessionBand === 'Session I 8-Week'
+        ? 'Fall 2026 I 8wk'
+        : 'Fall 2026',
+      semester: 'Fall 2026',
+      sessionBand: newCourseSessionBand,
+      status: newCourseStatus,
+      state: newCourseStatus === 'Completed' ? 'Completed' : newCourseStatus === 'Scheduled' ? 'Scheduled' : 'Current',
+      isActiveTerm: true
+    };
+    setActiveTermWorkingList((prev) => [newCourseObj, ...prev]);
+  };
 
-  // 5-Second Countdown Active Record Clear Modal State
+  const handleRemoveCourseFromActiveWorking = (idx) => {
+    setActiveTermWorkingList((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveActiveTermModal = () => {
+    const existingCourses = currentCourses;
+    const nonActiveCourses = existingCourses.filter((c) => !doesCourseMatchSemester(c, DEFAULT_ACTIVE_TERM_ID));
+
+    const formattedActive = activeTermWorkingList.map((c) => {
+      const compact = (c.compactCode || c.code || '').replace(/\s+/g, '').toUpperCase();
+      const isCompleted = c.status === 'Completed' || c.state === 'Completed';
+      return {
+        ...c,
+        code: c.code,
+        compactCode: compact,
+        title: c.title,
+        credits: Number(c.credits) || 3.0,
+        term: c.sessionBand === 'Session II 8-Week'
+          ? 'Fall 2026 II 8wk'
+          : c.sessionBand === 'Session I 8-Week'
+          ? 'Fall 2026 I 8wk'
+          : 'Fall 2026',
+        semester: 'Fall 2026',
+        sessionBand: c.sessionBand || 'Full 16-Week',
+        state: isCompleted ? 'Completed' : c.status === 'Scheduled' ? 'Scheduled' : 'Current',
+        status: c.status || (isCompleted ? 'Completed' : 'Current'),
+        isActiveTerm: true
+      };
+    });
+
+    const updatedValid = [...nonActiveCourses, ...formattedActive];
+    const newRecord = {
+      ...(cachedParsedTranscript || parsedTranscript || { studentMetadata: {} }),
+      validCourses: updatedValid,
+      completedCourses: updatedValid.filter((c) => c.state === 'Completed' || c.state === 'Transfer'),
+      currentCourses: updatedValid.filter((c) => c.state === 'Current' || c.state === 'Scheduled')
+    };
+
+    setCachedParsedTranscript(newRecord);
+    setIsDataExtracted(true);
+    setEditActiveTermModalOpen(false);
+  };
+
+  // Modal B: Registration Start Term Confirmation Modal
+  const [registrationModalState, setRegistrationModalState] = useState({
+    isOpen: false,
+    regResult: null,
+    selectedTerm: 'Spring 2027 16wk'
+  });
+
+  // Clear Active Student Modal (5-second countdown)
   const [clearModalOpen, setClearModalOpen] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
@@ -552,121 +692,42 @@ export default function Screen1Intake({
     };
   }, [clearModalOpen]);
 
-  useEffect(() => {
-    if (!clearModalOpen) return;
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setClearModalOpen(false);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [clearModalOpen]);
-
-  // Hydrate local state from incoming props when navigating back to Screen 1
-  useEffect(() => {
-    if (!parsedTranscript) return;
-    const meta = parsedTranscript.studentMetadata || {};
-    const name = meta.name || meta.student_name || '';
-    if (name) setStudentName(name);
-    const sId = meta.studentId || meta.student_id || '';
-    if (sId) setStudentId(sId);
-    const gpa = meta.gpa || meta.student_gpa || '';
-    if (gpa !== undefined && gpa !== null && gpa !== '') setDetectedGpa(String(gpa));
-    const adv = meta.advisor || meta.advisor_name || '';
-    if (adv) setAdvisorName(adv);
-    const em = meta.email || meta.student_email || '';
-    if (em) setStudentEmail(em);
-    const ph = meta.phone || meta.student_phone || '';
-    if (ph) setStudentPhone(ph);
-    const catYr = meta.catalogYear || meta.catalog_year || '';
-    if (catYr) setCatalogYear(catYr);
-
-    if (propProgramId) setSelectedProgramId(propProgramId);
-    if (propConstraints) {
-      if (propConstraints.modalityPreference) setModalityPreference(propConstraints.modalityPreference);
-      if (propConstraints.summerAvailability) setSummerAvailability(propConstraints.summerAvailability);
-      if (propConstraints.maxSummerCredits !== undefined) setMaxSummerCredits(propConstraints.maxSummerCredits);
-      if (propConstraints.pacingMode) setPacingMode(propConstraints.pacingMode);
-      if (propConstraints.max8wkCredits !== undefined) setMax8wkCredits(propConstraints.max8wkCredits);
-      if (propConstraints.max16wkCredits !== undefined) setMax16wkCredits(propConstraints.max16wkCredits);
-      if (propConstraints.startSemester) setCalculatedStartSemester(propConstraints.startSemester);
-    }
-
-    const validCourses = parsedTranscript.validCourses || [];
-    const completedCredits = validCourses
-      .filter((c) => c.state === 'Complete' || c.state === 'Transfer')
-      .reduce((s, c) => s + (c.credits || 0), 0);
-    const currentCredits = validCourses
-      .filter((c) => c.state === 'Current' || c.state === 'Scheduled')
-      .reduce((s, c) => s + (c.credits || 0), 0);
-
-    const startSem =
-      propConstraints?.startSemester ||
-      calculatedStartSemester ||
-      calculateStartingSemester(parsedTranscript);
-
-    setExtractedSummary({
-      completedCredits,
-      currentCredits,
-      totalCredits: completedCredits + currentCredits,
-      totalCourses: validCourses.length,
-      calculatedStartSemester: startSem
-    });
-
-    // Restore manual enrolled courses if any
-    const manualEnrolled = validCourses.filter((c) => c.isManualEnrollment);
-    if (manualEnrolled.length > 0) {
-      setActiveEnrolledCourses(manualEnrolled);
-    }
-
-    setCachedParsedTranscript(parsedTranscript);
-    setIsDataExtracted(true);
-  }, [parsedTranscript, propProgramId, propConstraints]);
-
   const handleConfirmClear = () => {
     setClearModalOpen(false);
     setAnthologyFile(null);
     setTranscriptFile(null);
     setDegreePlanFile(null);
-    setOptionAAnthologyFile(null);
-    setOptionATranscriptFile(null);
     setStudentName('');
     setStudentId('');
+    setAdvisorName('');
+    setAdvisorUsername('');
     setDetectedGpa('');
-    setStudentEmail('');
-    setStudentPhone('');
-    setIsDataExtracted(false);
-    setExtractedSummary(null);
     setCachedParsedTranscript(null);
-    setActiveEnrolledCourses([]);
-    setModalityPreferenceState('No Preference (Flexible)');
-    setSummerAvailabilityState('No Summer');
-    setMaxSummerCreditsState(6);
+    setIsDataExtracted(false);
     setPacingModeState('Full-Time');
+    setMin16wkCreditsState(12);
+    setMax16wkCreditsState(15);
     setMax8wkCreditsState(9);
-    setMax16wkCreditsState(18);
-    setCalculatedStartSemester('Fall 2026');
+    setModalityPreferenceState('No Preference (Default)');
+    setSummerAvailabilityState('No Summer (Default)');
+    setMaxSummerCreditsState(6);
     onClearActiveRecord?.();
   };
 
-  const hasActiveRecord = Boolean(parsedTranscript || cachedParsedTranscript);
-
-  // Student Records Verification & SOP Popup Modal State
+  // SOP Help & Wrong Document Modal
   const [documentModalState, setDocumentModalState] = useState({
     isOpen: false,
     isError: false,
-    docType: 'Anthology', // 'Anthology' or 'Transcript'
-    optionLabel: '',
+    docType: 'Anthology',
     fileName: '',
     errorMessage: '',
     missingColumns: []
   });
-  const sopDialogRef = useRef(null);
-  const sopDialogTitleId = useId();
 
-  // Skippable Currency Verification Warning Modal State (Document May Be Out of Date)
+  // Currency Warning Modal
   const [currencyWarningModalState, setCurrencyWarningModalState] = useState({
     isOpen: false,
-    docType: 'Anthology', // 'Anthology' or 'Transcript'
+    docType: 'Anthology',
     fileName: '',
     currentSemester: '',
     latestTermFound: '',
@@ -675,215 +736,11 @@ export default function Screen1Intake({
     onProceed: null,
     onCancel: null
   });
-  const currencyDialogRef = useRef(null);
-  const currencyDialogTitleId = useId();
 
-  useEffect(() => {
-    const dialog = currencyDialogRef.current;
-    if (!dialog) return;
-    if (currencyWarningModalState.isOpen) {
-      if (!dialog.open && typeof dialog.showModal === 'function') {
-        dialog.showModal();
-      }
-    } else if (dialog.open && typeof dialog.close === 'function') {
-      dialog.close();
-    }
-  }, [currencyWarningModalState.isOpen]);
-
-  useEffect(() => {
-    const dialog = currencyDialogRef.current;
-    if (!dialog) return;
-
-    const handleClose = () => {
-      setCurrencyWarningModalState((prev) => (prev.isOpen ? { ...prev, isOpen: false } : prev));
-    };
-    dialog.addEventListener('close', handleClose);
-
-    let handleBackdropClick = null;
-    if (typeof HTMLDialogElement !== 'undefined' && !('closedBy' in HTMLDialogElement.prototype)) {
-      handleBackdropClick = (event) => {
-        if (event.target !== dialog) return;
-        const rect = dialog.getBoundingClientRect();
-        const isDialogContent =
-          rect.top <= event.clientY &&
-          event.clientY <= rect.top + rect.height &&
-          rect.left <= event.clientX &&
-          event.clientX <= rect.left + rect.width;
-        if (!isDialogContent) {
-          dialog.close();
-        }
-      };
-      dialog.addEventListener('click', handleBackdropClick);
-    }
-
-    return () => {
-      dialog.removeEventListener('close', handleClose);
-      if (handleBackdropClick) {
-        dialog.removeEventListener('click', handleBackdropClick);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const dialog = zeroUploadDialogRef.current;
-    if (!dialog) return;
-    if (zeroUploadModalOpen) {
-      if (!dialog.open && typeof dialog.showModal === 'function') {
-        dialog.showModal();
-      }
-    } else if (dialog.open && typeof dialog.close === 'function') {
-      dialog.close();
-    }
-  }, [zeroUploadModalOpen]);
-
-  useEffect(() => {
-    const dialog = zeroUploadDialogRef.current;
-    if (!dialog) return;
-
-    const handleClose = () => {
-      setZeroUploadModalOpen(false);
-    };
-    dialog.addEventListener('close', handleClose);
-
-    let handleBackdropClick = null;
-    if (typeof HTMLDialogElement !== 'undefined' && !('closedBy' in HTMLDialogElement.prototype)) {
-      handleBackdropClick = (event) => {
-        if (event.target !== dialog) return;
-        const rect = dialog.getBoundingClientRect();
-        const isDialogContent =
-          rect.top <= event.clientY &&
-          event.clientY <= rect.top + rect.height &&
-          rect.left <= event.clientX &&
-          event.clientX <= rect.left + rect.width;
-        if (!isDialogContent) {
-          dialog.close();
-        }
-      };
-      dialog.addEventListener('click', handleBackdropClick);
-    }
-
-    return () => {
-      dialog.removeEventListener('close', handleClose);
-      if (handleBackdropClick) {
-        dialog.removeEventListener('click', handleBackdropClick);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const dialog = sopDialogRef.current;
-    if (!dialog) return;
-    if (documentModalState.isOpen) {
-      if (!dialog.open && typeof dialog.showModal === 'function') {
-        dialog.showModal();
-      }
-    } else if (dialog.open && typeof dialog.close === 'function') {
-      dialog.close();
-    }
-  }, [documentModalState.isOpen]);
-
-  // Fallback for browsers without native <dialog closedby="any"> support (per modern-web-guidance)
-  useEffect(() => {
-    const dialog = sopDialogRef.current;
-    if (!dialog) return;
-
-    const handleClose = () => {
-      setDocumentModalState((prev) => (prev.isOpen ? { ...prev, isOpen: false } : prev));
-    };
-    dialog.addEventListener('close', handleClose);
-
-    let handleBackdropClick = null;
-    if (typeof HTMLDialogElement !== 'undefined' && !('closedBy' in HTMLDialogElement.prototype)) {
-      handleBackdropClick = (event) => {
-        if (event.target !== dialog) return;
-        const rect = dialog.getBoundingClientRect();
-        const isDialogContent =
-          rect.top <= event.clientY &&
-          event.clientY <= rect.top + rect.height &&
-          rect.left <= event.clientX &&
-          event.clientX <= rect.left + rect.width;
-        if (!isDialogContent) {
-          dialog.close();
-        }
-      };
-      dialog.addEventListener('click', handleBackdropClick);
-    }
-
-    return () => {
-      dialog.removeEventListener('close', handleClose);
-      if (handleBackdropClick) {
-        dialog.removeEventListener('click', handleBackdropClick);
-      }
-    };
-  }, []);
-
-  const openSopGuideModal = (docType = 'Anthology', optionLabel = 'Student Intake') => {
-    setDocumentModalState({
-      isOpen: true,
-      isError: false,
-      docType,
-      optionLabel,
-      fileName: '',
-      errorMessage: '',
-      missingColumns: []
-    });
-  };
-
-  const openWrongDocumentModal = ({
-    docType = 'Anthology',
-    optionLabel,
-    fileName,
-    errorMessage,
-    missingColumns = []
-  }) => {
-    setDocumentModalState({
-      isOpen: true,
-      isError: true,
-      docType,
-      optionLabel,
-      fileName,
-      errorMessage,
-      missingColumns
-    });
-  };
-
-  // Progressive disclosure flag: true once advisor drops >= 1 student file
-  const hasFiles = Boolean(anthologyFile || transcriptFile);
-
-  // Update pacing linked dropdown defaults when pacingMode changes
-  const handlePacingModeChange = (mode) => {
-    setPacingMode(mode);
-    if (mode === 'Full-Time') {
-      setMax8wkCredits(9);
-      setMax16wkCredits(18);
-    } else {
-      setMax8wkCredits(6);
-      setMax16wkCredits(11);
-    }
-  };
-
-  // Update summer availability and corresponding credit cap
-  const handleSummerChange = (val) => {
-    setSummerAvailability(val);
-    if (val === 'No Summer') setMaxSummerCredits(0);
-    else if (val === 'Yes Summer') setMaxSummerCredits((prev) => (prev > 0 ? prev : 6));
-    else if (val === 'Light Summer') setMaxSummerCredits(3);
-    else if (val === 'Standard Summer') setMaxSummerCredits(6);
-    else if (val === 'Accelerated Summer') setMaxSummerCredits(9);
-  };
-
-  /**
-   * Deterministic parser runner that uses parseAnthologySpreadsheet and/or parseTranscriptPdf
-   * and auto-populates detected student metadata, catalog year, degree, minors, and start term.
-   */
-  const parseFilesAndPopulateMetadata = async (nextAnthologyFile, nextTranscriptFile) => {
-    if (!nextAnthologyFile && !nextTranscriptFile) {
-      setIsDataExtracted(false);
-      setExtractedSummary(null);
-      setCachedParsedTranscript(null);
-      return null;
-    }
-
+  // ---------------------------------------------------------------------------
+  // 8. Document Parsing & Pipeline Helpers
+  // ---------------------------------------------------------------------------
+  const parseFilesAndPopulateMetadata = async (nextAnthologyFile, nextTranscriptFile, nextDegreePlanFile) => {
     setIsProcessing(true);
     setParsingError('');
 
@@ -893,147 +750,159 @@ export default function Screen1Intake({
         advisorName.trim() ||
         (facultyProfile
           ? `${facultyProfile.first_name || ''} ${facultyProfile.last_name || ''}`.trim()
-          : 'Matthias Wood');
+          : '');
 
+      if (nextDegreePlanFile) {
+        const buffer = await nextDegreePlanFile.arrayBuffer();
+        const text = await extractTextFromPdf(buffer);
+        const planPayload = extractPlanPayloadFromPdfText(text);
+
+        if (planPayload) {
+          if (planPayload.studentName || planPayload.studentMetadata?.name) {
+            setStudentName(planPayload.studentName || planPayload.studentMetadata?.name);
+          }
+          if (planPayload.studentId || planPayload.studentMetadata?.studentId) {
+            setStudentId(planPayload.studentId || planPayload.studentMetadata?.studentId);
+          }
+          if (planPayload.advisorName || planPayload.advisorInfo?.name) {
+            setAdvisorName(planPayload.advisorName || planPayload.advisorInfo?.name);
+          }
+          const email = planPayload.advisorEmail || planPayload.advisorInfo?.email || planPayload.advisorInfo?.username || '';
+          if (email) setAdvisorUsername(parseAdvisorEmailUsername(email));
+          if (planPayload.catalogYear) handleCatalogYearChange(planPayload.catalogYear);
+          if (Array.isArray(planPayload.declaredCredentialIds) && planPayload.declaredCredentialIds.length > 0) {
+            setDeclaredProgramIds(planPayload.declaredCredentialIds);
+            setPrimaryProgramId(planPayload.declaredCredentialIds[0]);
+            setSelectedProgramId(planPayload.declaredCredentialIds[0]);
+          }
+          const rules = planPayload.pacingRules || planPayload.intakeConfig || {};
+          if (rules.pacingMode) setPacingMode(rules.pacingMode);
+          if (rules.selectedMin16Wk || rules.min16wkCredits) setMin16wkCredits(rules.selectedMin16Wk || rules.min16wkCredits);
+          if (rules.selectedCap16Wk || rules.max16wkCredits) setMax16wkCredits(rules.selectedCap16Wk || rules.max16wkCredits);
+          if (rules.max8wkCredits !== undefined) setMax8wkCredits(rules.max8wkCredits);
+          if (rules.modalityPreference) setModalityPreference(rules.modalityPreference);
+          if (rules.summerAvailability) setSummerAvailability(rules.summerAvailability);
+          if (rules.maxSummerCredits !== undefined) setMaxSummerCredits(rules.maxSummerCredits);
+
+          if (Array.isArray(planPayload.courses) && planPayload.courses.length > 0) {
+            parsed = {
+              validCourses: planPayload.courses,
+              completedCourses: planPayload.courses.filter((c) => c.state === 'Completed' || c.state === 'Transfer'),
+              currentCourses: planPayload.courses.filter((c) => c.state === 'Current' || c.state === 'Scheduled'),
+              excludedCourses: [],
+              studentMetadata: planPayload.studentMetadata || {}
+            };
+          }
+        } else {
+          const extractedState = await extractStateFromDegreePlanPdf(buffer);
+          if (extractedState?.parsedTranscript) {
+            parsed = extractedState.parsedTranscript;
+          } else if (extractedState?.studentMetadata) {
+            const history = extractedState.auditResult?.normalizedHistory || extractedState.auditResult?.allStudentCourses || [];
+            parsed = {
+              studentMetadata: extractedState.studentMetadata,
+              validCourses: history,
+              completedCourses: history.filter((c) => c.state === 'Complete' || c.state === 'Transfer'),
+              currentCourses: history.filter((c) => c.state === 'Current' || c.state === 'Scheduled'),
+              excludedCourses: []
+            };
+          }
+        }
+      }
+
+      // If anthology and/or transcript files are provided, parse/merge them
       if (nextAnthologyFile && !nextTranscriptFile) {
         const buffer = await nextAnthologyFile.arrayBuffer();
         const ext = '.' + nextAnthologyFile.name.split('.').pop().toLowerCase();
         parsed = parseAnthologySpreadsheet(buffer, ext, {
           referenceYear: 2026,
           masterDb,
-          studentMetadata: {
-            advisor: defaultAdvisor
-          }
+          studentMetadata: { advisor: defaultAdvisor }
         });
       } else if (nextTranscriptFile && !nextAnthologyFile) {
         const pdfBytes = await nextTranscriptFile.arrayBuffer();
         parsed = await parseTranscriptPdf(pdfBytes, {
           referenceYear: 2026,
           masterDb,
-          studentMetadata: {
-            advisor: defaultAdvisor
-          }
+          studentMetadata: { advisor: defaultAdvisor }
         });
-      } else {
-        const anthologyBufferOrString = await nextAnthologyFile.arrayBuffer();
+      } else if (nextAnthologyFile && nextTranscriptFile) {
+        const anthologyBuffer = await nextAnthologyFile.arrayBuffer();
         const pdfBytes = await nextTranscriptFile.arrayBuffer();
         const transcriptText = await extractTextFromPdf(pdfBytes);
         parsed = parseCombinedStudentRecords({
-          anthologyBufferOrString,
+          anthologyBufferOrString: anthologyBuffer,
           transcriptText,
           options: {
             referenceYear: 2026,
             masterDb,
-            studentMetadata: {
-              advisor: defaultAdvisor
-            }
+            studentMetadata: { advisor: defaultAdvisor }
           }
         });
       }
 
-      const meta = parsed.studentMetadata || {};
-      const resolvedName = meta.student_name || meta.name || studentName || generateDefaultStudentName();
-      const resolvedId = meta.student_id || meta.studentId || studentId || '';
-      const resolvedGpa =
-        meta.student_gpa !== null && meta.student_gpa !== undefined
-          ? String(meta.student_gpa)
-          : meta.gpa || '';
-
-      setStudentName(resolvedName);
-      if (resolvedId) setStudentId(resolvedId);
-      setAdvisorName(defaultAdvisor);
-      if (resolvedGpa) setDetectedGpa(resolvedGpa);
-
-      parsed.studentMetadata = {
-        ...meta,
-        name: resolvedName,
-        studentId: resolvedId,
-        advisor: defaultAdvisor,
-        gpa: resolvedGpa || meta.gpa
-      };
-
-      // Section 1.2 Auto-detect Catalog Year & Primary Major from parsed record
-      let targetCatalogYear = catalogYear;
-      const inferredYr = meta.catalog_year || meta.catalogYear;
-      if (inferredYr) {
-        const startYr = parseInt(String(inferredYr).split('-')[0], 10);
-        if (!Number.isNaN(startYr)) {
-          setMinCatalogYearStart(Math.max(2024, Math.min(2026, startYr)));
+      if (parsed) {
+        const meta = parsed.studentMetadata || {};
+        if (meta.student_name || meta.name) {
+          setStudentName(meta.student_name || meta.name);
         }
-        if (['2024-2025', '2025-2026', '2026-2027'].includes(inferredYr)) {
+        if (meta.student_id || meta.studentId) {
+          setStudentId(meta.student_id || meta.studentId);
+        }
+        if (meta.advisor || meta.advisor_name) {
+          setAdvisorName(meta.advisor || meta.advisor_name);
+        }
+        const parsedAdvEmail = meta.advisorEmail || meta.advisor_email || meta.email || '';
+        if (parsedAdvEmail) {
+          setAdvisorUsername(parseAdvisorEmailUsername(parsedAdvEmail));
+        }
+        if (meta.gpa !== undefined && meta.gpa !== null && meta.gpa !== '') {
+          setDetectedGpa(String(meta.gpa));
+        }
+
+        // Program auto-matching if available
+        let targetCatalogYear = catalogYear;
+        const inferredYr = meta.catalog_year || meta.catalogYear;
+        if (inferredYr && ['2024-2025', '2025-2026', '2026-2027'].includes(inferredYr)) {
           targetCatalogYear = inferredYr;
           setCatalogYear(inferredYr);
-        } else if (inferredYr === '2023-2024') {
-          targetCatalogYear = '2024-2025';
-          setCatalogYear('2024-2025');
         }
-      }
 
-      const detectedMajorStr = (meta.program || meta.major || '').toLowerCase();
-      const detectedProgCode = (meta.programCode || '').toUpperCase();
-      const minorsList = [
-        ...(meta.declaredMinors || []),
-        ...(meta.concentrations || [])
-      ].filter(Boolean);
-      const uniqueMinors = Array.from(new Set(minorsList));
+        const detectedMajorStr = (meta.program || meta.major || '').toLowerCase();
+        const detectedProgCode = (meta.programCode || '').toUpperCase();
+        const availableProgs = (masterDb.programs || []).filter(
+          (p) => p.catalog_year_id === targetCatalogYear
+        );
 
-      const availableProgs = (masterDb.programs || []).filter(
-        (p) => p.catalog_year_id === targetCatalogYear
-      );
-      if (availableProgs.length > 0) {
-        let matchedProg = null;
-        if (detectedProgCode.includes('CYBSC') || detectedMajorStr.includes('cybersecurity')) {
-          matchedProg = availableProgs.find((p) => p.name.toLowerCase().includes('cybersecurity'));
-        } else if (
-          detectedProgCode.includes('INTECH') ||
-          detectedMajorStr.includes('information technology')
-        ) {
-          const minorsStr = uniqueMinors.join(' ').toLowerCase();
-          if (minorsStr.includes('networking')) {
-            matchedProg = availableProgs.find((p) => p.name.toLowerCase().includes('networking'));
-          } else {
+        if (availableProgs.length > 0) {
+          let matchedProg = null;
+          if (detectedProgCode.includes('CYBSC') || detectedMajorStr.includes('cybersecurity')) {
+            matchedProg = availableProgs.find((p) => p.name.toLowerCase().includes('cybersecurity'));
+          } else if (detectedProgCode.includes('INTECH') || detectedMajorStr.includes('information technology')) {
+            if (detectedMajorStr.includes('networking')) {
+              matchedProg = availableProgs.find((p) => p.name.toLowerCase().includes('networking'));
+            } else {
+              matchedProg = availableProgs.find((p) =>
+                p.name.toLowerCase().includes('applications development') ||
+                p.name.toLowerCase().includes('information technology')
+              );
+            }
+          } else if (detectedMajorStr) {
             matchedProg = availableProgs.find((p) =>
-              p.name.toLowerCase().includes('applications development') ||
-              p.name.toLowerCase().includes('information technology')
+              p.name.toLowerCase().includes(detectedMajorStr.replace(/\s+bs$/i, '').trim())
             );
           }
-        } else if (detectedMajorStr) {
-          matchedProg = availableProgs.find((p) =>
-            p.name.toLowerCase().includes(detectedMajorStr.replace(/\s+bs$/i, '').trim())
-          );
+          if (matchedProg) {
+            setSelectedProgramId(matchedProg.id);
+          }
         }
-        if (matchedProg) {
-          setSelectedProgramId(matchedProg.id);
-        } else if (!availableProgs.some((p) => p.id === selectedProgramId)) {
-          setSelectedProgramId(availableProgs[0].id);
-        }
+
+        setCachedParsedTranscript(parsed);
+        setIsDataExtracted(true);
+        return parsed;
       }
 
-      if (uniqueMinors.length > 0) {
-        setAdditionalPrograms(uniqueMinors);
-      }
-
-      const startSem = calculateStartingSemester(parsed);
-      setCalculatedStartSemester(startSem);
-
-      const completedCredits = (parsed.validCourses || [])
-        .filter((c) => c.state === 'Complete' || c.state === 'Completed' || c.state === 'Transfer' || c.state === 'TR')
-        .reduce((s, c) => s + (c.credits || 0), 0);
-      const currentCredits = (parsed.validCourses || [])
-        .filter((c) => c.state === 'Current' || c.state === 'Scheduled')
-        .reduce((s, c) => s + (c.credits || 0), 0);
-
-      setExtractedSummary({
-        completedCredits,
-        currentCredits,
-        totalCredits: completedCredits + currentCredits,
-        totalCourses: parsed.validCourses?.length || 0,
-        calculatedStartSemester: startSem
-      });
-
-      setCachedParsedTranscript(parsed);
-      setIsDataExtracted(true);
-      return parsed;
+      return null;
     } catch (err) {
       setParsingError(`Extraction Error: ${err.message}`);
       return null;
@@ -1042,38 +911,22 @@ export default function Screen1Intake({
     }
   };
 
-  /**
-   * Shared deterministic verification check for Anthology .xlsx / .csv uploads
-   * used identically by both Option A and Option B.
-   */
-  const verifyAndAssignAnthologyFile = async (file, optionKey) => {
-    const optionLabel = optionKey === 'A' ? 'Option A (Returning Student Plan)' : 'Option B (New Student Audit)';
+  const handleAnthologyFileChange = async (file) => {
     if (!file) {
-      if (optionKey === 'A') {
-        setOptionAAnthologyFile(null);
-      } else {
-        setAnthologyFile(null);
-        await parseFilesAndPopulateMetadata(null, transcriptFile);
-      }
-      setParsingError('');
+      setAnthologyFile(null);
+      await parseFilesAndPopulateMetadata(null, transcriptFile, degreePlanFile);
       return;
     }
-
     try {
       const buffer = await file.arrayBuffer();
       const verification = verifyAnthologySpreadsheet(buffer);
       if (!verification.isValid) {
-        if (optionKey === 'A') {
-          setOptionAAnthologyFile(null);
-        } else {
-          setAnthologyFile(null);
-          setIsDataExtracted(false);
-          setExtractedSummary(null);
-        }
+        setAnthologyFile(null);
         setParsingError(verification.errorMessage);
-        openWrongDocumentModal({
+        setDocumentModalState({
+          isOpen: true,
+          isError: true,
           docType: 'Anthology',
-          optionLabel,
           fileName: file.name,
           errorMessage: verification.errorMessage,
           missingColumns: verification.missingColumns || []
@@ -1081,19 +934,14 @@ export default function Screen1Intake({
         return;
       }
 
-      setParsingError('');
       const ext = '.' + file.name.split('.').pop().toLowerCase();
       const parsedPreview = parseAnthologySpreadsheet(buffer, ext, { masterDb });
       const currencyCheck = verifyDocumentCurrency(parsedPreview, 'Anthology');
 
       const applyAnthology = async () => {
         setParsingError('');
-        if (optionKey === 'A') {
-          setOptionAAnthologyFile(file);
-        } else {
-          setAnthologyFile(file);
-          await parseFilesAndPopulateMetadata(file, transcriptFile);
-        }
+        setAnthologyFile(file);
+        await parseFilesAndPopulateMetadata(file, transcriptFile, degreePlanFile);
       };
 
       if (!currencyCheck.isCurrent) {
@@ -1106,53 +954,24 @@ export default function Screen1Intake({
           printedDate: '',
           explanation: currencyCheck.explanation,
           onProceed: applyAnthology,
-          onCancel: () => {
-            if (optionKey === 'A') {
-              setOptionAAnthologyFile(null);
-            } else {
-              setAnthologyFile(null);
-            }
-          }
+          onCancel: () => setAnthologyFile(null)
         });
         return;
       }
 
       await applyAnthology();
     } catch (err) {
-      if (optionKey === 'A') {
-        setOptionAAnthologyFile(null);
-      } else {
-        setAnthologyFile(null);
-      }
-      const msg = `Unable to verify Anthology file "${file.name}": ${err.message}`;
-      setParsingError(msg);
-      openWrongDocumentModal({
-        docType: 'Anthology',
-        optionLabel,
-        fileName: file.name,
-        errorMessage: msg,
-        missingColumns: []
-      });
+      setAnthologyFile(null);
+      setParsingError(`Unable to process Anthology file: ${err.message}`);
     }
   };
 
-  /**
-   * Shared deterministic verification check for Unofficial Transcript .pdf uploads
-   * used identically by both Option A and Option B.
-   */
-  const verifyAndAssignTranscriptFile = async (file, optionKey) => {
-    const optionLabel = optionKey === 'A' ? 'Option A (Returning Student Plan)' : 'Option B (New Student Audit)';
+  const handleTranscriptFileChange = async (file) => {
     if (!file) {
-      if (optionKey === 'A') {
-        setOptionATranscriptFile(null);
-      } else {
-        setTranscriptFile(null);
-        await parseFilesAndPopulateMetadata(anthologyFile, null);
-      }
-      setParsingError('');
+      setTranscriptFile(null);
+      await parseFilesAndPopulateMetadata(anthologyFile, null, degreePlanFile);
       return;
     }
-
     try {
       const buffer = await file.arrayBuffer();
       const parsedPreview = await parseTranscriptPdf(buffer, { masterDb });
@@ -1160,17 +979,12 @@ export default function Screen1Intake({
       const verification = verifyTranscriptText(text);
 
       if (!verification.isValid) {
-        if (optionKey === 'A') {
-          setOptionATranscriptFile(null);
-        } else {
-          setTranscriptFile(null);
-          setIsDataExtracted(false);
-          setExtractedSummary(null);
-        }
+        setTranscriptFile(null);
         setParsingError(verification.errorMessage);
-        openWrongDocumentModal({
+        setDocumentModalState({
+          isOpen: true,
+          isError: true,
           docType: 'Transcript',
-          optionLabel,
           fileName: file.name,
           errorMessage: verification.errorMessage,
           missingColumns: []
@@ -1178,17 +992,11 @@ export default function Screen1Intake({
         return;
       }
 
-      setParsingError('');
       const currencyCheck = verifyDocumentCurrency(parsedPreview, 'Transcript');
-
       const applyTranscript = async () => {
         setParsingError('');
-        if (optionKey === 'A') {
-          setOptionATranscriptFile(file);
-        } else {
-          setTranscriptFile(file);
-          await parseFilesAndPopulateMetadata(anthologyFile, file);
-        }
+        setTranscriptFile(file);
+        await parseFilesAndPopulateMetadata(anthologyFile, file, degreePlanFile);
       };
 
       if (!currencyCheck.isCurrent) {
@@ -1201,594 +1009,178 @@ export default function Screen1Intake({
           printedDate: currencyCheck.printedDate,
           explanation: currencyCheck.explanation,
           onProceed: applyTranscript,
-          onCancel: () => {
-            if (optionKey === 'A') {
-              setOptionATranscriptFile(null);
-            } else {
-              setTranscriptFile(null);
-            }
-          }
+          onCancel: () => setTranscriptFile(null)
         });
         return;
       }
 
       await applyTranscript();
     } catch (err) {
-      if (optionKey === 'A') {
-        setOptionATranscriptFile(null);
-      } else {
-        setTranscriptFile(null);
-      }
-      const msg = `Unable to verify Unofficial Transcript PDF "${file.name}": ${err.message}`;
-      setParsingError(msg);
-      openWrongDocumentModal({
-        docType: 'Transcript',
-        optionLabel,
-        fileName: file.name,
-        errorMessage: msg,
-        missingColumns: []
-      });
+      setTranscriptFile(null);
+      setParsingError(`Unable to process Unofficial Transcript: ${err.message}`);
     }
   };
 
-  const handleOptionAAnthologyFileChange = (f) => {
-    verifyAndAssignAnthologyFile(f, 'A');
-  };
-
-  const handleAnthologyFileChange = (f) => {
-    verifyAndAssignAnthologyFile(f, 'B');
-  };
-
-  const handleOptionATranscriptFileChange = (f) => {
-    verifyAndAssignTranscriptFile(f, 'A');
-  };
-
-  const handleTranscriptFileChange = (f) => {
-    verifyAndAssignTranscriptFile(f, 'B');
-  };
-
-  const handleAnthologyDropzoneError = (msg, optionKey) => {
-    setParsingError(msg);
-    if (msg) {
-      const optionLabel =
-        optionKey === 'A' ? 'Option A (Returning Student Plan)' : 'Option B (New Student Audit)';
-      openWrongDocumentModal({
-        docType: 'Anthology',
-        optionLabel,
-        fileName: 'Unsupported File Format',
-        errorMessage: msg,
-        missingColumns: []
-      });
-    }
-  };
-
-  const handleTranscriptDropzoneError = (msg, optionKey) => {
-    setParsingError(msg);
-    if (msg) {
-      const optionLabel =
-        optionKey === 'A' ? 'Option A (Returning Student Plan)' : 'Option B (New Student Audit)';
-      openWrongDocumentModal({
-        docType: 'Transcript',
-        optionLabel,
-        fileName: 'Unsupported File Format',
-        errorMessage: msg,
-        missingColumns: []
-      });
-    }
-  };
-
-  // Explicit Extract Records Action
-  const handleExtractRecords = async () => {
-    if (!anthologyFile && !transcriptFile) {
-      setParsingError('Please upload at least 1 student record document (.xlsx, .csv, or .pdf).');
+  const handleDegreePlanFileChange = async (file) => {
+    if (!file) {
+      setDegreePlanFile(null);
+      await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile, null);
       return;
     }
-    await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile);
+    setDegreePlanFile(file);
+    await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile, file);
   };
 
-  // Handle Option A Submission (Reload from exported PDF)
-  const handleReloadOptionA = async (e) => {
-    e.preventDefault();
-    if (!degreePlanFile) {
-      setParsingError('Please select a previously exported Degree Plan PDF (.pdf).');
-      return;
-    }
-
-    setIsProcessing(true);
-    setParsingError('');
-
-    try {
-      const buffer = await degreePlanFile.arrayBuffer();
-      const extractedState = await extractStateFromDegreePlanPdf(buffer);
-
-      if (!extractedState || !extractedState.auditResult || !extractedState.schedule) {
-        setParsingError(
-          'Could not find DegreePlanState metadata in this PDF. Please ensure this PDF was generated by this Degree Planner.'
-        );
-        setIsProcessing(false);
-        return;
-      }
-
-      // If newer optional student records were uploaded in Option A, verify and parse them using the exact same engine
-      if (optionAAnthologyFile || optionATranscriptFile) {
-        let updatedParsed = null;
-        if (optionAAnthologyFile && !optionATranscriptFile) {
-          const anthologyBuf = await optionAAnthologyFile.arrayBuffer();
-          const verification = verifyAnthologySpreadsheet(anthologyBuf);
-          if (!verification.isValid) {
-            setOptionAAnthologyFile(null);
-            setParsingError(verification.errorMessage);
-            openWrongDocumentModal({
-              docType: 'Anthology',
-              optionLabel: 'Option A (Returning Student Plan)',
-              fileName: optionAAnthologyFile.name,
-              errorMessage: verification.errorMessage,
-              missingColumns: verification.missingColumns || []
-            });
-            setIsProcessing(false);
-            return;
-          }
-          const ext = '.' + optionAAnthologyFile.name.split('.').pop().toLowerCase();
-          updatedParsed = parseAnthologySpreadsheet(anthologyBuf, ext, {
-            referenceYear: 2026,
-            masterDb,
-            studentMetadata: extractedState.studentMetadata || {}
-          });
-        } else if (optionATranscriptFile && !optionAAnthologyFile) {
-          const pdfBytes = await optionATranscriptFile.arrayBuffer();
-          updatedParsed = await parseTranscriptPdf(pdfBytes, {
-            referenceYear: 2026,
-            masterDb,
-            studentMetadata: extractedState.studentMetadata || {}
-          });
-        } else {
-          const anthologyBuf = await optionAAnthologyFile.arrayBuffer();
-          const pdfBytes = await optionATranscriptFile.arrayBuffer();
-          const transcriptText = await extractTextFromPdf(pdfBytes);
-          updatedParsed = parseCombinedStudentRecords({
-            anthologyBufferOrString: anthologyBuf,
-            transcriptText,
-            options: {
-              referenceYear: 2026,
-              masterDb,
-              studentMetadata: extractedState.studentMetadata || {}
-            }
-          });
-        }
-
-        extractedState.parsedTranscript = updatedParsed;
-        extractedState.studentMetadata = {
-          ...extractedState.studentMetadata,
-          ...updatedParsed.studentMetadata
-        };
-      }
-
-      onReloadPdfState(extractedState);
-    } catch (err) {
-      setParsingError(`Failed to parse PDF metadata: ${err.message}`);
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleReExtract = async () => {
+    await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile, degreePlanFile);
   };
 
-  // Available courses for Currently Enrolled Courses Tray (Workflow B)
-  const availableTrayCourses = React.useMemo(() => {
-    const currentProg = (masterDb?.programs || []).find((p) => p.id === selectedProgramId);
-    const catalogMap = new Map();
-    for (const c of masterDb?.courses || []) {
-      catalogMap.set(c.code.toUpperCase().replace(/\s+/g, ''), c);
-    }
+  // ---------------------------------------------------------------------------
+  // 9. Run Degree Audit Workflow & Modal B Integration
+  // ---------------------------------------------------------------------------
+  const proceedWithAudit = (parsedRecord, startTerm) => {
+    const effectiveStudentName = studentName.trim();
+    const effectiveStudentId = studentId.trim();
+    const effectiveAdvisor = advisorName.trim();
+    const effectiveAdvisorEmail = formatFullAdvisorEmail(advisorUsername);
 
-    const majorList = [];
-    if (currentProg?.requirements) {
-      const req = currentProg.requirements;
-      const processCourse = (item, catLabel) => {
-        const code = typeof item === 'string' ? item : item.code;
-        if (!code || code.startsWith('REQ_') || code.includes('ELECTIVE') || code.includes('GE-MATH') || dbAdapter.isPlaceholder(code)) return;
-        const compact = code.toUpperCase().replace(/\s+/g, '');
-        const catalogCourse = catalogMap.get(compact);
-        if (catalogCourse?.type === 'placeholder') return;
-        majorList.push({
-          code: catalogCourse?.code || code,
-          compactCode: compact,
-          title: catalogCourse?.title || (typeof item === 'object' ? item.title : code),
-          credits:
-            catalogCourse?.credits !== undefined
-              ? Number(catalogCourse.credits)
-              : typeof item === 'object' && item.credits
-              ? Number(item.credits)
-              : 3.0,
-          department: catalogCourse?.department || code.split(' ')[0],
-          number: catalogCourse?.number || parseInt(code.replace(/\D/g, ''), 10) || 10000,
-          category: catLabel,
-          type: 'concrete',
-          hasHDAttribute: Boolean(
-            catalogCourse?.hasHDAttribute || /\/HD\b/i.test(catalogCourse?.title || '')
-          )
-        });
+    let finalParsed = parsedRecord;
+    if (!finalParsed) {
+      finalParsed = {
+        studentMetadata: {},
+        validCourses: [],
+        completedCourses: [],
+        currentCourses: [],
+        excludedCourses: [],
+        summary: { totalCredits: 0, completedCredits: 0, currentCredits: 0, transferCredits: 0 }
       };
-
-      for (const c of req.major_core_courses || []) processCourse(c, 'Major Core');
-      for (const c of req.emphasis_courses || []) processCourse(c, 'Emphasis');
-      for (const c of req.math_courses || []) processCourse(c, 'Math Requirement');
     }
 
-    // Deduplicate major requirements by compactCode
-    const seenCodes = new Set();
-    const dedupedMajor = [];
-    for (const c of majorList) {
-      if (!seenCodes.has(c.compactCode)) {
-        seenCodes.add(c.compactCode);
-        dedupedMajor.push(c);
-      }
-    }
-
-    // Foundational concrete General Education courses
-    const concreteGeCodes = ['ENGL 15000', 'ENGL 17000', 'MTH 14100'];
-    const concreteGeList = concreteGeCodes.map((code) => {
-      const compact = code.replace(/\s+/g, '').toUpperCase();
-      const cat = catalogMap.get(compact);
-      return {
-        code: cat?.code || code,
-        compactCode: compact,
-        title: cat?.title || code,
-        credits: cat?.credits !== undefined ? Number(cat.credits) : 3.0,
-        department: cat?.department || code.split(' ')[0],
-        number: cat?.number || parseInt(code.replace(/\D/g, ''), 10) || 10000,
-        category: 'General Education',
-        type: 'concrete',
-        hasHDAttribute: Boolean(cat?.hasHDAttribute || /\/HD\b/i.test(cat?.title || ''))
-      };
-    });
-
-    // Dynamic canonical placeholders from dbAdapter (or seedData fallback)
-    const rawPlaceholders =
-      dbPlaceholders.length > 0
-        ? dbPlaceholders
-        : dbAdapter.getPlaceholdersSync();
-
-    const placeholderList = rawPlaceholders
-      .filter(
-        (p) =>
-          p.placeholder_category === 'ge_bucket' ||
-          p.placeholder_category === 'free_elective' ||
-          p.placeholder_category === 'elective_gap'
-      )
-      .map((p) => {
-        const compact = p.code.replace(/\s+/g, '').toUpperCase();
-        return {
-          code: p.code,
-          compactCode: compact,
-          title: p.title,
-          credits: Number(p.credits) || 3.0,
-          department: p.department || (p.code.startsWith('REQ_GE') ? 'GE' : 'ELEC'),
-          number: p.number || (p.code.includes('UPPER') ? 30000 : 10000),
-          category:
-            p.placeholder_category === 'ge_bucket'
-              ? 'General Education'
-              : 'General Elective',
-          type: 'placeholder',
-          isPlaceholder: true,
-          ge_bucket_id: p.ge_bucket_id || null,
-          hasHDAttribute: Boolean(p.hasHDAttribute || /\/HD\b/i.test(p.title || ''))
-        };
-      });
-
-    const geList = [...concreteGeList, ...placeholderList];
-
-    const majorKeys = new Set(dedupedMajor.map((c) => c.compactCode));
-    const filteredGe = geList.filter((c) => !majorKeys.has(c.compactCode));
-
-    let combined = [];
-    if (trayTab === 'major') combined = dedupedMajor;
-    else if (trayTab === 'ge') combined = geList;
-    else combined = [...dedupedMajor, ...filteredGe];
-
-    if (!traySearch.trim()) return combined;
-
-    const q = traySearch.trim().toLowerCase();
-    const matched = combined.filter(
-      (c) => c.code.toLowerCase().includes(q) || c.title.toLowerCase().includes(q)
-    );
-
-    if (q.length >= 3) {
-      const extra = [];
-      const existingKeys = new Set(matched.map((c) => c.compactCode));
-      for (const catCourse of masterDb?.courses || []) {
-        const compact = catCourse.code.toUpperCase().replace(/\s+/g, '');
-        if (
-          !existingKeys.has(compact) &&
-          (catCourse.code.toLowerCase().includes(q) || catCourse.title.toLowerCase().includes(q))
-        ) {
-          extra.push({
-            code: catCourse.code,
-            compactCode: compact,
-            title: catCourse.title,
-            credits: Number(catCourse.credits) || 3.0,
-            department: catCourse.department || catCourse.code.split(' ')[0],
-            number: catCourse.number || 10000,
-            category: catCourse.type === 'placeholder' ? 'Requirement Placeholder' : 'Catalog Course',
-            type: catCourse.type || 'concrete',
-            isPlaceholder: catCourse.type === 'placeholder',
-            ge_bucket_id: catCourse.ge_bucket_id || null,
-            hasHDAttribute: Boolean(
-              catCourse.hasHDAttribute || /\/HD\b/i.test(catCourse.title || '')
-            )
-          });
-          if (extra.length >= 10) break;
-        }
-      }
-      return [...matched, ...extra];
-    }
-
-    return matched;
-  }, [masterDb, selectedProgramId, trayTab, traySearch, dbPlaceholders]);
-
-  const handleAddEnrolledCourse = (c) => {
-    if (activeEnrolledCourses.some((item) => item.compactCode === c.compactCode)) return;
-    const currentSem = getCurrentAcademicSemester(new Date());
-    const isPh = Boolean(c.isPlaceholder || c.type === 'placeholder' || c.code?.startsWith('REQ_') || dbAdapter.isPlaceholder(c.code));
-    const newCourse = {
-      code: c.code,
-      compactCode: c.compactCode || c.code.replace(/\s+/g, '').toUpperCase(),
-      department: c.department || c.code.split(' ')[0],
-      number: c.number || parseInt(c.code.replace(/\D/g, ''), 10) || 10000,
-      title: c.title,
-      credits: Number(c.credits) || 3.0,
-      grade: 'Current',
-      state: 'Current',
-      term: `${currentSem.season.toUpperCase()}_${String(currentSem.year).slice(-2)}_16W`,
-      termInfo: {
-        season: currentSem.season,
-        year: currentSem.year,
-        session: '16W',
-        duration: '16W',
-        isTransfer: false
-      },
-      isManualEnrollment: true,
-      type: isPh ? 'placeholder' : 'concrete',
-      isPlaceholder: isPh,
-      ge_bucket_id: c.ge_bucket_id || null,
-      hasHDAttribute: Boolean(c.hasHDAttribute || /\/HD\b/i.test(c.title || ''))
+    finalParsed.studentMetadata = {
+      ...(finalParsed.studentMetadata || {}),
+      name: effectiveStudentName || finalParsed.studentMetadata?.name || '',
+      student_name: effectiveStudentName || finalParsed.studentMetadata?.student_name || '',
+      studentId: effectiveStudentId || finalParsed.studentMetadata?.studentId || '',
+      student_id: effectiveStudentId || finalParsed.studentMetadata?.student_id || '',
+      advisor: effectiveAdvisor || finalParsed.studentMetadata?.advisor || '',
+      advisorName: effectiveAdvisor || finalParsed.studentMetadata?.advisorName || '',
+      email: effectiveAdvisorEmail || finalParsed.studentMetadata?.email || '',
+      advisorEmail: effectiveAdvisorEmail || finalParsed.studentMetadata?.advisorEmail || '',
+      gpa: detectedGpa || finalParsed.studentMetadata?.gpa || '',
+      catalogYear,
+      pacingMode,
+      major: (masterDb.programs || []).find((p) => p.id === selectedProgramId)?.name || '',
+      core42Completed: core42TransferBlock,
+      declaredPrograms: declaredProgramIds
     };
-    setActiveEnrolledCourses((prev) => [...prev, newCourse]);
-  };
-
-  const handleRemoveEnrolledCourse = (compactCode) => {
-    setActiveEnrolledCourses((prev) => prev.filter((c) => c.compactCode !== compactCode));
-  };
-
-  const handleDropEnrolledCourse = (e) => {
-    try {
-      const raw = e.dataTransfer.getData('application/json');
-      if (raw) {
-        const c = JSON.parse(raw);
-        if (c && c.code) {
-          handleAddEnrolledCourse(c);
-        }
-      }
-    } catch (err) {
-      console.warn('Drop error:', err);
-    }
-  };
-
-  // Zero-Upload Flow: Advance directly to Degree Plan with clean degree audit
-  const handleProceedZeroUpload = () => {
-    setZeroUploadModalOpen(false);
-    const effectiveStudentName =
-      studentName.trim() || generateDefaultStudentName();
-    const defaultAdvisor =
-      advisorName.trim() ||
-      (facultyProfile
-        ? `${facultyProfile.first_name || ''} ${facultyProfile.last_name || ''}`.trim()
-        : 'Matthias Wood');
-
-    const totalEnrolledCredits = activeEnrolledCourses.reduce((s, c) => s + (c.credits || 0), 0);
-    const cleanParsed = {
-      studentMetadata: {
-        name: effectiveStudentName,
-        student_name: effectiveStudentName,
-        studentId: studentId.trim(),
-        student_id: studentId.trim(),
-        advisor: defaultAdvisor,
-        email: studentEmail.trim() || facultyProfile?.email || '',
-        phone: studentPhone.trim(),
-        gpa: '',
-        catalogYear,
-        pacingMode,
-        major: (masterDb?.programs || []).find((p) => p.id === selectedProgramId)?.name || ''
-      },
-      validCourses: [...activeEnrolledCourses],
-      completedCourses: [],
-      currentCourses: [...activeEnrolledCourses],
-      excludedCourses: [],
-      summary: {
-        totalCredits: totalEnrolledCredits,
-        completedCredits: 0,
-        currentCredits: totalEnrolledCredits,
-        transferCredits: 0,
-        residentCredits: totalEnrolledCredits,
-        upperLevelCredits: activeEnrolledCourses
-          .filter((c) => (c.number || 0) >= 30000)
-          .reduce((s, c) => s + (c.credits || 0), 0),
-        humanDiversityCourses: activeEnrolledCourses.filter((c) => c.hasHDAttribute).length
-      }
-    };
-
-    cleanParsed.studentMetadata.core42Completed = core42TransferBlock;
-    cleanParsed.studentMetadata.declaredPrograms = declaredProgramIds;
 
     onIntakeComplete({
-      parsedTranscript: cleanParsed,
+      parsedTranscript: finalParsed,
       selectedProgramId,
-      additionalPrograms,
+      additionalPrograms: declaredPrograms.filter((p) => p.id !== selectedProgramId).map((p) => p.name),
       declaredPrograms: declaredProgramIds,
       core42Completed: core42TransferBlock,
       constraints: {
-        startSemester: calculatedStartSemester || 'Spring 2027',
+        startSemester: startTerm || 'Spring 2027 16wk',
         modalityPreference,
         summerAvailability,
-        maxSummerCredits: summerAvailability === 'No Summer' ? 0 : Number(maxSummerCredits) || 6,
+        maxSummerCredits: summerAvailability === 'Yes Summer' ? Number(maxSummerCredits) || 6 : 0,
         pacingMode,
-        max8wkCredits,
-        max16wkCredits,
+        min16wkCredits: Number(min16wkCredits) || 12,
+        max16wkCredits: Number(max16wkCredits) || 15,
+        max8wkCredits: Number(max8wkCredits) || 9,
         core42Completed: core42TransferBlock
-      },
-      directToSchedule: true
+      }
     });
   };
 
-  // Handle Option B Submission (New Student Audit)
-  const handleAuditOptionB = async (e) => {
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
-    if (!anthologyFile && !transcriptFile && !cachedParsedTranscript && !parsedTranscript) {
-      setZeroUploadModalOpen(true);
-      return;
-    }
-
+  const handleRunDegreeAudit = async () => {
     setIsProcessing(true);
     setParsingError('');
 
     try {
       let parsed = cachedParsedTranscript || parsedTranscript;
-      if (!parsed && (anthologyFile || transcriptFile)) {
-        parsed = await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile);
+      if (!parsed && (anthologyFile || transcriptFile || degreePlanFile)) {
+        parsed = await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile, degreePlanFile);
       }
-      if (!parsed) {
+
+      const activeList = parsed?.validCourses || [];
+      const regResult = resolveRegistrationStartTerm({
+        courses: activeList,
+        referenceDate: DEFAULT_REFERENCE_DATE
+      });
+
+      if (regResult.requiresManualSelection) {
+        setRegistrationModalState({
+          isOpen: true,
+          regResult,
+          selectedTerm: regResult.startTerm || 'Spring 2027 16wk'
+        });
         setIsProcessing(false);
         return;
       }
 
-      // Merge manually designated currently enrolled courses (Workflow B)
-      if (activeEnrolledCourses.length > 0) {
-        const existingCompact = new Set(
-          (parsed.validCourses || []).map((c) => c.compactCode)
-        );
-        const toAdd = activeEnrolledCourses.filter((c) => !existingCompact.has(c.compactCode));
-        if (toAdd.length > 0) {
-          parsed.validCourses = [...(parsed.validCourses || []), ...toAdd];
-          parsed.currentCourses = [...(parsed.currentCourses || []), ...toAdd];
-          const addedCr = toAdd.reduce((s, c) => s + (c.credits || 0), 0);
-          if (parsed.summary) {
-            parsed.summary.currentCredits = (parsed.summary.currentCredits || 0) + addedCr;
-            parsed.summary.totalCredits = (parsed.summary.totalCredits || 0) + addedCr;
-            parsed.summary.residentCredits = (parsed.summary.residentCredits || 0) + addedCr;
-            parsed.summary.upperLevelCredits = (parsed.summary.upperLevelCredits || 0) +
-              toAdd.filter((c) => (c.number || 0) >= 30000).reduce((s, c) => s + (c.credits || 0), 0);
-          }
-        }
-      }
-
-      const effectiveStudentName =
-        studentName.trim() ||
-        parsed.studentMetadata?.student_name ||
-        parsed.studentMetadata?.name ||
-        generateDefaultStudentName();
-      const effectiveStudentId =
-        studentId.trim() ||
-        parsed.studentMetadata?.student_id ||
-        parsed.studentMetadata?.studentId ||
-        '';
-      const effectiveAdvisor =
-        advisorName.trim() ||
-        (facultyProfile
-          ? `${facultyProfile.first_name || ''} ${facultyProfile.last_name || ''}`.trim()
-          : 'Matthias Wood');
-
-      parsed.studentMetadata = {
-        ...(parsed.studentMetadata || {}),
-        name: effectiveStudentName,
-        student_name: effectiveStudentName,
-        studentId: effectiveStudentId,
-        student_id: effectiveStudentId,
-        advisor: effectiveAdvisor,
-        email: studentEmail.trim() || facultyProfile?.email || '',
-        phone: studentPhone.trim(),
-        gpa:
-          detectedGpa ||
-          (parsed.studentMetadata?.student_gpa !== null &&
-          parsed.studentMetadata?.student_gpa !== undefined
-            ? String(parsed.studentMetadata.student_gpa)
-            : parsed.studentMetadata?.gpa || ''),
-        catalogYear:
-          parsed.studentMetadata?.catalog_year ||
-          parsed.studentMetadata?.catalogYear ||
-          catalogYear,
-        pacingMode,
-        major: masterDb.programs.find((p) => p.id === selectedProgramId)?.name || '',
-        core42Completed: core42TransferBlock,
-        declaredPrograms: declaredProgramIds
-      };
-
-      const deterministicStart = calculatedStartSemester || calculateStartingSemester(parsed);
-
-      onIntakeComplete({
-        parsedTranscript: parsed,
-        selectedProgramId,
-        additionalPrograms,
-        declaredPrograms: declaredProgramIds,
-        core42Completed: core42TransferBlock,
-        constraints: {
-          startSemester: deterministicStart,
-          modalityPreference,
-          summerAvailability,
-          maxSummerCredits: summerAvailability === 'No Summer' ? 0 : Number(maxSummerCredits) || 6,
-          pacingMode,
-          max8wkCredits,
-          max16wkCredits,
-          core42Completed: core42TransferBlock
-        }
-      });
+      // If active Fall 2026 courses exist, automatically set start term to Spring 2027 16wk and proceed directly
+      proceedWithAudit(parsed, regResult.startTerm || 'Spring 2027 16wk');
     } catch (err) {
-      setParsingError(`Error parsing student records: ${err.message}`);
+      setParsingError(`Audit Error: ${err.message}`);
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const handleConfirmRegistrationModal = () => {
+    const term = registrationModalState.selectedTerm;
+    setRegistrationModalState((prev) => ({ ...prev, isOpen: false }));
+    const parsed = cachedParsedTranscript || parsedTranscript;
+    proceedWithAudit(parsed, term);
+  };
+
+  const hasActiveRecord = Boolean(parsedTranscript || cachedParsedTranscript || currentCourses.length > 0);
+
+  // ---------------------------------------------------------------------------
+  // 10. Render
+  // ---------------------------------------------------------------------------
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 space-y-8">
-      {/* Page Header */}
+      {/* Page Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2 text-xs font-bold text-[#857542] uppercase tracking-wider mb-1">
             <BookOpen className="w-4 h-4" />
-            <span>Step 1: Student Intake & Academic Constraints</span>
+            <span>Step 1: Student Intake &amp; Academic Constraints</span>
           </div>
           <h1 className="text-3xl font-display font-extrabold text-neutral-900 tracking-tight">
             Advising Workspace Intake
           </h1>
           <p className="text-xs text-neutral-600 mt-0.5">
-            Upload student transcript records or reload a previously exported degree plan to run the
-            deterministic audit.
+            Ingest student records, define declared credentials, and configure scheduling pacing constraints.
           </p>
         </div>
 
-        {Boolean(auditResult) && (
+        {hasActiveRecord && (
           <div id="screen1-active-record-toolbar" className="flex items-center space-x-3 flex-shrink-0">
             <button
               type="button"
               id="screen1-clear-active-btn"
+              data-testid="clear-active-student-btn"
               onClick={() => setClearModalOpen(true)}
-              className="px-3.5 py-2 text-xs font-bold border border-neutral-300 rounded text-neutral-700 hover:bg-neutral-100 hover:text-red-700 hover:border-red-200 transition flex items-center space-x-1.5 cursor-pointer"
+              className="px-3.5 py-2 text-xs font-bold border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-100 hover:text-red-700 hover:border-red-200 transition flex items-center space-x-1.5 cursor-pointer shadow-2xs"
               title="Clear Active Student Record"
             >
               <X className="w-3.5 h-3.5 text-neutral-500 hover:text-red-600 flex-shrink-0" />
-              <span>Clear Active Student</span>
+              <span>✕ Clear Active Student</span>
             </button>
 
             <button
               type="button"
               id="screen1-top-proceed-btn"
-              onClick={handleAuditOptionB}
+              data-testid="top-run-audit-btn"
+              onClick={handleRunDegreeAudit}
               disabled={isProcessing}
-              className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded shadow transition flex items-center space-x-2 cursor-pointer disabled:bg-neutral-300"
+              className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded-lg shadow-sm transition flex items-center space-x-2 cursor-pointer disabled:bg-neutral-300"
             >
-              <span>
-                {hasFiles || cachedParsedTranscript || parsedTranscript
-                  ? 'Proceed to Degree Audit'
-                  : 'Proceed to Optimal Degree Plan'}
-              </span>
+              <span>Run Degree Audit</span>
               <ArrowRight className="w-4 h-4 flex-shrink-0" />
             </button>
           </div>
@@ -1796,1392 +1188,1113 @@ export default function Screen1Intake({
       </div>
 
       {parsingError && (
-        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 flex items-start space-x-3 shadow-xs">
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 flex items-start space-x-3 shadow-xs">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <div>
+          <div className="flex-1">
             <p className="font-bold">Record Intake Error</p>
             <p className="text-xs mt-0.5">{parsingError}</p>
           </div>
+          <button
+            type="button"
+            onClick={() => setParsingError('')}
+            className="text-red-400 hover:text-red-700 p-1 rounded"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
-      {/* Two-Column Card Layout: Option A vs Option B (Equal Width 1/2 Columns on Large Screens) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        {/* OPTION A: Returning Student Reload */}
-        <div
-          className={`bg-white rounded-xl border p-6 shadow-sm transition ${
-            activeOption === 'A'
-              ? 'border-2 border-[#857542] ring-2 ring-[#857542]/20'
-              : 'border-neutral-200 opacity-90'
-          }`}
-          onClick={() => setActiveOption('A')}
-        >
-          <div className="mb-4 pb-3 border-b border-neutral-100">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#857542]">
-              Option A
-            </span>
-            <h2 className="text-lg font-bold text-neutral-900">Returning Student Plan</h2>
-          </div>
-
-          <p className="text-xs text-neutral-600 mb-4 leading-relaxed">
-            Drag in a previously generated Degree Plan PDF. The complete advisor state
-            and course locks will be restored automatically.
-          </p>
-
-          <form onSubmit={handleReloadOptionA} className="space-y-4">
-            {/* Box A1: Mandatory Degree Plan PDF Dropzone with text style matching Option B */}
+      {/* =================================================================== */}
+      {/* CARD 1: 1. STUDENT RECORDS */}
+      {/* =================================================================== */}
+      <div className="bg-white rounded-xl border border-neutral-200/90 p-6 shadow-sm space-y-6">
+        {/* Card Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-neutral-100 gap-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-[#F7F5EE] border border-[#B5A36A]/40 text-[#857542] rounded-lg">
+              <FileText className="w-5 h-5" />
+            </div>
             <div>
-              <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide flex items-center justify-between mb-1.5">
-                <span>1. PREVIOUSLY EXPORTED PLAN (.PDF ONLY)</span>
-                <span className="text-[10px] bg-neutral-100 text-neutral-700 font-mono px-1.5 py-0.5 rounded font-bold">
-                  REQUIRED
-                </span>
-              </label>
-
-              <StudentRecordDropzone
-                id="optionA-degreePlan"
-                title="Previously Exported Degree Plan"
-                subtitle=".pdf only (max 1 file)"
-                acceptedExtensions={['.pdf']}
-                file={degreePlanFile}
-                onFileChange={setDegreePlanFile}
-                onError={setParsingError}
-                icon={FileText}
-              />
+              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+                1. STUDENT RECORDS
+              </h2>
+              <p className="text-xs text-neutral-500">
+                Official documents, student identity, and active semester telemetry
+              </p>
             </div>
-
-            {/* Section A2: Optional Newer Student Records with exact Option B style & optional language */}
-            <div className="pt-2">
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
-                  2. OPTIONAL: NEWER STUDENT RECORDS (UPLOAD IF AVAILABLE)
-                </label>
-                <button
-                  type="button"
-                  id="optionA-sop-btn"
-                  onClick={() => openSopGuideModal('Anthology', 'Option A (Returning Student Plan)')}
-                  className="text-[11px] text-[#857542] hover:underline flex items-center space-x-1"
-                >
-                  <span>🎬 Scribe SOP</span>
-                  <ExternalLink className="w-3 h-3" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Box A2-1: Anthology .csv / .xlsx */}
-                <StudentRecordDropzone
-                  id="optionA-anthology"
-                  title="Anthology Course Schedule"
-                  subtitle=".csv or .xlsx only (max 1)"
-                  acceptedExtensions={['.xlsx', '.csv']}
-                  file={optionAAnthologyFile}
-                  onFileChange={handleOptionAAnthologyFileChange}
-                  onError={(msg) => handleAnthologyDropzoneError(msg, 'A')}
-                  icon={FileSpreadsheet}
-                />
-
-                {/* Box A2-2: Unofficial Transcript .pdf */}
-                <StudentRecordDropzone
-                  id="optionA-transcript"
-                  title="Unofficial Transcript"
-                  subtitle=".pdf only (max 1)"
-                  acceptedExtensions={['.pdf']}
-                  file={optionATranscriptFile}
-                  onFileChange={handleOptionATranscriptFileChange}
-                  onError={(msg) => handleTranscriptDropzoneError(msg, 'A')}
-                  icon={FileText}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isProcessing || !degreePlanFile}
-              className="w-full py-2.5 px-4 bg-[#857542] hover:bg-[#6E6035] disabled:bg-neutral-300 text-white text-xs font-bold rounded-md shadow transition flex items-center justify-center space-x-2"
-            >
-              <span>Reload Degree Plan Session</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </form>
+          </div>
+          <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold px-3 py-1 rounded-full flex items-center space-x-1.5 shadow-2xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Local Processing, Zero Uploads</span>
+          </span>
         </div>
 
-        {/* OPTION B: New Student Audit */}
-        <div
-          className={`bg-white rounded-xl border p-6 shadow-sm transition ${
-            activeOption === 'B'
-              ? 'border-2 border-[#857542] ring-2 ring-[#857542]/20'
-              : 'border-neutral-200 opacity-90'
-          }`}
-          onClick={() => setActiveOption('B')}
-        >
-          <div className="mb-4 pb-3 border-b border-neutral-100">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#857542]">
-              Option B
-            </span>
-            <h2 className="text-lg font-bold text-neutral-900">New Student Audit</h2>
+        {/* Identity Row (4 Inputs — All start empty with zero hardcoded sample names) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Student Full Name</span>
+              <span className="text-red-600 ml-0.5">*</span>
+            </label>
+            <input
+              id="optionB-student-name"
+              data-testid="student-full-name"
+              type="text"
+              placeholder="Auto-Filled by Transcripts"
+              value={studentName}
+              onChange={(e) => setStudentName(e.target.value)}
+              className="w-full px-3 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-semibold text-neutral-900 transition shadow-2xs"
+            />
           </div>
 
-          <form onSubmit={handleAuditOptionB} className="space-y-4">
-            {/* Stage 1: Student Record Upload */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
-                  1. Student Record Upload (Upload at least 1)
-                </label>
-                <button
-                  type="button"
-                  id="optionB-sop-btn"
-                  onClick={() => openSopGuideModal('Anthology', 'Option B (New Student Audit)')}
-                  className="text-[11px] text-[#857542] hover:underline flex items-center space-x-1"
-                >
-                  <span>🎬 Scribe SOP</span>
-                  <ExternalLink className="w-3 h-3" />
-                </button>
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Student ID</span>
+              <span className="text-red-600 ml-0.5">*</span>
+            </label>
+            <input
+              id="optionB-student-id"
+              data-testid="student-id"
+              type="text"
+              placeholder="Auto-Filled by Transcripts"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              className="w-full px-3 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-mono font-semibold text-neutral-900 transition shadow-2xs"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Advisor Full Name</span>
+            </label>
+            <input
+              id="optionB-advisor-name"
+              data-testid="advisor-full-name"
+              type="text"
+              placeholder="Prof. Name"
+              value={advisorName}
+              onChange={(e) => setAdvisorName(e.target.value)}
+              className="w-full px-3 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-semibold text-neutral-900 transition shadow-2xs"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Advisor Email</span>
+            </label>
+            <div className="flex rounded-lg border border-neutral-300 hover:border-[#857542] focus-within:border-[#857542] focus-within:ring-2 focus-within:ring-[#857542]/20 overflow-hidden bg-white shadow-2xs transition">
+              <input
+                id="optionB-advisor-email"
+                data-testid="advisor-email"
+                type="text"
+                placeholder="username"
+                value={advisorUsername}
+                onChange={(e) => setAdvisorUsername(parseAdvisorEmailUsername(e.target.value))}
+                className="w-full px-3 py-2 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 font-medium text-neutral-900"
+              />
+              <span className="inline-flex items-center px-2.5 bg-neutral-100 text-neutral-500 text-[11px] font-mono font-semibold border-l border-neutral-200 select-none">
+                @lindenwood.edu
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Ingestion Channels */}
+        <div className="space-y-3 pt-2 border-t border-neutral-100">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-neutral-800 uppercase tracking-wide">
+              Provide at least one document to Analyze
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setDocumentModalState({
+                  isOpen: true,
+                  isError: false,
+                  docType: 'Anthology',
+                  fileName: '',
+                  errorMessage: '',
+                  missingColumns: []
+                })
+              }
+              className="text-[11px] text-[#857542] hover:underline flex items-center space-x-1 cursor-pointer font-semibold"
+            >
+              <span>🎬 Scribe SOP Export Guides</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Channel 1: Anthology Schedule */}
+            <StudentRecordDropzone
+              id="optionB-anthology"
+              title="Anthology Schedule"
+              subtitle=".xlsx or .csv"
+              acceptedExtensions={['.xlsx', '.csv']}
+              file={anthologyFile}
+              onFileChange={handleAnthologyFileChange}
+              onError={setParsingError}
+              icon={FileSpreadsheet}
+            />
+
+            {/* Channel 2: Unofficial Transcript */}
+            <StudentRecordDropzone
+              id="optionB-transcript"
+              title="Unofficial Transcript"
+              subtitle=".pdf only"
+              acceptedExtensions={['.pdf']}
+              file={transcriptFile}
+              onFileChange={handleTranscriptFileChange}
+              onError={setParsingError}
+              icon={FileText}
+            />
+
+            {/* Channel 3: Exported Degree Plan */}
+            <StudentRecordDropzone
+              id="optionA-degreePlan"
+              title="Exported Degree Plan"
+              subtitle=".pdf (Smart Advising Plan)"
+              acceptedExtensions={['.pdf']}
+              file={degreePlanFile}
+              onFileChange={handleDegreePlanFileChange}
+              onError={setParsingError}
+              icon={FileText}
+            />
+          </div>
+        </div>
+
+        {/* Minimal Parsed Telemetry Panel (rendered below dropzones when courses exist) */}
+        {currentCourses.length > 0 && (
+          <div
+            id="parsed-telemetry-panel"
+            data-testid="parsed-telemetry-panel"
+            className="p-4 bg-[#F7F5EE]/70 rounded-xl border border-[#B5A36A]/60 space-y-3.5 shadow-2xs"
+          >
+            {/* Header Line */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[#B5A36A]/30">
+              <div className="flex items-center space-x-2 text-xs font-bold text-[#857542]">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>✓ {formatParsedTelemetrySummary(currentCourses, DEFAULT_ACTIVE_TERM_ID)}</span>
+              </div>
+              <button
+                type="button"
+                id="telemetry-re-extract-btn"
+                data-testid="telemetry-re-extract-btn"
+                onClick={handleReExtract}
+                className="text-[11px] font-bold text-[#857542] hover:text-[#5C512E] hover:underline flex items-center space-x-1 cursor-pointer"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Re-Extract</span>
+              </button>
+            </div>
+
+            {/* Active Term Breakdown */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-neutral-800">
+                  Active Term Enrollment Breakdown ({DEFAULT_ACTIVE_TERM_ID}):
+                </span>
+                <span className="text-[11px] font-mono text-neutral-600 font-semibold">
+                  {activeTermEnrollment.activeCourses.length} active courses • {activeTermEnrollment.activeTermTotalCredits} credits
+                </span>
               </div>
 
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <StudentRecordDropzone
-                    id="optionB-anthology"
-                    title="Anthology Course Schedule"
-                    subtitle=".csv or .xlsx only (max 1)"
-                    acceptedExtensions={['.xlsx', '.csv']}
-                    file={anthologyFile}
-                    onFileChange={handleAnthologyFileChange}
-                    onError={(msg) => handleAnthologyDropzoneError(msg, 'B')}
-                    icon={FileSpreadsheet}
-                  />
+              {activeTermEnrollment.activeCourses.length === 0 ? (
+                <p className="text-xs text-neutral-500 italic py-1">
+                  No active {DEFAULT_ACTIVE_TERM_ID} courses detected on records. Click &ldquo;Edit Active Term&rdquo; to add in-progress coursework.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {activeTermEnrollment.activeCourses.map((c, idx) => {
+                    const band = getCourseSessionBandLabel(c);
+                    const isCompleted = c.state === 'Completed' || c.status === 'Completed';
+                    const isScheduled = c.state === 'Scheduled' || c.status === 'Scheduled';
+                    return (
+                      <div
+                        key={`${c.code}-${idx}`}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-neutral-200/90 text-xs shadow-2xs"
+                      >
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 font-mono">
+                          {band}
+                        </span>
+                        <span className="font-bold font-mono text-neutral-900">{c.code}</span>
+                        <span className="text-neutral-600 max-w-[140px] truncate">{c.title}</span>
+                        <span className="font-mono text-neutral-500 text-[10px]">
+                          ({Math.round(c.credits || 3)}cr)
+                        </span>
+                        <span
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                            isCompleted
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              : isScheduled
+                              ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                              : 'bg-amber-50 text-amber-900 border border-amber-200'
+                          }`}
+                        >
+                          {isCompleted ? (c.grade ? `Completed (${c.grade})` : 'Completed') : isScheduled ? 'Scheduled' : 'In-Progress'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-                  <StudentRecordDropzone
-                    id="optionB-transcript"
-                    title="Unofficial Transcript"
-                    subtitle=".pdf only (max 1)"
-                    acceptedExtensions={['.pdf']}
-                    file={transcriptFile}
-                    onFileChange={handleTranscriptFileChange}
-                    onError={(msg) => handleTranscriptDropzoneError(msg, 'B')}
-                    icon={FileText}
-                  />
+            {/* Warning & Edit Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-[#B5A36A]/30">
+              <button
+                type="button"
+                id="edit-active-term-btn"
+                data-testid="edit-active-term-btn"
+                onClick={() => setEditActiveTermModalOpen(true)}
+                className="px-3 py-1.5 text-xs font-bold bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-300 rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-[#857542]" />
+                <span>✏️ Edit Active Term</span>
+              </button>
+
+              {activeTermEnrollment.showLowCreditWarning && (
+                <span
+                  id="low-active-credits-warning"
+                  data-testid="low-active-credits-warning"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-300 rounded-lg shadow-2xs"
+                >
+                  <span>⚠️ {activeTermEnrollment.activeTermTotalCredits} Active-Term Credits Detected (Expected ≥ 12 for Full-Time)</span>
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* =================================================================== */}
+      {/* CARD 2: 2. DEGREE CURRICULUM & CREDENTIAL ROSTER */}
+      {/* =================================================================== */}
+      <div className="bg-white rounded-xl border border-neutral-200/90 p-6 shadow-sm space-y-5">
+        {/* Card Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-neutral-100 gap-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-[#F7F5EE] border border-[#B5A36A]/40 text-[#857542] rounded-lg">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+                2. DEGREE CURRICULUM &amp; CREDENTIAL ROSTER
+              </h2>
+              <p className="text-xs text-neutral-500">
+                Catalog year binding, Missouri CORE 42 waiver, and multi-program credential stacking
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] bg-neutral-100 text-neutral-700 font-extrabold px-3 py-1 rounded-full border border-neutral-200">
+            Verified Curriculum Database
+          </span>
+        </div>
+
+        {/* 1. Catalog Year & CORE 42 Header Controls */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+          {/* Catalog Year */}
+          <div className="md:col-span-5">
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Catalog Year (Forward-Only)</span>
+              <span className="text-red-600 ml-0.5">*</span>
+            </label>
+            <CatalogYearCombobox
+              catalogYear={catalogYear}
+              minCatalogYearStart={minCatalogYearStart}
+              onChange={handleCatalogYearChange}
+            />
+            <p className="text-[10px] text-neutral-500 mt-1">
+              Forward-only catalog switching from matriculation year
+            </p>
+          </div>
+
+          {/* Missouri CORE 42 / AA Transfer Block Complete Toggle */}
+          <div className="md:col-span-7 bg-[#F7F5EE]/80 border border-[#B5A36A]/40 rounded-xl p-3 flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="core42-transfer-toggle"
+              data-testid="core42-transfer-toggle"
+              checked={core42TransferBlock}
+              onChange={(e) => setCore42TransferBlock(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-[#857542] focus:ring-[#857542] cursor-pointer"
+            />
+            <label htmlFor="core42-transfer-toggle" className="cursor-pointer select-none">
+              <span className="block text-xs font-bold text-neutral-900 leading-tight">
+                Missouri CORE 42 / AA Transfer Block Complete
+              </span>
+              <span className="block text-[10px] font-medium text-neutral-600 mt-0.5">
+                Waives all 42 lower-division GE requirements
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* 2. Credential Combobox & Add Action */}
+        <div className="space-y-1.5 pt-2 border-t border-neutral-100">
+          <label className="block text-xs font-bold text-neutral-800">
+            <span>Add Degree, Emphasis, Minor, or Certificate</span>
+          </label>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <ProgramCombobox
+                programs={(masterDb.programs || []).filter(
+                  (p) => p.catalog_year_id === catalogYear
+                )}
+                selectedProgramId={stagedComboboxProgramId}
+                onSelectProgramId={(newId) => setStagedComboboxProgramId(newId)}
+              />
+            </div>
+            <button
+              id="add-program-to-stack-button"
+              data-testid="add-program-to-stack-button"
+              type="button"
+              disabled={declaredProgramIds.includes(stagedComboboxProgramId)}
+              onClick={() => handleAddProgramToStack(stagedComboboxProgramId)}
+              className="px-4 py-2.5 bg-[#1E293B] hover:bg-[#0F172A] disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Add to Student Stack</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3. The Declared Credentials Stack Display */}
+        <div className="pt-2 border-t border-neutral-100 space-y-2.5">
+          <div className="flex items-center justify-between pb-1">
+            <span
+              id="declared-stack-header"
+              data-testid="declared-stack-header"
+              className="text-[11px] font-extrabold tracking-wider text-neutral-800 uppercase"
+            >
+              {formatDeclaredStackHeader(declaredPrograms)}
+            </span>
+            <span className="text-[10px] font-semibold text-neutral-500">
+              {declaredPrograms.length} {declaredPrograms.length === 1 ? 'Credential' : 'Credentials'} Active
+            </span>
+          </div>
+
+          <div className="space-y-2" id="declared-credentials-stack">
+            {declaredPrograms.length === 0 ? (
+              <div className="p-4 text-center text-xs text-neutral-500 border border-dashed border-neutral-300 rounded-xl bg-neutral-50/50">
+                No degree programs declared. Select a program above and click <span className="font-semibold text-neutral-700">+ Add to Student Stack</span>.
+              </div>
+            ) : (
+              declaredPrograms.map((prog) => {
+                const category = getProgramCategory(prog);
+                const isMajor = category === 'Major' || category === 'Major - Track';
+                const isPrimary = isMajor && prog.id === effectivePrimaryMajorId;
+                const isSecondaryMajor = isMajor && !isPrimary;
+                const credits = prog.total_program_credits || prog.total_major_credits || 0;
+                const details = parseProgramDetails(prog.name);
+
+                let borderClass = 'border-l-4 border-l-[#1E293B]';
+                let badgeText = category;
+                let badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
+                let iconText = '🎓';
+
+                if (category === 'Minor') {
+                  borderClass = 'border-l-4 border-l-slate-400';
+                  badgeText = 'Minor';
+                  badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+                  iconText = '📘';
+                } else if (category === 'Certificate') {
+                  borderClass = 'border-l-4 border-l-neutral-300';
+                  badgeText = 'Certificate';
+                  badgeClass = 'bg-neutral-100 text-neutral-700 border-neutral-300';
+                  iconText = '📜';
+                } else if (isSecondaryMajor) {
+                  borderClass = 'border-l-4 border-l-[#857542]';
+                  badgeText = 'Secondary Major (Double Major)';
+                  badgeClass = 'bg-[#857542]/15 text-[#857542] border-[#857542]/30';
+                  iconText = '🎓';
+                } else if (isPrimary) {
+                  borderClass = 'border-l-4 border-l-[#1E293B]';
+                  badgeText = 'Primary Major';
+                  badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
+                  iconText = '🎓';
+                }
+
+                return (
+                  <div
+                    key={prog.id}
+                    id={`declared-card-${prog.id}`}
+                    data-testid={`declared-card-${prog.id}`}
+                    className={`p-3 bg-neutral-50/70 hover:bg-neutral-50 rounded-xl border border-neutral-200 ${borderClass} transition flex items-center justify-between gap-3 shadow-2xs`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm select-none">{iconText}</span>
+                        <span className="text-xs font-bold text-neutral-900 leading-tight">
+                          {details.discipline}
+                        </span>
+                        <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${badgeClass}`}>
+                          {isSecondaryMajor ? '🎓 SECONDARY MAJOR (Double Major)' : badgeText}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-neutral-600 flex-wrap">
+                        {details.emphasis && (
+                          <span className="font-semibold text-[#857542] bg-[#F7F5EE] border border-[#B5A36A]/40 px-1 rounded">
+                            {details.emphasis}
+                          </span>
+                        )}
+                        <span className="font-mono font-medium">{credits} credits</span>
+                        {isPrimary && declaredPrograms.filter((p) => getProgramCategory(p).startsWith('Major')).length === 1 && (
+                          <span className="inline-flex items-center gap-1 font-bold text-[#857542] bg-[#857542]/10 border border-[#857542]/30 px-1.5 py-0.5 rounded">
+                            <Lock className="w-2.5 h-2.5" />
+                            <span>Primary Degree (Locked)</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {isSecondaryMajor && (
+                        <button
+                          type="button"
+                          id={`make-primary-${prog.id}`}
+                          data-testid={`make-primary-${prog.id}`}
+                          onClick={() => handleMakePrimary(prog.id)}
+                          className="px-2.5 py-1 text-[10px] font-bold text-[#857542] hover:text-[#5C512E] bg-[#F7F5EE] hover:bg-[#EFEBD9] border border-[#B5A36A]/50 rounded-md transition cursor-pointer"
+                        >
+                          Make Primary
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        id={`remove-program-${prog.id}`}
+                        data-testid={`remove-program-${prog.id}`}
+                        onClick={() => handleRemoveProgramFromStack(prog.id)}
+                        className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                        title={`Remove ${prog.name}`}
+                        aria-label={`Remove ${prog.name}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Overlap Summary */}
+          <div
+            id="declared-stack-overlap-footer"
+            data-testid="declared-stack-overlap-footer"
+            className="p-3 bg-white rounded-xl border border-neutral-200 shadow-2xs flex flex-wrap items-center justify-between gap-2 text-xs"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-neutral-600">
+                Combined Total: <strong className="font-bold text-neutral-900">{stackOverlap.totalDeclaredCredits} cr</strong>
+              </span>
+              <span className="text-neutral-300">|</span>
+              <span className="text-neutral-600">
+                Shared Overlap: <strong className="font-bold text-[#857542]">-{stackOverlap.sharedOverlapCredits} cr</strong>
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-neutral-600">
+                Net Program Load: <strong className="font-extrabold text-[#1E293B] text-sm">{stackOverlap.netProgramLoad} cr</strong>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* =================================================================== */}
+      {/* CARD 3: 3. SCHEDULING CONSTRAINTS */}
+      {/* =================================================================== */}
+      <div className="bg-white rounded-xl border border-neutral-200/90 p-6 shadow-sm space-y-6">
+        {/* Card Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-neutral-100 gap-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-[#F7F5EE] border border-[#B5A36A]/40 text-[#857542] rounded-lg">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+                3. SCHEDULING CONSTRAINTS
+              </h2>
+              <p className="text-xs text-neutral-500">
+                Pacing caps, 8-week accelerated session limits, and term availability rules
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] bg-neutral-100 text-neutral-700 font-extrabold px-3 py-1 rounded-full border border-neutral-200">
+            Path Pacing Rules
+          </span>
+        </div>
+
+        {/* First Grid Row (3 Columns) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 1. Enrollment Status */}
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Enrollment Status</span>
+              <span className="text-red-600 ml-0.5">*</span>
+            </label>
+            <div className="relative">
+              <select
+                id="optionB-pacing-mode"
+                data-testid="enrollment-status-select"
+                value={pacingMode}
+                onChange={(e) => setPacingMode(e.target.value)}
+                className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
+              >
+                <option value="Full-Time">Full-Time Student</option>
+                <option value="Part-Time">Part-Time Student</option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <p className="text-[10px] text-neutral-500 mt-1">
+              Full-Time (&ge;12min) and Part-Time (&lt;12max) loads for Fall &amp; Spring
+            </p>
+          </div>
+
+          {/* 2. 16-Week Semester Minimum */}
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>16-Week Semester Minimum</span>
+              <span className="text-red-600 ml-0.5">*</span>
+            </label>
+            <div className="relative">
+              <select
+                id="optionB-min-16wk"
+                data-testid="min-16wk-select"
+                value={pacingOptions.selectedMin16Wk}
+                onChange={(e) => setMin16wkCredits(e.target.value)}
+                className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
+              >
+                {pacingOptions.min16WkOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* 3. 16-Week Semester Cap */}
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>16-Week Semester Cap</span>
+              <span className="text-red-600 ml-0.5">*</span>
+            </label>
+            <div className="relative">
+              <select
+                id="optionB-max-16wk"
+                data-testid="cap-16wk-select"
+                value={pacingOptions.selectedCap16Wk}
+                onChange={(e) => setMax16wkCredits(e.target.value)}
+                className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
+              >
+                {pacingOptions.cap16WkOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+
+        {/* Second Grid Row (3 Columns default, expands to 4 when Yes Summer is selected) */}
+        <div
+          className={`grid gap-4 ${
+            summerAvailability === 'Yes Summer'
+              ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4'
+              : 'grid-cols-1 md:grid-cols-3'
+          }`}
+        >
+          {/* 1. Course Modality Preference */}
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Course Modality Preference</span>
+            </label>
+            <div className="relative">
+              <select
+                id="optionB-modality-select"
+                data-testid="modality-select"
+                value={modalityPreference}
+                onChange={(e) => setModalityPreference(e.target.value)}
+                className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
+              >
+                {MODALITY_PREFERENCE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* 2. 8-Week Session Cap */}
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>8-Week Session Cap</span>
+            </label>
+            <div className="relative">
+              <select
+                id="optionB-max-8wk"
+                data-testid="cap-8wk-select"
+                value={max8wkCredits}
+                onChange={(e) => setMax8wkCredits(e.target.value)}
+                className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
+              >
+                {pacingOptions.cap8WkOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* 3. Summer Availability */}
+          <div>
+            <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+              <span>Summer Availability</span>
+            </label>
+            <div className="relative">
+              <select
+                id="optionB-summer-select"
+                data-testid="summer-select"
+                value={summerAvailability}
+                onChange={(e) => setSummerAvailability(e.target.value)}
+                className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
+              >
+                {SUMMER_AVAILABILITY_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* 4. Summer Credit Cap (Only when Yes Summer is selected) */}
+          {summerAvailability === 'Yes Summer' && (
+            <div>
+              <label className="block text-xs font-bold text-neutral-800 mb-1.5">
+                <span>Summer Credit Cap</span>
+              </label>
+              <div className="relative">
+                <select
+                  id="optionB-summer-cap"
+                  data-testid="summer-cap-select"
+                  value={maxSummerCredits}
+                  onChange={(e) => setMaxSummerCredits(e.target.value)}
+                  className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
+                >
+                  {pacingOptions.summerCapOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Dynamic Policy Callout Banners at bottom of Card 3 */}
+        {(pacingOptions.showSummerTuitionNotice || pacingOptions.showOverloadNotice) && (
+          <div className="space-y-2 pt-2 border-t border-neutral-100">
+            {pacingOptions.showSummerTuitionNotice && (
+              <div
+                data-testid="summer-tuition-notice"
+                className="p-3 rounded-lg bg-[#F7F5EE] border border-[#B5A36A] text-xs text-neutral-800 flex items-start space-x-2"
+              >
+                <span className="text-sm select-none">ℹ️</span>
+                <div>
+                  <strong className="font-bold text-neutral-900">Summer Tuition Notice:</strong>{' '}
+                  <span>{pacingOptions.summerTuitionNoticeText}</span>
+                </div>
+              </div>
+            )}
+
+            {pacingOptions.showOverloadNotice && (
+              <div
+                data-testid="overload-notice"
+                className="p-3 rounded-lg bg-amber-50 border border-amber-300 text-xs text-amber-900 flex items-start space-x-2"
+              >
+                <span className="text-sm select-none">⚠️</span>
+                <div>
+                  <strong className="font-bold text-amber-950">Academic Course Overload Notice:</strong>{' '}
+                  <span>{pacingOptions.overloadNoticeText}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* =================================================================== */}
+      {/* Bottom Dynamic Action Bar */}
+      {/* =================================================================== */}
+      <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-4">
+        <button
+          type="button"
+          id="optionB-submit-btn"
+          data-testid="run-degree-audit-btn"
+          onClick={handleRunDegreeAudit}
+          disabled={isProcessing}
+          className="w-full sm:w-auto px-8 py-3.5 bg-[#857542] hover:bg-[#6E6035] disabled:bg-neutral-300 text-white text-sm font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer"
+        >
+          <span>Run Degree Audit</span>
+          <ArrowRight className="w-4 h-4 flex-shrink-0" />
+        </button>
+      </div>
+
+      {/* =================================================================== */}
+      {/* MODAL A: Active Term Course Editor */}
+      {/* =================================================================== */}
+      {editActiveTermModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="active-term-modal-title"
+        >
+          <div
+            className="bg-white rounded-2xl border-2 border-[#B5A36A] max-w-3xl w-full p-6 text-neutral-900 shadow-2xl relative space-y-5 animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-neutral-200 flex-shrink-0">
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 rounded-xl bg-[#F7F5EE] border border-[#B5A36A]/50 text-[#857542]">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 id="active-term-modal-title" className="text-base font-extrabold text-neutral-900">
+                    Active Term Course Editor ({DEFAULT_ACTIVE_TERM_ID})
+                  </h3>
+                  <p className="text-xs text-neutral-500">
+                    Add, remove, or modify session bands and completion statuses for active term enrollments.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditActiveTermModalOpen(false)}
+                className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto space-y-5 pr-1">
+              {/* Section 1: Active Term Courses List */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-neutral-800 uppercase tracking-wide">
+                    Enrolled Active Courses ({activeTermWorkingList.length})
+                  </span>
+                  <span className="font-mono text-neutral-600 font-semibold text-[11px]">
+                    Total:{' '}
+                    {activeTermWorkingList.reduce((sum, c) => sum + (Number(c.credits) || 0), 0)} cr
+                  </span>
                 </div>
 
-                {extractedSummary && (
-                  <div className="p-2.5 bg-[#F7F5EE] rounded-lg border border-[#B5A36A]/60 flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <span className="flex items-center space-x-1.5 font-bold text-[#857542]">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>
-                        Parsed {extractedSummary.totalCourses} Active Courses ({extractedSummary.completedCredits.toFixed(1)} Completed + {extractedSummary.currentCredits.toFixed(1)} Current = {extractedSummary.totalCredits.toFixed(1)} Total cr)
-                      </span>
-                    </span>
-                    <button
-                      type="button"
-                      id="optionB-extract-btn"
-                      onClick={handleExtractRecords}
-                      className="text-[11px] font-bold text-[#857542] hover:underline flex items-center space-x-1"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>Re-Extract</span>
-                    </button>
+                {activeTermWorkingList.length === 0 ? (
+                  <div className="p-4 border-2 border-dashed border-neutral-200 rounded-xl text-center text-xs text-neutral-400">
+                    No active term courses currently enrolled. Search the catalog below to add courses.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {activeTermWorkingList.map((c, idx) => (
+                      <div
+                        key={`${c.code}-${idx}`}
+                        className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-xs text-neutral-900">{c.code}</span>
+                            <span className="text-[10px] font-mono text-neutral-500 bg-white px-1.5 py-0.5 rounded border border-neutral-200">
+                              {Math.round(c.credits || 3)} cr
+                            </span>
+                          </div>
+                          <p className="text-xs text-neutral-700 truncate mt-0.5">{c.title}</p>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
+                          {/* Term Band Selector */}
+                          <select
+                            value={c.sessionBand || 'Full 16-Week'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setActiveTermWorkingList((prev) =>
+                                prev.map((item, i) => (i === idx ? { ...item, sessionBand: val } : item))
+                              );
+                            }}
+                            className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs"
+                          >
+                            <option value="Full 16-Week">Full 16-Week</option>
+                            <option value="Session I 8-Week">Session I 8-Week</option>
+                            <option value="Session II 8-Week">Session II 8-Week</option>
+                          </select>
+
+                          {/* Status Selector */}
+                          <select
+                            value={c.status || 'In-Progress'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setActiveTermWorkingList((prev) =>
+                                prev.map((item, i) => (i === idx ? { ...item, status: val } : item))
+                              );
+                            }}
+                            className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs"
+                          >
+                            <option value="In-Progress">In-Progress</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="Completed">Completed</option>
+                          </select>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCourseFromActiveWorking(idx)}
+                            className="p-1.5 text-neutral-400 hover:text-red-600 rounded-lg hover:bg-neutral-100 transition cursor-pointer"
+                            title="Remove course"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Stage 2: Program Selectors, Optional Bingo Sheet, Constraints, and Student Metadata */}
-            <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-5">
-              {/* Header */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-neutral-200">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
-                    2. Program Selection &amp; Scheduling Preferences
-                  </span>
-                </div>
-                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full flex items-center space-x-1">
-                  <CheckCircle2 className="w-3 h-3" />
-                  <span>FERPA Local Memory Active</span>
+              {/* Section 2: Catalog Course Search */}
+              <div className="pt-3 border-t border-neutral-200 space-y-3">
+                <span className="text-xs font-bold text-neutral-800 uppercase tracking-wide block">
+                  Search All 1,936 Catalog Courses to Add
                 </span>
-              </div>
 
-              {/* Section A: Degree Curriculum & Catalog + Declared Credentials Stack Builder */}
-              <div className="p-3.5 bg-white rounded-xl border border-neutral-200/90 shadow-2xs space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-neutral-100 gap-2">
-                  <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wide flex items-center space-x-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-[#857542] flex-shrink-0" />
-                    <span>Degree Curriculum &amp; Declared Credentials Stack</span>
-                  </h3>
-                  <span className="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
-                    Verified Degree Programs &amp; Minors
-                  </span>
-                </div>
-
-                {/* 1. Catalog Year & CORE 42 Header Controls */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
-                  {/* Catalog Year (Forward-only selection) */}
-                  <div className="md:col-span-5">
-                    <label className="block text-xs font-bold text-neutral-800 mb-1.5">
-                      <span>Catalog Year (Forward-Only)</span>
-                      <span className="text-red-600 ml-0.5">*</span>
-                    </label>
-                    <CatalogYearCombobox
-                      catalogYear={catalogYear}
-                      minCatalogYearStart={minCatalogYearStart}
-                      onChange={handleCatalogYearChange}
-                    />
-                    <p className="text-[10px] text-neutral-500 mt-1">
-                      Forward-only catalog switching from matriculation year
-                    </p>
-                  </div>
-
-                  {/* Missouri CORE 42 / AA Transfer Block Complete Toggle */}
-                  <div className="md:col-span-7 bg-[#F7F5EE]/80 border border-[#B5A36A]/40 rounded-lg p-2.5 flex items-start gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                  <div className="sm:col-span-6 relative">
                     <input
-                      type="checkbox"
-                      id="core42-transfer-toggle"
-                      data-testid="core42-transfer-toggle"
-                      checked={core42TransferBlock}
-                      onChange={(e) => setCore42TransferBlock(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-[#857542] focus:ring-[#857542] cursor-pointer"
+                      type="text"
+                      placeholder="Search code or title (e.g. MTH 14100, CSC, Ethics)..."
+                      value={activeTermSearchQuery}
+                      onChange={(e) => setActiveTermSearchQuery(e.target.value)}
+                      className="w-full pl-8 pr-3 py-2 text-xs bg-neutral-50 border border-neutral-300 rounded-lg focus:outline-none focus:border-[#857542] text-neutral-900"
                     />
-                    <label htmlFor="core42-transfer-toggle" className="cursor-pointer select-none">
-                      <span className="block text-xs font-bold text-neutral-900 leading-tight">
-                        Missouri CORE 42 / AA Transfer Block Complete
-                      </span>
-                      <span className="block text-[10px] font-medium text-neutral-600 mt-0.5">
-                        Waives all 42 lower-division GE requirements
-                      </span>
-                    </label>
+                    <Search className="w-4 h-4 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+
+                  <div className="sm:col-span-3">
+                    <select
+                      value={newCourseSessionBand}
+                      onChange={(e) => setNewCourseSessionBand(e.target.value)}
+                      className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer"
+                    >
+                      <option value="Full 16-Week">Full 16-Week</option>
+                      <option value="Session I 8-Week">Session I 8-Week</option>
+                      <option value="Session II 8-Week">Session II 8-Week</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-3">
+                    <select
+                      value={newCourseStatus}
+                      onChange={(e) => setNewCourseStatus(e.target.value)}
+                      className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer"
+                    >
+                      <option value="In-Progress">In-Progress</option>
+                      <option value="Scheduled">Scheduled</option>
+                      <option value="Completed">Completed</option>
+                    </select>
                   </div>
                 </div>
 
-                {/* 2. Credential Combobox & Add Action */}
-                <div className="space-y-1.5 pt-1 border-t border-neutral-100">
-                  <label className="block text-xs font-bold text-neutral-800">
-                    <span>Add Degree, Emphasis, Minor, or Certificate</span>
-                  </label>
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <div className="flex-1 min-w-0">
-                      <ProgramCombobox
-                        programs={(masterDb.programs || []).filter(
-                          (p) => p.catalog_year_id === catalogYear
-                        )}
-                        selectedProgramId={stagedComboboxProgramId}
-                        onSelectProgramId={(newId) => {
-                          setStagedComboboxProgramId(newId);
-                        }}
-                      />
-                    </div>
-                    <button
-                      id="add-program-to-stack-button"
-                      data-testid="add-program-to-stack-button"
-                      type="button"
-                      disabled={declaredProgramIds.includes(stagedComboboxProgramId)}
-                      onClick={() => handleAddProgramToStack(stagedComboboxProgramId)}
-                      className="px-3.5 py-2.5 bg-[#1E293B] hover:bg-[#0F172A] disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>+ Add to Student Stack</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 3. The Declared Credentials Stack Display */}
-                <div className="pt-2 border-t border-neutral-100 space-y-2">
-                  <div className="flex items-center justify-between pb-1">
-                    <span
-                      id="declared-stack-header"
-                      data-testid="declared-stack-header"
-                      className="text-[11px] font-extrabold tracking-wider text-neutral-800"
-                    >
-                      {formatDeclaredStackHeader(declaredPrograms)}
-                    </span>
-                    <span className="text-[10px] font-semibold text-neutral-500">
-                      {declaredPrograms.length} {declaredPrograms.length === 1 ? 'Credential' : 'Credentials'} Active
-                    </span>
-                  </div>
-
-                  {/* Cards Stack */}
-                  <div className="space-y-2" id="declared-credentials-stack">
-                    {declaredPrograms.length === 0 ? (
-                      <div className="p-3 text-center text-xs text-neutral-500 border border-dashed border-neutral-300 rounded-lg bg-neutral-50/50">
-                        No degree programs declared. Select a major, minor, or certificate above and click <span className="font-semibold text-neutral-700">+ Add to Student Stack</span>.
-                      </div>
+                {/* Search Results List */}
+                {activeTermSearchQuery.trim().length >= 2 && (
+                  <div className="border border-neutral-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-neutral-100 bg-white shadow-2xs">
+                    {activeTermSearchResults.length === 0 ? (
+                      <p className="p-3 text-xs text-neutral-400 text-center">
+                        No courses found matching &ldquo;{activeTermSearchQuery}&rdquo;
+                      </p>
                     ) : (
-                      declaredPrograms.map((prog) => {
-                        const category = getProgramCategory(prog);
-                        const isMajor = category === 'Major' || category === 'Major - Track';
-                        const isPrimary = isMajor && prog.id === effectivePrimaryMajorId;
-                        const isSecondaryMajor = isMajor && !isPrimary;
-                        const credits = prog.total_program_credits || prog.total_major_credits || 0;
-                        const details = parseProgramDetails(prog.name);
-
-                        let borderClass = 'border-l-4 border-l-[#1E293B]';
-                        let badgeText = category;
-                        let badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
-                        let iconText = '🎓';
-
-                        if (category === 'Minor') {
-                          borderClass = 'border-l-4 border-l-slate-400';
-                          badgeText = 'Minor';
-                          badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
-                          iconText = '📘';
-                        } else if (category === 'Certificate') {
-                          borderClass = 'border-l-4 border-l-neutral-300';
-                          badgeText = 'Certificate';
-                          badgeClass = 'bg-neutral-100 text-neutral-700 border-neutral-300';
-                          iconText = '📜';
-                        } else if (isSecondaryMajor) {
-                          borderClass = 'border-l-4 border-l-[#857542]';
-                          badgeText = 'Secondary Major (Double Major)';
-                          badgeClass = 'bg-[#857542]/15 text-[#857542] border-[#857542]/30';
-                          iconText = '🎓';
-                        } else if (isPrimary) {
-                          borderClass = 'border-l-4 border-l-[#1E293B]';
-                          badgeText = 'Primary Major';
-                          badgeClass = 'bg-[#1E293B]/10 text-[#1E293B] border-[#1E293B]/20';
-                          iconText = '🎓';
-                        }
-
+                      activeTermSearchResults.map((course) => {
+                        const compact = course.code.replace(/\s+/g, '').toUpperCase();
+                        const isAlreadyAdded = activeTermWorkingList.some(
+                          (c) => (c.compactCode || c.code.replace(/\s+/g, '').toUpperCase()) === compact
+                        );
                         return (
                           <div
-                            key={prog.id}
-                            id={`declared-card-${prog.id}`}
-                            data-testid={`declared-card-${prog.id}`}
-                            className={`p-3 bg-neutral-50/70 hover:bg-neutral-50 rounded-lg border border-neutral-200 ${borderClass} transition flex items-center justify-between gap-3 shadow-2xs`}
+                            key={course.code}
+                            className="p-2.5 flex items-center justify-between gap-2 hover:bg-[#F7F5EE]/60 transition"
                           >
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-sm select-none">{iconText}</span>
-                                <span className="text-xs font-bold text-neutral-900 leading-tight">
-                                  {details.discipline}
-                                </span>
-                                <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${badgeClass}`}>
-                                  {isSecondaryMajor ? '🎓 SECONDARY MAJOR (Double Major)' : badgeText}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-neutral-600 flex-wrap">
-                                {details.emphasis && (
-                                  <span className="font-semibold text-[#857542] bg-[#F7F5EE] border border-[#B5A36A]/40 px-1 rounded">
-                                    {details.emphasis}
-                                  </span>
-                                )}
-                                <span className="font-mono font-medium">
-                                  {credits} credits
-                                </span>
-                                {isPrimary && declaredPrograms.filter((p) => getProgramCategory(p).startsWith('Major')).length === 1 && (
-                                  <span className="inline-flex items-center gap-1 font-bold text-[#857542] bg-[#857542]/10 border border-[#857542]/30 px-1.5 py-0.5 rounded">
-                                    <Lock className="w-2.5 h-2.5" />
-                                    <span>Primary Degree (Locked)</span>
-                                  </span>
-                                )}
-                              </div>
+                            <div className="min-w-0 flex-1 truncate">
+                              <span className="font-mono font-bold text-xs text-neutral-900 mr-2">
+                                {course.code}
+                              </span>
+                              <span className="text-xs text-neutral-700 truncate">{course.title}</span>
+                              <span className="text-[10px] font-mono text-neutral-500 ml-2">
+                                ({Math.round(course.credits || 3)}cr)
+                              </span>
                             </div>
 
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              {isSecondaryMajor && (
-                                <button
-                                  type="button"
-                                  id={`make-primary-${prog.id}`}
-                                  data-testid={`make-primary-${prog.id}`}
-                                  onClick={() => handleMakePrimary(prog.id)}
-                                  className="px-2 py-1 text-[10px] font-bold text-[#857542] hover:text-[#5C512E] bg-[#F7F5EE] hover:bg-[#EFEBD9] border border-[#B5A36A]/50 rounded transition cursor-pointer"
-                                  title={`Make ${prog.name} the Primary Degree Anchor`}
-                                >
-                                  Make Primary
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                id={`remove-program-${prog.id}`}
-                                data-testid={`remove-program-${prog.id}`}
-                                onClick={() => handleRemoveProgramFromStack(prog.id)}
-                                className="p-1 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
-                                title={`Remove ${prog.name}`}
-                                aria-label={`Remove ${prog.name}`}
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
+                            <button
+                              type="button"
+                              disabled={isAlreadyAdded}
+                              onClick={() => handleAddCourseToActiveWorking(course)}
+                              className="px-2.5 py-1 text-[11px] font-bold rounded-lg transition disabled:bg-neutral-100 disabled:text-neutral-400 bg-[#857542] hover:bg-[#6E6035] text-white flex-shrink-0 cursor-pointer"
+                            >
+                              {isAlreadyAdded ? 'Added' : '+ Add'}
+                            </button>
                           </div>
                         );
                       })
                     )}
                   </div>
-
-                  {/* Live Overlap Footer */}
-                  <div
-                    id="declared-stack-overlap-footer"
-                    data-testid="declared-stack-overlap-footer"
-                    className="mt-2.5 p-2.5 bg-white rounded-lg border border-neutral-200 shadow-2xs flex flex-wrap items-center justify-between gap-2 text-xs"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-neutral-600">
-                        Combined Total: <strong className="font-bold text-neutral-900">{stackOverlap.totalDeclaredCredits} cr</strong>
-                      </span>
-                      <span className="text-neutral-300">|</span>
-                      <span className="text-neutral-600">
-                        Shared Overlap: <strong className="font-bold text-[#857542]">-{stackOverlap.sharedOverlapCredits} cr</strong>
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-neutral-600">
-                        Net Program Load: <strong className="font-extrabold text-[#1E293B] text-sm">{stackOverlap.netProgramLoad} cr</strong>
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
+            </div>
 
-              {/* Section B: Important Scheduling Building Constraints */}
-              <div className="p-3.5 bg-white rounded-xl border border-neutral-200/90 shadow-2xs space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
-                  <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wide flex items-center space-x-1.5">
-                    <Layers className="w-3.5 h-3.5 text-[#857542] flex-shrink-0" />
-                    <span>Scheduling Constraints &amp; Pacing</span>
-                  </h3>
-                  <span className="text-[10px] font-mono text-neutral-500">Critical-Path Pacing Rules</span>
-                </div>
-
-                {/* Row 1: Schedule Start Semester & Modality Preference */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-800 mb-1.5">
-                      <span>Schedule Start Semester</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        id="optionB-start-semester"
-                        value={calculatedStartSemester}
-                        onChange={(e) => setCalculatedStartSemester(e.target.value)}
-                        className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
-                      >
-                        <option value="Fall 2026">Fall 2026</option>
-                        <option value="Spring 2027">Spring 2027</option>
-                        <option value="Summer 2027">Summer 2027</option>
-                        <option value="Fall 2027">Fall 2027</option>
-                        <option value="Spring 2028">Spring 2028</option>
-                        <option value="Summer 2028">Summer 2028</option>
-                        <option value="Fall 2028">Fall 2028</option>
-                        <option value="Spring 2029">Spring 2029</option>
-                        <option value="Summer 2029">Summer 2029</option>
-                        <option value="Fall 2029">Fall 2029</option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                    <p className="text-[10px] text-neutral-500 mt-1">
-                      First term the planner will schedule new courses into. Auto-defaults based on uploaded records, or select manually.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
-                      <span>Course Modality Preference</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        id="optionB-modality-select"
-                        value={modalityPreference}
-                        onChange={(e) => setModalityPreference(e.target.value)}
-                        className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer truncate"
-                      >
-                        <option value="No Preference">No Preference</option>
-                        <option value="Online-Only">Online-Only</option>
-                        <option value="Prefer OnGround">Prefer OnGround</option>
-                        <option value="Prefer Online">Prefer Online</option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expandable Currently Enrolled Courses Quick-Add Tray (Workflow B) */}
-                <div className="pt-2 border-t border-neutral-100">
-                  <button
-                    type="button"
-                    id="optionB-toggle-enrolled-tray-btn"
-                    onClick={() => setIsEnrolledTrayOpen((prev) => !prev)}
-                    className="w-full flex items-center justify-between p-2.5 rounded-lg border text-xs font-bold transition bg-[#F7F5EE] border-[#B5A36A]/50 text-[#857542] hover:bg-[#EFEBD9] cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-2 truncate">
-                      <Sparkles className="w-4 h-4 text-[#857542] flex-shrink-0" />
-                      <span className="truncate">
-                        {activeEnrolledCourses.length > 0
-                          ? `Currently Enrolled Courses • ${activeEnrolledCourses.length} Courses Active (${activeEnrolledCourses.reduce((s, c) => s + (c.credits || 0), 0).toFixed(1)} cr)`
-                          : '+ Add Currently Enrolled Courses (Optional)'}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-1.5 text-[11px] font-semibold text-neutral-600 flex-shrink-0">
-                      <span>{isEnrolledTrayOpen ? 'Collapse' : 'Expand'}</span>
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isEnrolledTrayOpen ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </div>
-                  </button>
-
-                  {isEnrolledTrayOpen && (
-                    <div className="mt-2.5 p-3.5 bg-neutral-50/90 rounded-xl border border-neutral-200 space-y-3">
-                      <p className="text-[11px] text-neutral-600 leading-relaxed">
-                        Designate courses the student is actively taking this semester (e.g. if an uploaded Student-Based transcript lacks in-progress courses, or for incoming students). Click or drag courses into the active enrollment bucket.
-                      </p>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {/* Left Pane: Available Major & GE Requirements */}
-                        <div className="bg-white p-3 rounded-lg border border-neutral-200 flex flex-col h-72">
-                          <div className="mb-2 space-y-1.5 flex-shrink-0">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[11px] font-bold text-neutral-900 uppercase tracking-wide">
-                                Available Requirements
-                              </span>
-                              <span className="text-[10px] text-neutral-500 font-mono">
-                                {availableTrayCourses.length} courses
-                              </span>
-                            </div>
-
-                            {/* Search Input */}
-                            <div className="relative">
-                              <input
-                                id="tray-course-search"
-                                type="text"
-                                placeholder="Search course code or title..."
-                                value={traySearch}
-                                onChange={(e) => setTraySearch(e.target.value)}
-                                className="w-full pl-7 pr-3 py-1 text-xs bg-neutral-50 border border-neutral-200 rounded focus:outline-none focus:border-[#857542] text-neutral-800"
-                              />
-                              <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            </div>
-
-                            {/* Filter Tabs */}
-                            <div className="flex border-b border-neutral-100 gap-1 pt-1 text-[10px] font-bold">
-                              <button
-                                type="button"
-                                onClick={() => setTrayTab('all')}
-                                className={`px-2 py-0.5 rounded-t transition ${
-                                  trayTab === 'all'
-                                    ? 'bg-[#F7F5EE] text-[#857542] border-b-2 border-[#857542]'
-                                    : 'text-neutral-500 hover:text-neutral-800'
-                                }`}
-                              >
-                                All
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setTrayTab('major')}
-                                className={`px-2 py-0.5 rounded-t transition ${
-                                  trayTab === 'major'
-                                    ? 'bg-[#F7F5EE] text-[#857542] border-b-2 border-[#857542]'
-                                    : 'text-neutral-500 hover:text-neutral-800'
-                                }`}
-                              >
-                                Major Requirements
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setTrayTab('ge')}
-                                className={`px-2 py-0.5 rounded-t transition ${
-                                  trayTab === 'ge'
-                                    ? 'bg-[#F7F5EE] text-[#857542] border-b-2 border-[#857542]'
-                                    : 'text-neutral-500 hover:text-neutral-800'
-                                }`}
-                              >
-                                General Education
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Scrollable Course List */}
-                          <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-                            {availableTrayCourses.length === 0 ? (
-                              <p className="text-[11px] text-neutral-400 text-center py-6">
-                                No courses matching &ldquo;{traySearch}&rdquo;
-                              </p>
-                            ) : (
-                              availableTrayCourses.map((c) => {
-                                const isAdded = activeEnrolledCourses.some(
-                                  (item) => item.compactCode === c.compactCode
-                                );
-                                return (
-                                  <div
-                                    key={`${c.category}-${c.compactCode}`}
-                                    draggable={!isAdded}
-                                    onDragStart={(e) => {
-                                      e.dataTransfer.setData('application/json', JSON.stringify(c));
-                                    }}
-                                    onClick={() => {
-                                      if (!isAdded) handleAddEnrolledCourse(c);
-                                    }}
-                                    className={`p-2 rounded border text-left transition flex items-center justify-between ${
-                                      isAdded
-                                        ? 'bg-neutral-50 border-neutral-200 opacity-60 cursor-default'
-                                        : 'bg-white hover:bg-[#F7F5EE] border-neutral-200 hover:border-[#B5A36A] cursor-pointer shadow-2xs'
-                                    }`}
-                                  >
-                                    <div className="truncate mr-2">
-                                      <div className="flex items-center space-x-1.5">
-                                        <span className="font-bold text-xs text-neutral-900 font-mono">
-                                          {c.code}
-                                        </span>
-                                        <span className="text-[9px] font-mono text-neutral-500 bg-neutral-100 px-1 py-0.2 rounded">
-                                          {c.credits.toFixed(1)} cr
-                                        </span>
-                                      </div>
-                                      <p className="text-[10px] text-neutral-600 truncate mt-0.5">
-                                        {c.title}
-                                      </p>
-                                    </div>
-                                    {isAdded ? (
-                                      <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center space-x-1 flex-shrink-0">
-                                        <Check className="w-2.5 h-2.5" />
-                                        <span>Added</span>
-                                      </span>
-                                    ) : (
-                                      <button
-                                        type="button"
-                                        data-tray-add-code={c.compactCode}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleAddEnrolledCourse(c);
-                                        }}
-                                        className="text-[10px] font-bold text-[#857542] hover:text-[#6E6035] bg-[#F7F5EE] hover:bg-[#EFEBD9] px-2 py-0.5 rounded border border-[#B5A36A]/40 flex-shrink-0 cursor-pointer"
-                                      >
-                                        + Add
-                                      </button>
-                                    )}
-                                  </div>
-                                );
-                              })
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Right Pane: Active Enrollments for [Active Term] */}
-                        <div
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            setIsDragOverTray(true);
-                          }}
-                          onDragLeave={() => setIsDragOverTray(false)}
-                          onDrop={(e) => {
-                            e.preventDefault();
-                            setIsDragOverTray(false);
-                            handleDropEnrolledCourse(e);
-                          }}
-                          className={`bg-white p-3 rounded-lg border flex flex-col h-72 transition ${
-                            isDragOverTray
-                              ? 'border-2 border-[#857542] bg-[#F7F5EE]/40'
-                              : 'border-neutral-200'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between pb-2 border-b border-neutral-100 mb-2 flex-shrink-0">
-                            <div>
-                              <span className="text-[11px] font-bold text-neutral-900 uppercase tracking-wide block">
-                                Active Enrollments ({getCurrentAcademicSemester(new Date())?.termName || 'Fall 2026'})
-                              </span>
-                              <span className="text-[10px] font-mono text-[#857542] font-semibold">
-                                {activeEnrolledCourses.length} Courses • {activeEnrolledCourses.reduce((s, c) => s + (c.credits || 0), 0).toFixed(1)} cr
-                              </span>
-                            </div>
-                            {activeEnrolledCourses.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={() => setActiveEnrolledCourses([])}
-                                className="text-[10px] text-red-600 hover:underline font-semibold flex items-center space-x-1"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                <span>Clear</span>
-                              </button>
-                            )}
-                          </div>
-
-                          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-                            {activeEnrolledCourses.length === 0 ? (
-                              <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-neutral-200 rounded-lg p-4 text-center">
-                                <Sparkles className="w-6 h-6 text-neutral-300 mb-1" />
-                                <p className="text-xs font-semibold text-neutral-600">
-                                  No Active Courses Designated
-                                </p>
-                                <p className="text-[10px] text-neutral-400 mt-1 max-w-[200px]">
-                                  Click courses from the left or drag them here to designate them as currently in-progress.
-                                </p>
-                              </div>
-                            ) : (
-                              activeEnrolledCourses.map((c) => (
-                                <div
-                                  key={c.compactCode}
-                                  className="p-2 rounded bg-[#FFFBEB] border-l-4 border-l-[#D97706] border border-amber-200/80 text-left flex items-center justify-between shadow-2xs"
-                                >
-                                  <div className="truncate mr-2">
-                                    <div className="flex items-center space-x-1.5">
-                                      <span className="font-bold text-xs text-neutral-900 font-mono">
-                                        {c.code}
-                                      </span>
-                                      <span className="text-[9px] font-mono text-amber-900 bg-amber-100/90 px-1 py-0.2 rounded font-semibold">
-                                        {c.credits.toFixed(1)} cr
-                                      </span>
-                                      <span className="text-[8px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-1 py-0.2 rounded">
-                                        Current
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] text-neutral-600 truncate mt-0.5">
-                                      {c.title}
-                                    </p>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveEnrolledCourse(c.compactCode)}
-                                    title="Remove from active enrollments"
-                                    className="p-1 text-neutral-400 hover:text-red-600 rounded hover:bg-amber-100 transition flex-shrink-0"
-                                  >
-                                    <X className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Row 2: Summer Availability & Conditional Max Summer Credits */}
-                <div className="pt-2 border-t border-neutral-100 space-y-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
-                        <span>Summer Availability</span>
-                      </label>
-                      <div className="relative">
-                        <select
-                          id="optionB-summer-select"
-                          value={summerAvailability}
-                          onChange={(e) => handleSummerChange(e.target.value)}
-                          className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer truncate"
-                        >
-                          <option value="No Summer">No Summer (Default)</option>
-                          <option value="Yes Summer">Yes Summer</option>
-                        </select>
-                        <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      </div>
-                    </div>
-
-                    {summerAvailability === 'Yes Summer' && (
-                      <div>
-                        <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
-                          <span>Max Summer Credits Cap</span>
-                        </label>
-                        <div className="relative">
-                          <select
-                            id="optionB-summer-cap"
-                            value={maxSummerCredits}
-                            onChange={(e) => setMaxSummerCredits(Number(e.target.value))}
-                            className="w-full appearance-none pl-3 pr-8 py-2 text-xs bg-white border border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
-                          >
-                            <option value={3}>3 Credits</option>
-                            <option value={6}>6 Credits (Standard)</option>
-                            <option value={9}>9 Credits</option>
-                            <option value={12}>12 (Not Recommended)</option>
-                          </select>
-                          <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {summerAvailability === 'Yes Summer' && (
-                    <div className="p-2.5 rounded-lg bg-[#F7F5EE] border border-[#B5A36A] text-[11px] text-neutral-800 leading-relaxed">
-                      <strong>Summer Tuition Notice:</strong> Summer courses are billed per credit hour separately from standard fall/spring flat-rate tuition and may incur additional charges.
-                    </div>
-                  )}
-                </div>
-
-                {/* Row 3: 3 Linked Pacing Mode Dropdowns */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-neutral-100">
-                  {/* Dropdown 1: Academic Pacing Mode */}
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
-                      <span>Pacing Mode</span>
-                      <span className="text-red-600 ml-0.5">*</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        id="optionB-pacing-mode"
-                        value={pacingMode}
-                        onChange={(e) => handlePacingModeChange(e.target.value)}
-                        className="w-full appearance-none pl-2.5 pr-6 py-2 text-[11px] bg-white border border-[#857542] ring-1 ring-[#857542]/30 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
-                      >
-                        <option value="Full-Time">Full-Time</option>
-                        <option value="Part-Time">Part-Time</option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-
-                  {/* Dropdown 2: Max 8-Week Session Cap */}
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
-                      <span>8-Week Session Cap</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        id="optionB-max-8wk"
-                        value={max8wkCredits}
-                        onChange={(e) => setMax8wkCredits(Number(e.target.value))}
-                        className="w-full appearance-none pl-2.5 pr-6 py-2 text-[11px] bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
-                      >
-                        {(pacingMode === 'Full-Time' ? [3, 6, 9, 12] : [3, 6]).map((cr) => (
-                          <option key={cr} value={cr}>
-                            {cr}cr / 8wk{ (pacingMode === 'Full-Time' && cr === 9) || (pacingMode === 'Part-Time' && cr === 6) ? ' (Default)' : '' }
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-
-                  {/* Dropdown 3: Max 16-Week Semester Cap */}
-                  <div>
-                    <label className="block text-xs font-bold text-neutral-800 mb-1.5 whitespace-nowrap">
-                      <span>16-Week Semester Cap</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        id="optionB-max-16wk"
-                        value={max16wkCredits}
-                        onChange={(e) => setMax16wkCredits(Number(e.target.value))}
-                        className="w-full appearance-none pl-2.5 pr-6 py-2 text-[11px] bg-white border border-neutral-300 hover:border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-lg font-bold text-neutral-900 transition shadow-2xs cursor-pointer"
-                      >
-                        {(pacingMode === 'Full-Time'
-                          ? [12, 15, 17, 18, 21, 24]
-                          : [1, 3, 6, 9, 11, 12]
-                        ).map((cr) => (
-                          <option key={cr} value={cr}>
-                            {cr}cr / 16wk{ (pacingMode === 'Full-Time' && cr === 18) || (pacingMode === 'Part-Time' && cr === 11) ? ' (Default)' : '' }
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section C: Student & Advisor Profile */}
-              <div className="pt-3 border-t border-neutral-200 space-y-3">
-                <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
-                  Student &amp; Advisor Profile (Editable Header Metadata)
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                      Student Full Name
-                    </label>
-                    <input
-                      id="optionB-student-name"
-                      type="text"
-                      placeholder="Auto-filled from transcript or blank"
-                      value={studentName}
-                      onChange={(e) => setStudentName(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded font-semibold focus:outline-none focus:border-[#857542]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                      Student ID / Enrollment #
-                    </label>
-                    <input
-                      id="optionB-student-id"
-                      type="text"
-                      placeholder="Optional ID"
-                      value={studentId}
-                      onChange={(e) => setStudentId(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded font-mono font-semibold focus:outline-none focus:border-[#857542]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                      Academic Advisor Name
-                    </label>
-                    <input
-                      id="optionB-advisor-name"
-                      type="text"
-                      placeholder="Advisor Name"
-                      value={advisorName}
-                      onChange={(e) => setAdvisorName(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded font-semibold focus:outline-none focus:border-[#857542]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Primary Submit Button */}
+            {/* Modal Footer */}
+            <div className="pt-3 border-t border-neutral-200 flex items-center justify-end space-x-3 flex-shrink-0">
               <button
-                id="optionB-submit-btn"
-                type="submit"
-                disabled={isProcessing}
-                className="w-full py-3 px-4 bg-[#857542] hover:bg-[#6E6035] disabled:bg-neutral-300 text-white text-sm font-bold rounded-lg shadow-md transition flex items-center justify-center space-x-2 mt-4 cursor-pointer"
+                type="button"
+                onClick={() => setEditActiveTermModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-300 rounded-lg transition cursor-pointer"
               >
-                <span>
-                  {hasFiles || cachedParsedTranscript || parsedTranscript
-                    ? 'Proceed to Degree Audit'
-                    : 'Proceed to Optimal Degree Plan'}
-                </span>
-                <ArrowRight className="w-4 h-4 flex-shrink-0" />
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="save-active-term-btn"
+                data-testid="save-active-term-btn"
+                onClick={handleSaveActiveTermModal}
+                className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded-lg shadow-sm transition cursor-pointer"
+              >
+                Done / Save Changes
               </button>
             </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Zero-Upload Confirmation Modal (New Student / Clean Degree Plan Setup) */}
-      <dialog
-        ref={zeroUploadDialogRef}
-        id="zero-upload-modal"
-        aria-labelledby={zeroUploadDialogTitleId}
-        className="w-full max-w-lg rounded-xl shadow-2xl p-0 backdrop:bg-black/60 backdrop:backdrop-blur-xs border-2 border-[#B5A36A] text-left bg-white open:animate-in open:fade-in-0 open:zoom-in-95 m-auto"
-      >
-        <div className="p-6 space-y-4">
-          {/* Header */}
-          <div className="flex items-start justify-between pb-3 border-b border-neutral-200">
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 rounded-full bg-[#F7F5EE] text-[#857542] border border-[#B5A36A]/50">
-                <Sparkles className="w-6 h-6 text-[#857542]" />
-              </div>
-              <div>
-                <h2
-                  id={zeroUploadDialogTitleId}
-                  className="text-base font-extrabold text-neutral-900 leading-snug"
-                >
-                  New Student / Clean Degree Plan Setup
-                </h2>
-                <p className="text-xs font-semibold text-[#857542]">
-                  Fresh Graduation Plan Initiation
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setZeroUploadModalOpen(false)}
-              aria-label="Close modal"
-              className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
+        </div>
+      )}
 
-          {/* Body Message */}
-          <div className="p-4 rounded-lg bg-[#F7F5EE] border border-[#B5A36A]/40 text-xs text-neutral-800 space-y-2">
-            <p className="leading-relaxed">
-              No prior transcript or Anthology course history was uploaded. The Degree Audit stage
-              will be skipped, and you will proceed directly to the Degree Plan to construct a clean,
-              multi-year graduation plan from scratch for{' '}
-              <strong className="text-neutral-900 font-bold">
-                {(masterDb?.programs || []).find((p) => p.id === selectedProgramId)?.name || 'Selected Degree'}
-              </strong>{' '}
-              ({catalogYear}).
-            </p>
-            {activeEnrolledCourses.length > 0 && (
-              <p className="text-[11px] font-semibold text-[#857542] pt-1 border-t border-[#B5A36A]/30">
-                ✓ Including {activeEnrolledCourses.length} currently enrolled course(s) ({activeEnrolledCourses.reduce((s, c) => s + (c.credits || 0), 0).toFixed(1)} cr) as active in-progress credits.
+      {/* =================================================================== */}
+      {/* MODAL B: Registration Start Term Confirmation Modal */}
+      {/* =================================================================== */}
+      {registrationModalState.isOpen && registrationModalState.regResult && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reg-modal-title"
+        >
+          <div
+            className="bg-white rounded-2xl border-2 border-[#B5A36A] max-w-xl w-full p-6 text-neutral-900 shadow-2xl relative space-y-5 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-neutral-200">
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 rounded-xl bg-[#F7F5EE] border border-[#B5A36A]/50 text-[#857542]">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 id="reg-modal-title" className="text-base font-extrabold text-neutral-900 leading-snug">
+                    Confirm Registration Start Term
+                  </h3>
+                  <p className="text-xs text-neutral-500">
+                    No active Fall 2026 courses detected. Select the starting semester for course scheduling.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRegistrationModalState((prev) => ({ ...prev, isOpen: false }))}
+                className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Priority Registration Window Box */}
+            <div className="p-4 rounded-xl bg-[#F7F5EE] border border-[#B5A36A]/50 space-y-2 text-xs">
+              <div className="flex items-center justify-between text-[#857542] font-bold">
+                <span className="flex items-center space-x-1.5">
+                  <Clock className="w-4 h-4" />
+                  <span>Student Standing: {registrationModalState.regResult.priorityWindow.standing}</span>
+                </span>
+                <span className="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-[#B5A36A]/40">
+                  {registrationModalState.regResult.priorityWindow.windowLabel} ({registrationModalState.regResult.priorityWindow.creditBand} cr)
+                </span>
+              </div>
+              <p className="text-neutral-700 leading-relaxed">
+                Registration Cutoff:{' '}
+                <strong className="text-neutral-900 font-bold">
+                  {registrationModalState.regResult.priorityWindow.cutoffDate}
+                </strong>{' '}
+                ({registrationModalState.regResult.priorityWindow.cutoffRule})
               </p>
-            )}
-          </div>
+            </div>
 
-          {/* Actions */}
-          <div className="pt-3 border-t border-neutral-200 flex items-center justify-end space-x-3">
-            <button
-              type="button"
-              id="zero-upload-cancel-btn"
-              onClick={() => setZeroUploadModalOpen(false)}
-              className="px-4 py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-300 rounded-lg transition cursor-pointer"
-            >
-              Cancel / Upload File
-            </button>
-            <button
-              type="button"
-              id="zero-upload-proceed-btn"
-              onClick={handleProceedZeroUpload}
-              className="px-4 py-2 text-xs font-bold text-white bg-[#857542] hover:bg-[#6b5e35] rounded-lg shadow-sm transition flex items-center space-x-1.5 cursor-pointer"
-            >
-              <span>Proceed to Optimal Degree Plan</span>
-              <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
-            </button>
+            {/* Term Selector */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-neutral-800">
+                Select Starting Term from Eligible Registration Windows:
+              </label>
+              <div className="relative">
+                <select
+                  id="registration-start-term-select"
+                  data-testid="registration-start-term-select"
+                  value={registrationModalState.selectedTerm}
+                  onChange={(e) =>
+                    setRegistrationModalState((prev) => ({ ...prev, selectedTerm: e.target.value }))
+                  }
+                  className="w-full appearance-none pl-3.5 pr-8 py-2.5 text-xs bg-white border border-[#857542] focus:border-[#857542] focus:ring-2 focus:ring-[#857542]/20 rounded-xl font-bold text-neutral-900 shadow-2xs cursor-pointer"
+                >
+                  {registrationModalState.regResult.eligibleTerms.map((term) => (
+                    <option key={term} value={term}>
+                      {term}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-3 border-t border-neutral-200 flex items-center justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setRegistrationModalState((prev) => ({ ...prev, isOpen: false }))}
+                className="px-4 py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-300 rounded-lg transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="confirm-registration-term-btn"
+                data-testid="confirm-start-term-btn"
+                onClick={handleConfirmRegistrationModal}
+                className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded-lg shadow-sm transition flex items-center space-x-1.5 cursor-pointer"
+              >
+                <span>Confirm &amp; Run Degree Audit</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
-      </dialog>
+      )}
 
-
-      {/* Student Record Wrong Document Notification & SOP Export Instructions Popup Modal */}
-      <dialog
-        ref={sopDialogRef}
-        id="anthology-verification-modal"
-        {...{ closedby: 'any' }}
-        aria-labelledby={sopDialogTitleId}
-        className="w-full max-w-lg rounded-xl border-2 border-[#B5A36A] bg-white p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-xs"
-      >
-        <div className="p-6 space-y-4 text-left">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-3 border-b border-neutral-200 pb-3">
-            <div className="flex items-start space-x-3">
-              {documentModalState.isError ? (
-                <div className="p-2 rounded-lg bg-red-100 text-red-700 flex-shrink-0">
-                  <AlertTriangle className="w-6 h-6" />
-                </div>
-              ) : documentModalState.docType === 'Transcript' ? (
-                <div className="p-2 rounded-lg bg-[#F7F5EE] text-[#857542] border border-[#B5A36A]/40 flex-shrink-0">
-                  <FileText className="w-6 h-6" />
-                </div>
-              ) : (
-                <div className="p-2 rounded-lg bg-[#F7F5EE] text-[#857542] border border-[#B5A36A]/40 flex-shrink-0">
-                  <FileSpreadsheet className="w-6 h-6" />
-                </div>
-              )}
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#857542]">
-                  {documentModalState.optionLabel ||
-                    (documentModalState.docType === 'Transcript'
-                      ? 'Unofficial Transcript Verification'
-                      : 'Anthology File Verification')}
-                </span>
-                <h2
-                  id={sopDialogTitleId}
-                  className="text-base font-extrabold text-neutral-900 leading-snug"
-                >
-                  {documentModalState.isError
-                    ? documentModalState.docType === 'Transcript'
-                      ? 'Wrong Document Uploaded — Transcript Verification Failed'
-                      : 'Wrong Document Uploaded — Anthology Verification Failed'
-                    : documentModalState.docType === 'Transcript'
-                    ? 'SOP Guide: How to Export Unofficial Transcripts from Anthology'
-                    : 'SOP Guide: How to Export Student Course Schedules from Anthology'}
-                </h2>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setDocumentModalState((prev) => ({ ...prev, isOpen: false }))}
-              aria-label="Close modal"
-              className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Error Details Box (Shown when wrong document is uploaded) */}
-          {documentModalState.isError && (
-            <div className="p-3.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-800 space-y-1.5">
-              <p className="font-bold flex items-center space-x-1.5">
-                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                <span>
-                  Rejected File: <code className="font-mono font-extrabold">{documentModalState.fileName}</code>
-                </span>
-              </p>
-              <p className="leading-relaxed">{documentModalState.errorMessage}</p>
-              {documentModalState.missingColumns?.length > 0 && (
-                <p className="text-[11px] font-mono text-red-700 bg-white/80 p-2 rounded border border-red-200">
-                  Missing Anthology Columns: {documentModalState.missingColumns.slice(0, 6).join(', ')}
-                  {documentModalState.missingColumns.length > 6
-                    ? ` (+${documentModalState.missingColumns.length - 6} more)`
-                    : ''}
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Guide Selector Tabs */}
-          <div className="flex border-b border-neutral-200 gap-2 pt-1">
-            <button
-              type="button"
-              id="sop-tab-anthology"
-              onClick={() => setDocumentModalState((prev) => ({ ...prev, docType: 'Anthology' }))}
-              className={`pb-2 px-3 text-xs font-bold border-b-2 transition ${
-                documentModalState.docType === 'Anthology'
-                  ? 'border-[#857542] text-[#857542]'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
-              }`}
-            >
-              Anthology Schedule (.xlsx / .csv)
-            </button>
-            <button
-              type="button"
-              id="sop-tab-transcript"
-              onClick={() => setDocumentModalState((prev) => ({ ...prev, docType: 'Transcript' }))}
-              className={`pb-2 px-3 text-xs font-bold border-b-2 transition ${
-                documentModalState.docType === 'Transcript'
-                  ? 'border-[#857542] text-[#857542]'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
-              }`}
-            >
-              Unofficial Transcript (.pdf)
-            </button>
-          </div>
-
-          {/* Step-by-Step Instructions based on selected docType */}
-          {documentModalState.docType === 'Anthology' ? (
-            <div className="p-4 rounded-lg bg-[#F7F5EE] border border-[#B5A36A]/50 space-y-2.5">
-              <h3 className="text-xs font-extrabold text-neutral-900 uppercase tracking-wide">
-                How to Export Course Schedules from Anthology:
-              </h3>
-              <ol className="text-xs text-neutral-800 space-y-1.5 list-decimal list-inside leading-relaxed">
-                <li>
-                  Log into <strong>Anthology Student</strong> and open the student&apos;s record.
-                </li>
-                <li>
-                  Navigate to <strong>Academic Records</strong> &rarr;{' '}
-                  <strong>Student Course Schedules (All Results)</strong>.
-                </li>
-                <li>
-                  Confirm the table displays all <strong>20 standard columns</strong> (starting with{' '}
-                  <code className="font-mono text-[11px] bg-white px-1 py-0.5 rounded border border-neutral-200">
-                    Course Code
-                  </code>
-                  ,{' '}
-                  <code className="font-mono text-[11px] bg-white px-1 py-0.5 rounded border border-neutral-200">
-                    Course Name
-                  </code>
-                  ,{' '}
-                  <code className="font-mono text-[11px] bg-white px-1 py-0.5 rounded border border-neutral-200">
-                    Published Code
-                  </code>
-                  ,{' '}
-                  <code className="font-mono text-[11px] bg-white px-1 py-0.5 rounded border border-neutral-200">
-                    Term
-                  </code>
-                  ,{' '}
-                  <code className="font-mono text-[11px] bg-white px-1 py-0.5 rounded border border-neutral-200">
-                    Course Status
-                  </code>
-                  , and{' '}
-                  <code className="font-mono text-[11px] bg-white px-1 py-0.5 rounded border border-neutral-200">
-                    Letter Grade
-                  </code>
-                  ).
-                </li>
-                <li>
-                  Click the <strong>Export to Excel (.xlsx)</strong> or{' '}
-                  <strong>Export to CSV (.csv)</strong> icon in the top-right toolbar and upload that
-                  file here.
-                </li>
-              </ol>
-
-              {/* Direct Scribe SOP Link */}
-              <div className="pt-2 border-t border-[#B5A36A]/30 flex items-center justify-between gap-2">
-                <span className="text-[11px] font-semibold text-neutral-700">
-                  Need visual step-by-step screenshots?
-                </span>
-                <a
-                  id="anthology-sop-modal-link"
-                  href={ANTHOLOGY_SOP_GUIDE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-[#EFEBD9] text-[#857542] border border-[#857542] text-xs font-bold transition shadow-2xs"
-                >
-                  <span>🎬 Open Scribe SOP Instructions</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 rounded-lg bg-[#F7F5EE] border border-[#B5A36A]/50 space-y-2.5">
-              <h3 className="text-xs font-extrabold text-neutral-900 uppercase tracking-wide">
-                How to Export Unofficial Transcripts from Anthology:
-              </h3>
-              <ol className="text-xs text-neutral-800 space-y-1.5 list-decimal list-inside leading-relaxed">
-                <li>
-                  Log into <strong>Anthology Student</strong> and open the student&apos;s record.
-                </li>
-                <li>
-                  Navigate to <strong>Academic Records</strong> &rarr;{' '}
-                  <strong>Transcripts</strong> (or <strong>Unofficial Transcript</strong>).
-                </li>
-                <li>
-                  Select <strong>Unofficial Transcript - Landscape</strong> or <strong>Enrollment-Based Transcript</strong>.
-                </li>
-                <li>
-                  Click <strong>Print / Export to PDF</strong> and ensure the document contains the text layer with Course, Description, Credits, and Grades. Upload that{' '}
-                  <code className="font-mono text-[11px] bg-white px-1 py-0.5 rounded border border-neutral-200">
-                    .pdf
-                  </code>{' '}
-                  file here.
-                </li>
-              </ol>
-
-              {/* Direct Scribe SOP Link */}
-              <div className="pt-2 border-t border-[#B5A36A]/30 flex items-center justify-between gap-2">
-                <span className="text-[11px] font-semibold text-neutral-700">
-                  Need visual step-by-step screenshots?
-                </span>
-                <a
-                  id="transcript-sop-modal-link"
-                  href={TRANSCRIPT_SOP_GUIDE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-[#EFEBD9] text-[#857542] border border-[#857542] text-xs font-bold transition shadow-2xs"
-                >
-                  <span>🎬 Open Scribe SOP Instructions</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-          )}
-
-          {/* Footer Action */}
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <button
-              type="button"
-              id="anthology-modal-dismiss-btn"
-              onClick={() => setDocumentModalState((prev) => ({ ...prev, isOpen: false }))}
-              className="px-4 py-2 bg-[#857542] hover:bg-[#6E6035] text-white text-xs font-bold rounded-lg shadow transition"
-            >
-              {documentModalState.isError
-                ? documentModalState.docType === 'Transcript'
-                  ? 'Understood — Upload Correct Transcript PDF'
-                  : 'Understood — Upload Correct Anthology File'
-                : 'Close SOP Guide'}
-            </button>
-          </div>
-        </div>
-      </dialog>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Skippable Currency Warning Modal (Document May Be Out of Date) */}
-      {/* ------------------------------------------------------------------ */}
-      <dialog
-        ref={currencyDialogRef}
-        id="currency-warning-dialog"
-        aria-labelledby={currencyDialogTitleId}
-        className="w-full max-w-xl rounded-xl shadow-2xl p-0 backdrop:bg-black/60 backdrop:backdrop-blur-xs border border-amber-300 text-left bg-white open:animate-in open:fade-in-0 open:zoom-in-95 m-auto"
-      >
-        <div className="p-6 space-y-5">
-          {/* Header */}
-          <div className="flex items-start justify-between pb-3 border-b border-amber-200">
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                <AlertTriangle className="w-6 h-6 text-amber-700" />
-              </div>
-              <div>
-                <h2
-                  id={currencyDialogTitleId}
-                  className="text-base font-extrabold text-neutral-900 leading-snug"
-                >
-                  Uploaded Document May Be Out of Date
-                </h2>
-                <p className="text-xs font-semibold text-amber-800">
-                  Institutional Currency Verification Notice
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (currencyWarningModalState.onCancel) currencyWarningModalState.onCancel();
-                setCurrencyWarningModalState((prev) => ({ ...prev, isOpen: false }));
-              }}
-              aria-label="Close modal"
-              className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Explanation Banner */}
-          <div className="p-4 rounded-lg bg-amber-50/80 border border-amber-200 space-y-2 text-xs text-amber-950">
-            <p className="font-bold flex items-center space-x-1.5 text-amber-900">
-              <span>
-                File Flagged:{' '}
-                <code className="font-mono font-extrabold text-neutral-900 bg-white px-1.5 py-0.5 rounded border border-amber-200">
-                  {currencyWarningModalState.fileName}
-                </code>
-              </span>
-            </p>
-            <p className="leading-relaxed text-neutral-800">
-              {currencyWarningModalState.explanation}
-            </p>
-          </div>
-
-          {/* Comparison Breakdown Box */}
-          <div className="bg-[#F7F5EE] p-3.5 rounded-lg border border-[#B5A36A]/40 text-xs space-y-2">
-            <h3 className="font-bold text-neutral-900 uppercase tracking-wider text-[11px]">
-              Active Semester vs. Document Verification:
-            </h3>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div className="bg-white p-2 rounded border border-neutral-200">
-                <span className="text-neutral-500 block text-[10px] uppercase font-bold">
-                  Current Active Semester
-                </span>
-                <span className="font-extrabold text-emerald-800">
-                  {currencyWarningModalState.currentSemester || 'Fall 2026'}
-                </span>
-              </div>
-              <div className="bg-white p-2 rounded border border-neutral-200">
-                <span className="text-neutral-500 block text-[10px] uppercase font-bold">
-                  Document Detected Status
-                </span>
-                <span className="font-extrabold text-amber-800">
-                  {currencyWarningModalState.latestTermFound ||
-                    currencyWarningModalState.printedDate ||
-                    'Prior Term Snapshot'}
-                </span>
-              </div>
-            </div>
-            <p className="text-[11px] text-neutral-600 leading-normal pt-1">
-              To guarantee that the student&apos;s remaining requirements and 8-week schedule are computed correctly, current in-progress courses must be reflected.
-            </p>
-          </div>
-
-          {/* Scribe SOP Link Helper */}
-          <div className="flex items-center justify-between text-xs pt-1">
-            <span className="text-neutral-600 font-medium text-[11px]">
-              Need help exporting the latest record?
-            </span>
-            <a
-              id="currency-sop-modal-link"
-              href={
-                currencyWarningModalState.docType === 'Transcript'
-                  ? TRANSCRIPT_SOP_GUIDE_URL
-                  : ANTHOLOGY_SOP_GUIDE_URL
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1 text-[#857542] hover:text-[#6b5e35] font-bold text-xs underline"
-            >
-              <span>Export Instructions SOP</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
-          {/* Action Buttons (Skippable!) */}
-          <div className="pt-3 border-t border-neutral-200 flex items-center justify-end space-x-3">
-            <button
-              type="button"
-              id="currency-modal-upload-newer-btn"
-              onClick={() => {
-                if (currencyWarningModalState.onCancel) currencyWarningModalState.onCancel();
-                setCurrencyWarningModalState((prev) => ({ ...prev, isOpen: false }));
-              }}
-              className="px-4 py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-300 rounded-lg transition"
-            >
-              Upload Newer Document
-            </button>
-            <button
-              type="button"
-              id="currency-modal-proceed-btn"
-              onClick={() => {
-                if (currencyWarningModalState.onProceed) currencyWarningModalState.onProceed();
-                setCurrencyWarningModalState((prev) => ({ ...prev, isOpen: false }));
-              }}
-              className="px-4 py-2 text-xs font-bold text-white bg-[#857542] hover:bg-[#6b5e35] rounded-lg shadow-sm transition flex items-center space-x-1.5"
-            >
-              <span>Proceed Anyway / Use This Document</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </dialog>
-      {/* 5-Second Countdown Active Record Clear Modal */}
+      {/* =================================================================== */}
+      {/* Clear Active Student Safety Modal (5-Second Countdown) */}
+      {/* =================================================================== */}
       {clearModalOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150"
@@ -3199,10 +2312,7 @@ export default function Screen1Intake({
                 <AlertTriangle className="w-5 h-5 text-red-400" />
               </div>
               <div className="space-y-1">
-                <h3
-                  id="clear-student-intake-title"
-                  className="text-base font-bold text-white tracking-tight"
-                >
+                <h3 id="clear-student-intake-title" className="text-base font-bold text-white tracking-tight">
                   Clear Active Student Record?
                 </h3>
                 <p className="text-xs text-neutral-300 leading-relaxed">
@@ -3216,7 +2326,7 @@ export default function Screen1Intake({
                 type="button"
                 id="clear-student-intake-cancel-btn"
                 onClick={() => setClearModalOpen(false)}
-                className="px-4 py-2 text-xs font-semibold rounded-lg border border-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-800 transition"
+                className="px-4 py-2 text-xs font-semibold rounded-lg border border-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -3235,6 +2345,145 @@ export default function Screen1Intake({
                 <span>
                   {countdown > 0 ? `Confirm Clear (${countdown}s)` : 'Confirm Clear Record'}
                 </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* SOP Export Guide & Document Verification Modal */}
+      {/* =================================================================== */}
+      {documentModalState.isOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="bg-white rounded-2xl border-2 border-[#B5A36A] max-w-lg w-full p-6 text-neutral-900 shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-150 text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between pb-3 border-b border-neutral-200">
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 rounded-xl bg-[#F7F5EE] border border-[#B5A36A]/50 text-[#857542]">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-neutral-900">
+                    {documentModalState.isError ? 'Document Verification Notice' : 'Anthology & Transcript Export Guide'}
+                  </h3>
+                  <p className="text-xs text-neutral-500">Official Lindenwood Scribe SOP instructions</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDocumentModalState((prev) => ({ ...prev, isOpen: false }))}
+                className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {documentModalState.isError && (
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 space-y-1">
+                <p className="font-bold">Rejected File: {documentModalState.fileName}</p>
+                <p>{documentModalState.errorMessage}</p>
+              </div>
+            )}
+
+            <div className="space-y-3 text-xs text-neutral-700">
+              <p>
+                Follow the official Lindenwood University Scribe SOPs to export student documents from Anthology Student:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <a
+                  href={ANTHOLOGY_SOP_GUIDE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl border border-neutral-200 hover:border-[#857542] hover:bg-[#F7F5EE]/40 transition block text-neutral-900 font-bold"
+                >
+                  <FileSpreadsheet className="w-5 h-5 text-[#857542] mb-1" />
+                  <span>Anthology Schedule SOP</span>
+                  <p className="text-[10px] text-neutral-500 font-normal mt-0.5">.xlsx or .csv format</p>
+                </a>
+                <a
+                  href={TRANSCRIPT_SOP_GUIDE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl border border-neutral-200 hover:border-[#857542] hover:bg-[#F7F5EE]/40 transition block text-neutral-900 font-bold"
+                >
+                  <FileText className="w-5 h-5 text-[#857542] mb-1" />
+                  <span>Unofficial Transcript SOP</span>
+                  <p className="text-[10px] text-neutral-500 font-normal mt-0.5">.pdf format</p>
+                </a>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-neutral-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDocumentModalState((prev) => ({ ...prev, isOpen: false }))}
+                className="px-4 py-2 text-xs font-bold text-white bg-[#857542] hover:bg-[#6E6035] rounded-lg transition cursor-pointer"
+              >
+                Close Guide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* Skippable Currency Warning Modal */}
+      {/* =================================================================== */}
+      {currencyWarningModalState.isOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="bg-white rounded-2xl border-2 border-amber-400 max-w-lg w-full p-6 text-neutral-900 shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-150 text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start space-x-3 pb-3 border-b border-amber-200">
+              <div className="p-2.5 rounded-xl bg-amber-100 border border-amber-300 text-amber-800">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-neutral-900">
+                  Uploaded Document May Be Out of Date
+                </h3>
+                <p className="text-xs text-amber-800 font-semibold">Institutional Currency Verification</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 space-y-1">
+              <p className="font-bold">File: {currencyWarningModalState.fileName}</p>
+              <p>{currencyWarningModalState.explanation}</p>
+            </div>
+
+            <div className="pt-3 border-t border-neutral-200 flex items-center justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (currencyWarningModalState.onCancel) currencyWarningModalState.onCancel();
+                  setCurrencyWarningModalState((prev) => ({ ...prev, isOpen: false }));
+                }}
+                className="px-4 py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-300 rounded-lg transition cursor-pointer"
+              >
+                Upload Newer Document
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (currencyWarningModalState.onProceed) currencyWarningModalState.onProceed();
+                  setCurrencyWarningModalState((prev) => ({ ...prev, isOpen: false }));
+                }}
+                className="px-4 py-2 text-xs font-bold text-white bg-[#857542] hover:bg-[#6E6035] rounded-lg shadow-sm transition flex items-center space-x-1.5 cursor-pointer"
+              >
+                <span>Proceed Anyway</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

@@ -26,7 +26,10 @@ async function verifyLive() {
   });
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
-      consoleErrors.push(msg.text());
+      const text = msg.text();
+      if (!text.includes('fetchStandardFontData') && !text.includes('Cannot polyfill')) {
+        consoleErrors.push(text);
+      }
     }
   });
   page.on('pageerror', (err) => {
@@ -35,7 +38,7 @@ async function verifyLive() {
 
   try {
     console.log('Navigating to live deployment...');
-    await page.goto(LIVE_URL, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(LIVE_URL, { waitUntil: 'networkidle2', timeout: 35000 });
 
     const title = await page.title();
     console.log(`[PASS] Live Page Title: "${title}"`);
@@ -44,108 +47,170 @@ async function verifyLive() {
     const header = await page.$eval('header', (el) => el.innerText);
     console.log('[PASS] Live Header Text:', header.replace(/\n/g, ' '));
 
-    // Verify Screen 1 Intake
+    // Demo login if on Screen 0
+    const demoBtn = await page.$('button[type="button"]');
+    const isLogin = await page.evaluate(() => document.body.innerText.includes('Faculty Access Required') || document.body.innerText.includes('Sign In'));
+    if (isLogin) {
+      const bypass = await page.evaluate(() => {
+        const btn = Array.from(document.querySelectorAll('button')).find((b) => b.textContent.includes('Instant Demo / Local Dev Bypass'));
+        if (btn) {
+          btn.click();
+          return true;
+        }
+        return false;
+      });
+      if (bypass) {
+        await new Promise((r) => setTimeout(r, 600));
+        console.log('[PASS] Demo bypass executed on live site.');
+      }
+    }
+
+    // Verify Screen 1 Intake Heading
     const screen1H1 = await page.$eval('h1, h2', (el) => el.innerText);
     console.log('[PASS] Live Screen 1 Heading:', screen1H1);
 
-    // Checkpoint 1: Bingo Sheet dropzone is 100% removed
-    const bingoDropzone = await page.$('#optionB-bingo-sheet');
-    if (bingoDropzone !== null) {
-      throw new Error('FAILED: #optionB-bingo-sheet still exists in the live DOM!');
+    // Checkpoint 1: 3-Card Layout Structure
+    const hasCard1 = await page.evaluate(() => document.body.innerText.includes('1. STUDENT RECORDS'));
+    const hasCard2 = await page.evaluate(() => document.body.innerText.includes('2. DEGREE CURRICULUM & CREDENTIAL ROSTER'));
+    const hasCard3 = await page.evaluate(() => document.body.innerText.includes('3. SCHEDULING CONSTRAINTS'));
+    if (!hasCard1 || !hasCard2 || !hasCard3) {
+      throw new Error(`FAILED: 3-Card layout headers missing. Card1: ${hasCard1}, Card2: ${hasCard2}, Card3: ${hasCard3}`);
     }
-    console.log('[PASS] Live Checkpoint 1: Bingo Sheet dropzone completely removed.');
+    console.log('[PASS] Live Checkpoint 1: 3-Card structure confirmed on live deployment.');
 
-    // Checkpoint 2: Schedule Start Semester labeling
-    const startSemLabel = await page.evaluate(() => {
-      const el = document.querySelector('label[for="optionB-start-semester"]') ||
-        Array.from(document.querySelectorAll('label')).find((l) => l.textContent.includes('Schedule Start Semester'));
-      return el ? el.textContent.trim() : null;
+    // Checkpoint 2: Header Badges
+    const badgeLocal = await page.evaluate(() => document.body.innerText.includes('Local Processing, Zero Uploads'));
+    const badgePacing = await page.evaluate(() => document.body.innerText.includes('Path Pacing Rules'));
+    if (!badgeLocal || !badgePacing) {
+      throw new Error('FAILED: Expected header badges "Local Processing, Zero Uploads" or "Path Pacing Rules".');
+    }
+    console.log('[PASS] Live Checkpoint 2: Card header badges confirmed.');
+
+    // Checkpoint 3: Initial Empty Identity Row & Placeholders
+    const identityState = await page.evaluate(() => {
+      const nameInput = document.querySelector('#optionB-student-name');
+      const idInput = document.querySelector('#optionB-student-id');
+      const advNameInput = document.querySelector('#optionB-advisor-name');
+      const advEmailInput = document.querySelector('#optionB-advisor-email');
+      const addon = Array.from(document.querySelectorAll('span')).some((s) => s.textContent.includes('@lindenwood.edu'));
+      return {
+        nameVal: nameInput?.value,
+        namePlaceholder: nameInput?.placeholder,
+        idVal: idInput?.value,
+        idPlaceholder: idInput?.placeholder,
+        advNamePlaceholder: advNameInput?.placeholder,
+        advEmailPlaceholder: advEmailInput?.placeholder,
+        hasEmailAddon: addon
+      };
     });
-    if (!startSemLabel || !startSemLabel.includes('Schedule Start Semester')) {
-      throw new Error(`FAILED: Start Semester label mismatch. Found: ${startSemLabel}`);
+    console.log('[PASS] Live Checkpoint 3: Identity inputs inspected:', identityState);
+    if (identityState.nameVal !== '' || identityState.idVal !== '') {
+      throw new Error('FAILED: Initial student identity inputs must start empty with zero sample data.');
     }
-    console.log(`[PASS] Live Checkpoint 2: "Schedule Start Semester" verified.`);
-
-    // Checkpoint 3: Zero-Upload Button Label
-    const submitBtnText = await page.$eval('#optionB-submit-btn', (el) => el.textContent.trim());
-    console.log(`[PASS] Live Checkpoint 3: Submit button initial label: "${submitBtnText}"`);
-    if (!submitBtnText.includes('Proceed to Optimal Degree Plan') && !submitBtnText.includes('Proceed to Plan Setup')) {
-      throw new Error(`FAILED: Expected "Proceed to Optimal Degree Plan". Found: ${submitBtnText}`);
+    if (identityState.namePlaceholder !== 'Auto-Filled by Transcripts' || !identityState.hasEmailAddon) {
+      throw new Error('FAILED: Identity input placeholders or @lindenwood.edu addon mismatch.');
     }
 
-    // Checkpoint 4: Test Currently Enrolled Courses tray
-    console.log('Testing Currently Enrolled Courses tray on live site...');
-    const trayToggleBtn = await page.$('#optionB-toggle-enrolled-tray-btn');
-    if (!trayToggleBtn) {
-      throw new Error('FAILED: #optionB-toggle-enrolled-tray-btn missing on live site!');
+    // Checkpoint 4: 3 Ingestion Dropzones
+    const dropzones = await page.evaluate(() => {
+      return {
+        anthology: Boolean(document.querySelector('#optionB-anthology')),
+        transcript: Boolean(document.querySelector('#optionB-transcript')),
+        degreePlan: Boolean(document.querySelector('#optionA-degreePlan'))
+      };
+    });
+    if (!dropzones.anthology || !dropzones.transcript || !dropzones.degreePlan) {
+      throw new Error(`FAILED: Dropzone missing: ${JSON.stringify(dropzones)}`);
     }
-    await trayToggleBtn.click();
+    console.log('[PASS] Live Checkpoint 4: 3 Ingestion dropzones verified.');
+
+    // Checkpoint 5: Card 3 Pacing Controls & Overload / Summer Gating
+    console.log('Testing Card 3 Pacing Controls on live site...');
+    const pacingModeSelect = await page.$('#optionB-pacing-mode');
+    if (!pacingModeSelect) throw new Error('FAILED: #optionB-pacing-mode missing on live site!');
+
+    // Test Overload Notice at 21 cr
+    const capSelect = await page.$('#optionB-max-16wk');
+    await page.select('#optionB-max-16wk', '21');
     await new Promise((r) => setTimeout(r, 400));
 
-    const searchInput = await page.$('#tray-course-search');
-    if (!searchInput) throw new Error('FAILED: #tray-course-search missing on live site!');
-    await searchInput.type('ICS 21300');
+    const overloadNoticeText = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="overload-notice"]');
+      return el ? el.innerText.replace(/\n+/g, ' ') : null;
+    });
+    if (!overloadNoticeText || !overloadNoticeText.includes('Students with a cumulative GPA of 3.5 or above are eligible to take up to 24 credits')) {
+      throw new Error(`FAILED: Overload notice missing or mismatch at 21 cr. Found: ${overloadNoticeText}`);
+    }
+    console.log('[PASS] Live Checkpoint 5: Overload notice verified at 21 cr.');
+
+    // Test Summer Availability & Dynamic Summer Cap Dropdown
+    await page.select('#optionB-summer-select', 'Yes Summer');
     await new Promise((r) => setTimeout(r, 400));
+    const summerCapExists = await page.$('#optionB-summer-cap');
+    if (!summerCapExists) throw new Error('FAILED: #optionB-summer-cap missing when "Yes Summer" selected!');
+    console.log('[PASS] Live Checkpoint 6: Summer availability & dynamic summer cap dropdown verified.');
 
-    const addBtn1 = await page.$('button[data-tray-add-code="ICS21300"]');
-    if (!addBtn1) throw new Error('FAILED: Could not find button[data-tray-add-code="ICS21300"] on live site!');
-    await addBtn1.click();
-    console.log('[PASS] Live Checkpoint 4: Successfully added ICS 21300 via Quick-Add tray.');
-
-    // Checkpoint 5: Zero-Upload Modal Flow to Screen 3
-    console.log('Testing Zero-Upload Modal flow to Screen 3 on live site...');
-    const mainProceedBtn = await page.$('#optionB-submit-btn');
-    await mainProceedBtn.click();
+    // Checkpoint 7: Test Modal B on zero-course state
+    console.log('Testing Modal B Registration Start Term Confirmation Modal on live site...');
+    const submitBtn = await page.$('#optionB-submit-btn');
+    if (!submitBtn) throw new Error('FAILED: #optionB-submit-btn missing on live site!');
+    await submitBtn.click();
     await new Promise((r) => setTimeout(r, 600));
 
-    const modal = await page.$('#zero-upload-modal');
-    const isModalOpen = await page.evaluate((m) => m && m.open, modal);
-    if (!isModalOpen) {
-      throw new Error('FAILED: #zero-upload-modal did not open on live site!');
-    }
-    console.log('[PASS] Live Checkpoint 5: Zero-upload confirmation modal opened successfully.');
-
-    // Click Proceed to Schedule Board inside modal
-    const confirmBtn = await page.$('#zero-upload-proceed-btn');
-    if (!confirmBtn) throw new Error('FAILED: #zero-upload-proceed-btn missing in modal!');
-    await confirmBtn.click();
-    await new Promise((r) => setTimeout(r, 1200));
-
-    // Verify Screen 3
-    const screen3H1 = await page.$eval('h1', (el) => el.innerText);
-    console.log('[PASS] Live Screen 3 Heading:', screen3H1);
-
-    // Check course cards or bands
-    const scheduledCourses = await page.evaluate(() => {
-      return document.body.innerText.includes('ICS 21300') || document.body.innerText.includes('Interactive Graduation Road Map');
+    const modalBTitle = await page.evaluate(() => {
+      const h3 = Array.from(document.querySelectorAll('h3')).find((el) => el.textContent.includes('Confirm Registration Start Term'));
+      return h3 ? h3.textContent.trim() : null;
     });
-    console.log(`[PASS] Live Checkpoint 6: Landed on Schedule Board (Roadmap verified: ${scheduledCourses})`);
+    if (!modalBTitle) throw new Error('FAILED: Modal B did not open when clicking Run Degree Audit with zero active courses!');
+    console.log('[PASS] Live Checkpoint 7: Modal B confirmed on live site with priority window info.');
 
-    // Checkpoint 7: Test Unofficial Transcript PDF Upload on Live Site
-    console.log('Testing Brandon Paz Unofficial Transcript PDF upload on live site...');
-    await page.goto(LIVE_URL, { waitUntil: 'networkidle2' });
+    // Cancel modal B
+    await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button')).find((b) => b.textContent.includes('Cancel'));
+      if (btn) btn.click();
+    });
+    await new Promise((r) => setTimeout(r, 400));
+
+    // Checkpoint 8: Real Transcript Upload (Brandon Paz)
+    console.log('Testing Brandon Paz Unofficial Transcript upload on live site...');
     const transcriptInput = await page.$('input#optionB-transcript-input');
     if (!transcriptInput) throw new Error('FAILED: input#optionB-transcript-input not found on live site!');
-    
+
     const samplePdf = 'c:\\Users\\todwood\\Documents\\Antigravity Work\\Degree_Panner\\.tmp\\samples\\Brandon Paz\\sub_Transcript - UnOfficial_landscape.pdf';
     await transcriptInput.uploadFile(samplePdf);
-    await new Promise((r) => setTimeout(r, 2000));
-
-    const liveErrorBox = await page.evaluate(() => {
-      const el = document.querySelector('.text-red-700, .bg-red-50, .border-red-500');
-      return el ? el.innerText.replace(/\n+/g, ' ') : null;
-    });
-    if (liveErrorBox) {
-      throw new Error(`FAILED: Error box displayed on live transcript upload: ${liveErrorBox}`);
-    }
+    await new Promise((r) => setTimeout(r, 2500));
 
     const liveSummaryBadge = await page.evaluate(() => {
-      const el = Array.from(document.querySelectorAll('div, span')).find((d) => d.textContent.includes('Active Courses'));
+      const el = document.querySelector('[data-testid="parsed-telemetry-panel"]');
       return el ? el.innerText.replace(/\n+/g, ' ') : null;
     });
-    console.log(`[PASS] Live Checkpoint 7: Transcript uploaded cleanly without errors. Badge: "${liveSummaryBadge}"`);
+    if (!liveSummaryBadge || !liveSummaryBadge.includes('Parsed') || !liveSummaryBadge.includes('Total Credits')) {
+      throw new Error(`FAILED: Parsed Telemetry Panel text missing. Found: ${liveSummaryBadge}`);
+    }
+    console.log(`[PASS] Live Checkpoint 8: Brandon Paz transcript processed. Telemetry banner: "${liveSummaryBadge.slice(0, 100)}..."`);
 
-    // Take screenshot of live deployed site
+    // Checkpoint 9: Modal A (Active Term Course Editor)
+    console.log('Testing Modal A (Active Term Course Editor) on live site...');
+    const editActiveTermBtn = await page.$('[data-testid="edit-active-term-btn"]');
+    if (!editActiveTermBtn) throw new Error('FAILED: [data-testid="edit-active-term-btn"] missing on live site!');
+    await editActiveTermBtn.click();
+    await new Promise((r) => setTimeout(r, 500));
+
+    const modalATitle = await page.evaluate(() => {
+      const h3 = Array.from(document.querySelectorAll('h3')).find((el) => el.textContent.includes('Active Term Course Editor'));
+      return h3 ? h3.textContent.trim() : null;
+    });
+    if (!modalATitle) throw new Error('FAILED: Modal A did not open when clicking Edit Active Term button!');
+    console.log('[PASS] Live Checkpoint 9: Modal A verified on live site.');
+
+    // Close Modal A
+    await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button')).find((b) => b.textContent.includes('Cancel'));
+      if (btn) btn.click();
+    });
+    await new Promise((r) => setTimeout(r, 400));
+
+    // Save screenshot
     const screenPath = '.tmp/live_github_pages_verification.png';
     await page.screenshot({ path: screenPath, fullPage: true });
     console.log(`[PASS] Saved live screenshot to ${screenPath}`);

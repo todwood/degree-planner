@@ -1335,3 +1335,55 @@
   - *Autonomous Headless Playwright Verification (`.tmp/verify_track_comparator_ui.mjs`):* Verified Data Science BS plan tabs switching, Computer Science BS single-track clean roadmap, 12cr Part-Time plateau badge, Pacing Opportunity banner, and preview toggle with 0 console errors and clean process teardown.
   - *Production Build:* Vite production build succeeded cleanly with 0 errors in 4.77s.
   - *Live Deployment:* Deployed to GitHub Pages via `node execution/deploy_to_github_pages.js --live` and verified end-to-end via headless Chrome automation (`node execution/verify_live_pages.js`), asserting 7/7 checkpoints and 0 console errors on live site.
+
+
+### 78. Screen 1 Overhaul — Step 1: Pure Intake Logic, Telemetry Math, Registration Windows & Unit Tests
+- **Objective:** Implement pure deterministic helper functions in `src/utils/intakeHelpers.js` (and `src/utils/transcriptParser.js` / `src/engine/transcriptParser.js`) and comprehensive unit tests in `tests/screen1OverhaulLogic.test.js` without modifying any React UI components (`src/components/Screen1Intake.jsx`).
+- **Key Architectural Implementations (`src/utils/intakeHelpers.js`):**
+  1. *Whole-Number Credit Telemetry & Active-Term Audit (`formatParsedTelemetrySummary`, `computeParsedTelemetryTotals`, `evaluateActiveTermEnrollment`):*
+     - Computes whole-number (`Math.round`) credit totals for `transferCredits`, `institutionalCredits`, `currentCredits`, and `totalCredits = transferCredits + institutionalCredits + currentCredits`.
+     - Returns formatted banner string: `"Parsed {totalCourses} Courses ({transferCredits} Transfer + {institutionalCredits} Institutional + {currentCredits} Current = {totalCredits} Total Credits)"`.
+     - `evaluateActiveTermEnrollment(courses, activeTermId, enrollmentStatus = 'FULL_TIME')` filters active-semester courses across `16-Week`, `Session I`, and `Session II` (including completed courses from that same active semester, e.g., completed `Fall Session I` courses), computes `activeTermTotalCredits`, sets `showLowCreditWarning: true` when `FULL_TIME` and `activeTermTotalCredits < 12`, and always sets `canEditActiveTerm: true`.
+  2. *Advisor Email & Identity Normalization (`parseAdvisorEmailUsername`, `formatFullAdvisorEmail`):*
+     - Strips `@lindenwood.edu` (case-insensitive) from parsed transcript advisor emails and formats clean usernames into `${username.trim()}@lindenwood.edu`.
+  3. *Registration Start Term Auto-Calculation & 1-Week Cutoff Window (`resolveRegistrationStartTerm`, `computePriorityRegistrationWindow`):*
+     - Defines 7 registration term windows (`Fall 2026 16wk`, `Fall 2026 II 8wk`, `Spring 2027 16wk`, `Spring 2027 II 8wk`, `Summer 2027`, `Fall 2027 16wk`, `Fall 2027 II 8wk`) with Friday Week 1 registration cutoffs (excluding standalone `Fall I 8wk` and `Spring I 8wk`).
+     - Auto-resolves `startTerm: 'Spring 2027 16wk'` with `requiresManualSelection: false` when active `Fall 2026` courses exist; otherwise sets `requiresManualSelection: true` and filters `eligibleTerms` where `cutoffDate >= referenceDate` (excluding `Fall 2026 II 8wk` on `2026-10-29`).
+     - Computes credit-tiered priority registration windows (`>=90` Senior Priority Week 1, `60-89` Junior Week 2, `30-59` Sophomore Week 3, `0-29` Freshman Week 4) and exact cutoff rule (`1 week after start of classes`).
+  4. *Scheduling Constraints & Pacing Options Validator (`getPacingConstraintOptions`):*
+     - Enforces Full-Time (`[12, 15, 18]` min; `[12, 15, 16, 17, 18, 21, 24]` cap filtered `>= selectedMin16Wk`) and Part-Time (`[3, 6, 9]` min; `[3, 6, 9, 11]` cap filtered `>= selectedMin16Wk`) constraints, 8-week session caps (`[0, 3, 6, 9, 12]`), modality preferences, summer availability (`[3, 6, 9, 12]` + summer tuition notice), and `> 18` credit overload notices.
+  5. *Smart PDF Plan State Serializer (`serializePlanPayloadForPdf`, `extractPlanPayloadFromPdfText`):*
+     - Encodes and decodes student intake configuration, declared credential IDs, advisor identity, and pacing rules inside `LINDENWOOD_PLAN_PAYLOAD_V1:...` blocks.
+- **Verification:**
+  - Created `tests/screen1OverhaulLogic.test.js` (13 unit tests covering all 5 modules).
+  - Full Vitest suite: **201 / 201 tests passing across 17 test files (100% green)** with zero regressions.
+
+### 79. Screen 1 Overhaul — Step 2: UI Layout Rebuild, Active-Term & Registration Modals, Verification & Live Release
+- **Objective:** Rebuild `src/components/Screen1Intake.jsx` into the streamlined 3-card layout, wire pure intake helpers from `src/utils/intakeHelpers.js`, implement Modal A (Active Term Course Editor) and Modal B (Registration Start Term Confirmation Modal), verify with headless Playwright testing with deterministic process teardown, maintain 100% test pass rate across 201 unit tests, and deploy live to GitHub Pages.
+- **Architectural Implementation (`src/components/Screen1Intake.jsx`):**
+  1. *Global Header & Action Bar:* Preserved Global Top Banner, 3-Step Navigation Stepper, Page Header Bar with `[ ✕ Clear Active Student ]` (triggering 5-second countdown safety modal), and dynamic `[ Run Degree Audit → ]` button.
+  2. *Card 1: `1. STUDENT RECORDS`:*
+     - Right Header Badge: `Local Processing, Zero Uploads`.
+     - Identity Row (4 Inputs): `Student Full Name*` (`placeholder="Auto-Filled by Transcripts"`), `Student ID*` (`placeholder="Auto-Filled by Transcripts"`), `Advisor Full Name` (`placeholder="Prof. Name"`), and `Advisor Email` (`placeholder="username"` with fixed right `@lindenwood.edu` input addon). All start empty with zero sample data. Uses `parseAdvisorEmailUsername` and `formatFullAdvisorEmail`.
+     - Subheader: `"Provide at least one document to Analyze"`.
+     - 3 Ingestion Channels: Anthology Schedule (`.xlsx`/`.csv`), Unofficial Transcript (`.pdf`), and Exported Degree Plan (`.pdf (Smart Advising Plan)` hydrating via `extractPlanPayloadFromPdfText`).
+     - Minimal Parsed Telemetry Panel: Displays `✓ {formatParsedTelemetrySummary}` with whole-number credit totals and `[ Re-Extract ]` button. Renders Active Term breakdown (`16-Week`, `Session I`, `Session II`), `[ ✏️ Edit Active Term ]` button (`data-testid="edit-active-term-btn"`), and subtle warning badge `⚠️ {activeTermTotalCredits} Active-Term Credits Detected (Expected ≥ 12 for Full-Time)` (`data-testid="low-active-credits-warning"`) strictly when `showLowCreditWarning === true`.
+  3. *Modal A: Active Term Course Editor (`Edit Active Term`):*
+     - Allows searching the full 1,936-course catalog (unfiltered by degree) and adding/removing active-term courses with selectors for Term Band (`Full 16-Week`, `Session I 8-Week`, `Session II 8-Week`) and status (`In-Progress`, `Scheduled`, `Completed`).
+  4. *Card 2: `2. DEGREE CURRICULUM & CREDENTIAL ROSTER`:*
+     - Preserved full multi-program stack builder (`ProgramCombobox`, Primary/Secondary Major with `[Make Primary]`, Minors/Certificates, N-way overlap summary, Catalog Year combobox, and Missouri CORE 42 waiver toggle).
+  5. *Card 3: `3. SCHEDULING CONSTRAINTS`:*
+     - Header: `3. SCHEDULING CONSTRAINTS` with badge `Path Pacing Rules`.
+     - Clean 2-row horizontal grid with zero "Row 1/2" text and no manual Target Start Term dropdown.
+     - Row 1: Enrollment Status (`Full-Time Student` | `Part-Time Student` with helper text `"Full-Time (≥12min) and Part-Time (<12max) loads for Fall & Spring"`), 16-Week Semester Minimum (`[12, 15, 18]` FT / `[3, 6, 9]` PT), and 16-Week Semester Cap (filtered `>= Minimum`, no helper text).
+     - Row 2: Course Modality Preference (`No Preference (Default)`, `Online-Only`, `Prefer OnGround`, `Prefer Online`), 8-Week Session Cap (`0, 3, 6, 9, 12` cr), Summer Availability (`No Summer (Default)` | `Yes Summer`), and Summer Credit Cap (`3, 6, 9, 12` cr, rendered only when `Yes Summer` is selected).
+     - Dynamic Policy Callout Banners: `ℹ️ Summer Tuition Notice` when `Yes Summer` is active; `⚠️ Academic Course Overload Notice` when cap > 18 cr.
+  6. *Modal B: Registration Start Term Confirmation Modal:*
+     - Evaluates `resolveRegistrationStartTerm({ courses, referenceDate: '2026-10-29' })`.
+     - If `requiresManualSelection === false` (active Fall 2026 courses exist): automatically sets start term to `Spring 2027 16wk` and advances directly to Screen 2.
+     - If `requiresManualSelection === true`: opens confirmation modal displaying priority registration window (`Senior Priority Week 1`, `Junior Week 2`, `Sophomore Week 3`, `Freshman Week 4`) and cutoff date (`1 week after start of classes`), allowing selection from `eligibleTerms` (`Spring 2027 16wk`, `Spring 2027 II 8wk`, `Summer 2027`, `Fall 2027 16wk`, `Fall 2027 II 8wk`).
+- **Verification & Deployment:**
+  - *Unit Tests:* 201 / 201 Vitest unit tests passing (100% green across 17 test files).
+  - *Production Build:* Vite production build succeeded cleanly with 0 errors in 5.38s.
+  - *Playwright Headless Verification (`.tmp/verify_screen1_overhaul.mjs`):* Verified 3-card structure, empty initial identity inputs with placeholders and `@lindenwood.edu` addon, Card 3 Full-Time/Part-Time options, overload notice at 21 cr, dynamic summer cap dropdown, Modal B registration start term confirmation, Brandon Paz transcript upload, Minimal Parsed Telemetry Panel, Modal A catalog course search, zero console errors, and clean process teardown inside `finally` block.
+  - *Live Production Release:* Deployed to GitHub Pages via `node execution/deploy_to_github_pages.js --live` and verified end-to-end via `node execution/verify_live_pages.js` with 0 console errors.

@@ -2459,11 +2459,16 @@ export async function extractStateFromDegreePlanPdf(pdfBytes) {
   const keywords = pdfDoc.getKeywords();
   const subject = pdfDoc.getSubject();
 
-  // Check custom subject/keywords JSON payload (supporting both DegreePlanState and legacy prefix)
+  // Check custom subject/keywords JSON payload (supporting LINDENWOOD_PLAN_PAYLOAD_V1, DegreePlanState, and legacy prefix)
   for (const candidate of [subject, keywords]) {
     if (!candidate) continue;
     let b64 = null;
-    if (candidate.includes('DegreePlanState:')) {
+    if (candidate.includes('LINDENWOOD_PLAN_PAYLOAD_V1:')) {
+      b64 = candidate
+        .split('LINDENWOOD_PLAN_PAYLOAD_V1:')[1]
+        .split(':END_LINDENWOOD_PLAN_PAYLOAD_V1')[0]
+        .trim();
+    } else if (candidate.includes('DegreePlanState:')) {
       b64 = candidate.split('DegreePlanState:')[1].trim();
     } else if (candidate.includes('LindenwoodDegreePlanState:')) {
       b64 = candidate.split('LindenwoodDegreePlanState:')[1].trim();
