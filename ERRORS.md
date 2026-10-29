@@ -99,8 +99,9 @@
   1. In `src/engine/transcriptParser.js` (`extractSpatialTranscriptFromPdf`), implemented a defensive memory clone (`Uint8Array` copy) before passing data to `pdfjs.getDocument`, guaranteeing that callers' original `ArrayBuffers` are never detached by worker transfers.
   2. In `src/engine/transcriptParser.js` (`parseTranscriptPdf`), attached the spatial extractor's `reconstructedText` directly to the returned parsed result (`res.reconstructedText = reconstructedText;`), eliminating redundant PDF parsing.
   3. In `src/components/Screen1Intake.jsx` (`verifyAndAssignTranscriptFile`), streamlined the verification pipeline to call `parseTranscriptPdf(buffer)` once, use its `reconstructedText` for `verifyTranscriptText`, run `verifyDocumentCurrency`, and apply the parsed transcript into state cleanly.
-  4. Verified across Brandon Paz's Unofficial Transcripts (both Enrollment-Based and Student-Based variants) in Vitest and headless Chrome automation, with 100% successful extraction and 0 errors.
-
-
+  4. Verified across Brandon Paz's Unofficial Transcripts (both Enrollment-Based and Student-Based variants) in Vitest and headless Chrome automation, with 100% successful extraction and 0 errors.### Issue 18: Playwright Popover Selector Targeting `button` Instead of `div[role="option"]`
+- **Symptom:** In `.tmp/verify_intake_to_audit_transition.mjs`, clicking the catalog year or program search result timed out on `locator('button:has-text("2025–2026")')` and `locator('button:has-text("Theatre")')`.
+- **Root Cause:** Both `CatalogYearCombobox.jsx` and `ProgramCombobox.jsx` implement WAI-ARIA accessible popover listboxes where selectable options are rendered as `<div role="option" id="...">`, not `<button>`.
+- **Resolution:** Updated test selectors to target explicit listbox IDs: `#catalog-year-option-2025-2026`, `#catalog-year-option-2026-2027`, and `#optionB-program-listbox [role="option"]:has-text("Theatre")`, and used `#optionB-program-search-input` for the search field. Verified clean execution with exit code 0.
 
 

@@ -255,7 +255,7 @@ export default function Screen2Audit({
   const completedCr = total.completed || 0;
   const enrolledCr = total.enrolled || 0;
   const earnedPlusEnrolled = total.EarnedPlusEnrolled || completedCr + enrolledCr;
-  const targetCr = Math.max(120, total.projectedTotal || 120);
+  const targetCr = auditResult?.targetGraduationCredits || total.target || Math.max(120, total.projectedTotal || 120);
 
   // Percent coordinates for Race to the Graduation Flag
   const completedPct = Math.min(100, Math.max(0, (completedCr / targetCr) * 100));
@@ -331,10 +331,12 @@ export default function Screen2Audit({
             ← Back to Intake
           </button>
           <button
+            id="top-confirm-audit-proceed-btn"
+            data-testid="top-confirm-audit-proceed-btn"
             onClick={checkMissingAvailabilityAndProceed}
             className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded shadow transition flex items-center space-x-2"
           >
-            <span>Proceed to Optimal Degree Plan</span>
+            <span>Confirm Audit & Build Schedule (Screen 3)</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -540,9 +542,13 @@ export default function Screen2Audit({
       <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
           <h2 className="text-base font-bold text-neutral-900">
-            Race to the Graduation Flag (120+ Credits)
+            Race to the Graduation Flag ({targetCr}+ Credits)
           </h2>
           <div className="text-xs font-semibold text-neutral-600 flex flex-wrap items-center gap-2">
+            <span className="font-bold text-neutral-900 font-mono" data-testid="audit-summary-metric">
+              {Number(completedCr.toFixed(1))} / {targetCr} Credits Completed
+            </span>
+            <span>|</span>
             <span>
               Completed: <strong className="font-bold text-neutral-900 font-mono" data-testid="audit-completed-cr">{completedCr.toFixed(1)}</strong> cr
             </span>
@@ -609,10 +615,10 @@ export default function Screen2Audit({
           {/* Milestone markers below track */}
           <div className="flex justify-between text-[10px] font-mono text-neutral-400 mt-1.5">
             <span>0 cr</span>
-            <span>30 cr (Sophomore)</span>
-            <span>60 cr (Junior)</span>
-            <span>90 cr (Senior)</span>
-            <span className="font-bold text-neutral-900">120+ cr (Conferral)</span>
+            <span>{Math.round(targetCr * 0.25)} cr (Sophomore)</span>
+            <span>{Math.round(targetCr * 0.5)} cr (Junior)</span>
+            <span>{Math.round(targetCr * 0.75)} cr (Senior)</span>
+            <span className="font-bold text-neutral-900">{targetCr}+ cr (Conferral)</span>
           </div>
         </div>
 
@@ -661,7 +667,7 @@ export default function Screen2Audit({
               <span className="font-bold text-neutral-900">Total Program Credits:</span>{' '}
               <span className="font-mono">{completedCr.toFixed(1)} Completed + {enrolledCr.toFixed(1)} Current = {earnedPlusEnrolled.toFixed(1)} Total</span>{' '}
               (+ <span className="font-mono">{(total.remainingPlanned || 0).toFixed(1)} Planned</span> ={' '}
-              <strong className="font-mono text-neutral-950">{(total.projectedTotal || 120).toFixed(1)} / 120+ Target</strong>)
+              <strong className="font-mono text-neutral-950">{(total.projectedTotal || targetCr).toFixed(1)} / {targetCr}+ Target</strong>)
               {total.transferCredits > 0 && (
                 <span className="ml-2 bg-[#F7F5EE] text-[#857542] text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#B5A36A]">
                   {total.transferCredits.toFixed(1)} Transfer Credits (UNIV/LUL Waived)
@@ -1590,10 +1596,12 @@ export default function Screen2Audit({
       {/* Bottom Action Bar */}
       <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
         <button
+          id="confirm-audit-proceed-btn"
+          data-testid="confirm-audit-proceed-btn"
           onClick={checkMissingAvailabilityAndProceed}
           className="px-6 py-2.5 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded shadow transition flex items-center justify-center space-x-2"
         >
-          <span>Proceed to Optimal Degree Plan</span>
+          <span>Confirm Audit & Build Schedule (Screen 3)</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

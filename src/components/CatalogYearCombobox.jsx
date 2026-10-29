@@ -22,13 +22,20 @@ const CATALOG_YEAR_CONFIG = [
     startYear: 2024,
     badgeText: 'Historical',
     badgeClass: 'bg-neutral-100 text-neutral-600 border-neutral-200'
+  },
+  {
+    id: '2023-2024',
+    label: '2023–2024',
+    startYear: 2023,
+    badgeText: 'Historical',
+    badgeClass: 'bg-neutral-100 text-neutral-600 border-neutral-200'
   }
 ];
 
 export default function CatalogYearCombobox({
   catalogYear = '2026-2027',
   onChange = () => {},
-  minCatalogYearStart = 2024,
+  minCatalogYearStart = 2023,
   disabled = false,
   className = ''
 }) {
@@ -101,6 +108,9 @@ export default function CatalogYearCombobox({
         </option>
         <option value="2024-2025" disabled={minCatalogYearStart > 2024}>
           2024–2025
+        </option>
+        <option value="2023-2024" disabled={minCatalogYearStart > 2023}>
+          2023–2024
         </option>
       </select>
 

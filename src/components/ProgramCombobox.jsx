@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, ChevronDown, Check } from 'lucide-react';
 import { getProgramCategory } from '../utils/programStackUtils.js';
+import masterProgramsDb from '../data/masterProgramsDatabase.json' with { type: 'json' };
 
 /**
  * Parses program name into discipline, emphasis, and degree badge.
@@ -39,6 +40,7 @@ export function parseProgramDetails(name = '') {
  */
 export default function ProgramCombobox({
   programs = [],
+  catalogYear = '2026-2027',
   selectedProgramId = '',
   onSelectProgramId = () => {},
   disabled = false,
@@ -52,10 +54,26 @@ export default function ProgramCombobox({
   const searchInputRef = useRef(null);
   const listboxRef = useRef(null);
 
+  // Fallback to masterProgramsDatabase filtered by catalogYear if programs prop is empty
+  const effectivePrograms = useMemo(() => {
+    if (Array.isArray(programs) && programs.length > 0) {
+      return programs;
+    }
+    const all = masterProgramsDb?.programs
+      ? (Array.isArray(masterProgramsDb.programs) ? masterProgramsDb.programs : Object.values(masterProgramsDb.programs))
+      : [];
+    return all.filter(
+      (p) =>
+        p.catalogYear === catalogYear ||
+        p.catalog_year === catalogYear ||
+        p.catalog_year_id === catalogYear
+    );
+  }, [programs, catalogYear]);
+
   // Find currently selected program
   const selectedProgram = useMemo(() => {
-    return programs.find((p) => p.id === selectedProgramId) || programs[0] || null;
-  }, [programs, selectedProgramId]);
+    return effectivePrograms.find((p) => p.id === selectedProgramId) || effectivePrograms[0] || null;
+  }, [effectivePrograms, selectedProgramId]);
 
   const { discipline, emphasis, degreeBadge } = useMemo(() => {
     return parseProgramDetails(selectedProgram?.name || '');
@@ -68,14 +86,14 @@ export default function ProgramCombobox({
   // Filter programs by search query (discipline, emphasis, id, degree, or category)
   const filteredPrograms = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return programs;
-    return programs.filter((p) => {
-      const name = (p.name || '').toLowerCase();
+    if (!q) return effectivePrograms;
+    return effectivePrograms.filter((p) => {
+      const name = (p.name || p.program_name || '').toLowerCase();
       const id = (p.id || '').toLowerCase();
       const cat = getProgramCategory(p).toLowerCase();
       return name.includes(q) || id.includes(q) || cat.includes(q);
     });
-  }, [programs, searchQuery]);
+  }, [effectivePrograms, searchQuery]);
 
   // Focus search input on open
   useEffect(() => {
@@ -150,7 +168,7 @@ export default function ProgramCombobox({
         className="sr-only absolute -left-[9999px] opacity-0 pointer-events-none w-0 h-0"
       >
         <optgroup label="Official Undergraduate Degree Programs">
-          {programs.map((p) => (
+          {effectivePrograms.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
             </option>

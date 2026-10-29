@@ -36,6 +36,7 @@ import { calculateStartingSemester } from '../engine/scheduler.js';
 import dbAdapter from '../data/dbAdapter.js';
 import ProgramCombobox, { parseProgramDetails } from './ProgramCombobox.jsx';
 import CatalogYearCombobox from './CatalogYearCombobox.jsx';
+import masterProgramsDb from '../data/masterProgramsDatabase.json' with { type: 'json' };
 import {
   getProgramCategory,
   formatDeclaredStackHeader,
@@ -317,12 +318,34 @@ export default function Screen1Intake({
     if (propCatalogYear) setCatalogYearState(propCatalogYear);
   }, [propCatalogYear]);
 
+  const allAvailablePrograms = useMemo(() => {
+    if (masterProgramsDb?.programs) {
+      return Array.isArray(masterProgramsDb.programs)
+        ? masterProgramsDb.programs
+        : Object.values(masterProgramsDb.programs);
+    }
+    if (masterDb?.programs) {
+      return Array.isArray(masterDb.programs)
+        ? masterDb.programs
+        : Object.values(masterDb.programs);
+    }
+    return [];
+  }, [masterDb]);
+
+  const availableProgramsForYear = useMemo(() => {
+    return allAvailablePrograms.filter(
+      (p) =>
+        p.catalogYear === catalogYear ||
+        p.catalog_year === catalogYear ||
+        p.catalog_year_id === catalogYear
+    );
+  }, [allAvailablePrograms, catalogYear]);
+
   const declaredPrograms = useMemo(() => {
-    const list = masterDb?.programs || [];
     return declaredProgramIds
-      .map((id) => list.find((p) => p.id === id))
+      .map((id) => allAvailablePrograms.find((p) => p.id === id) || (masterDb?.programs || []).find((p) => p.id === id))
       .filter(Boolean);
-  }, [declaredProgramIds, masterDb]);
+  }, [declaredProgramIds, allAvailablePrograms, masterDb]);
 
   const effectivePrimaryMajorId = useMemo(() => {
     const declaredMajors = declaredPrograms.filter((p) => {
@@ -335,8 +358,8 @@ export default function Screen1Intake({
   }, [declaredPrograms, primaryProgramId]);
 
   const stackOverlap = useMemo(() => {
-    return calculateStackOverlap(declaredPrograms, masterDb);
-  }, [declaredPrograms, masterDb]);
+    return calculateStackOverlap(declaredPrograms, { ...masterDb, programs: allAvailablePrograms });
+  }, [declaredPrograms, masterDb, allAvailablePrograms]);
 
   const handleMakePrimary = (progId) => {
     setPrimaryProgramId(progId);
@@ -347,12 +370,12 @@ export default function Screen1Intake({
   const handleAddProgramToStack = (progId) => {
     if (!progId || declaredProgramIds.includes(progId)) return;
     setDeclaredProgramIds((prev) => [...prev, progId]);
-    const addedProg = (masterDb?.programs || []).find((p) => p.id === progId);
+    const addedProg = allAvailablePrograms.find((p) => p.id === progId) || (masterDb?.programs || []).find((p) => p.id === progId);
     if (addedProg) {
       const cat = getProgramCategory(addedProg);
       const isMajor = cat === 'Major' || cat === 'Major - Track';
       const hasExistingMajor = declaredProgramIds.some((id) => {
-        const p = (masterDb?.programs || []).find((x) => x.id === id);
+        const p = allAvailablePrograms.find((x) => x.id === id) || (masterDb?.programs || []).find((x) => x.id === id);
         return p && (getProgramCategory(p) === 'Major' || getProgramCategory(p) === 'Major - Track');
       });
       if (isMajor && !hasExistingMajor) {
@@ -369,7 +392,7 @@ export default function Screen1Intake({
       const next = prev.filter((id) => id !== progId);
       if (progId === effectivePrimaryMajorId) {
         const nextMajor = next.find((id) => {
-          const p = (masterDb?.programs || []).find((x) => x.id === id);
+          const p = allAvailablePrograms.find((x) => x.id === id) || (masterDb?.programs || []).find((x) => x.id === id);
           return p && (getProgramCategory(p) === 'Major' || getProgramCategory(p) === 'Major - Track');
         });
         if (nextMajor) {
@@ -384,7 +407,7 @@ export default function Screen1Intake({
       }
       return next;
     });
-    const removedProg = (masterDb?.programs || []).find((p) => p.id === progId);
+    const removedProg = allAvailablePrograms.find((p) => p.id === progId) || (masterDb?.programs || []).find((p) => p.id === progId);
     if (removedProg) {
       onUpdateAdditionalPrograms?.((prev) => (prev || []).filter((n) => n !== removedProg.name));
     }
@@ -392,11 +415,11 @@ export default function Screen1Intake({
 
   const handleCatalogYearChange = (newYear) => {
     setCatalogYear(newYear);
-    const remapped = remapStackForCatalogYear(declaredProgramIds, newYear, masterDb);
+    const remapped = remapStackForCatalogYear(declaredProgramIds, newYear, { programs: allAvailablePrograms });
     setDeclaredProgramIds(remapped);
     const remappedPrimary =
       remapped.find((id) => {
-        const p = (masterDb?.programs || []).find((x) => x.id === id);
+        const p = allAvailablePrograms.find((x) => x.id === id) || (masterDb?.programs || []).find((x) => x.id === id);
         return p && getProgramCategory(p).startsWith('Major');
       }) || remapped[0];
     if (remappedPrimary) {
@@ -870,8 +893,11 @@ export default function Screen1Intake({
 
         const detectedMajorStr = (meta.program || meta.major || '').toLowerCase();
         const detectedProgCode = (meta.programCode || '').toUpperCase();
-        const availableProgs = (masterDb.programs || []).filter(
-          (p) => p.catalog_year_id === targetCatalogYear
+        const availableProgs = allAvailablePrograms.filter(
+          (p) =>
+            p.catalogYear === targetCatalogYear ||
+            p.catalog_year === targetCatalogYear ||
+            p.catalog_year_id === targetCatalogYear
         );
 
         if (availableProgs.length > 0) {
@@ -1069,7 +1095,7 @@ export default function Screen1Intake({
       gpa: detectedGpa || finalParsed.studentMetadata?.gpa || '',
       catalogYear,
       pacingMode,
-      major: (masterDb.programs || []).find((p) => p.id === selectedProgramId)?.name || '',
+      major: (allAvailablePrograms.find((p) => p.id === selectedProgramId) || (masterDb.programs || []).find((p) => p.id === selectedProgramId))?.name || '',
       core42Completed: core42TransferBlock,
       declaredPrograms: declaredProgramIds
     };
@@ -1538,9 +1564,8 @@ export default function Screen1Intake({
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex-1 min-w-0">
               <ProgramCombobox
-                programs={(masterDb.programs || []).filter(
-                  (p) => p.catalog_year_id === catalogYear
-                )}
+                programs={availableProgramsForYear}
+                catalogYear={catalogYear}
                 selectedProgramId={stagedComboboxProgramId}
                 onSelectProgramId={(newId) => setStagedComboboxProgramId(newId)}
               />

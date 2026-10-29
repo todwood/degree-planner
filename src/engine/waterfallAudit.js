@@ -13,11 +13,85 @@
  */
 
 import masterDbDefault from '../data/masterDatabase.json' with { type: 'json' };
+import masterProgramsDefault from '../data/masterProgramsDatabase.json' with { type: 'json' };
+import ge2026 from '../data/ge_2026_2027.json' with { type: 'json' };
+import ge2025 from '../data/ge_2025_2026.json' with { type: 'json' };
+import ge2024 from '../data/ge_2024_2025.json' with { type: 'json' };
+import ge2023 from '../data/ge_2023_2024.json' with { type: 'json' };
 import {
   normalizeCourseCode,
   isGradeCOrHigher,
   isTransferPlaceholder
 } from './transcriptParser.js';
+
+export const GE_MATRICES_BY_YEAR = {
+  '2026-2027': ge2026,
+  '2025-2026': ge2025,
+  '2024-2025': ge2024,
+  '2023-2024': ge2023
+};
+
+/**
+ * Returns all catalog programs combined from masterProgramsDatabase (1,008 harvested programs)
+ * and catalogDb/masterDbDefault with duplicate ID preservation.
+ */
+export function getAllCatalogPrograms(db = masterDbDefault) {
+  const map = new Map();
+
+  const masterList = masterProgramsDefault?.programs
+    ? (Array.isArray(masterProgramsDefault.programs)
+        ? masterProgramsDefault.programs
+        : Object.values(masterProgramsDefault.programs))
+    : [];
+  for (const p of masterList) {
+    if (p && p.id) map.set(p.id, p);
+  }
+
+  const dbList = db?.programs
+    ? (Array.isArray(db.programs)
+        ? db.programs
+        : Object.values(db.programs))
+    : [];
+  for (const p of dbList) {
+    if (p && p.id) map.set(p.id, p);
+  }
+
+  return Array.from(map.values());
+}
+
+/**
+ * Resolves General Education catalog distribution rules for any specified catalog year.
+ */
+export function resolveGeMatrixForYear(catalogYear = '2026-2027', db = null) {
+  if (db?.general_education && db.general_education[catalogYear]) {
+    const raw = db.general_education[catalogYear];
+    return {
+      catalog_year: catalogYear,
+      total_credits_required: Number(raw.total_credits_required) || 42,
+      categories: raw.categories || raw.distribution_categories || {}
+    };
+  }
+
+  const fileMatrix = GE_MATRICES_BY_YEAR[catalogYear] || GE_MATRICES_BY_YEAR['2026-2027'];
+  if (fileMatrix) {
+    return {
+      catalog_year: fileMatrix.catalog_year || catalogYear,
+      total_credits_required: Number(fileMatrix.total_credits_required) || 42,
+      categories: fileMatrix.distribution_categories || fileMatrix.categories || {}
+    };
+  }
+
+  if (db?.general_education && db.general_education['2026-2027']) {
+    const raw = db.general_education['2026-2027'];
+    return {
+      catalog_year: '2026-2027',
+      total_credits_required: Number(raw.total_credits_required) || 42,
+      categories: raw.categories || raw.distribution_categories || {}
+    };
+  }
+
+  return null;
+}
 
 const GE_DEPARTMENTS = new Set([
   'ENGL',
@@ -244,19 +318,32 @@ export function runWaterfallAudit(
 
   // Resolve selected program(s)
   const requestedIds = Array.isArray(programIdOrIds) ? programIdOrIds : [programIdOrIds];
+  const allProgs = getAllCatalogPrograms(db);
   const selectedPrograms = requestedIds
     .map((idOrName) => {
+      if (!idOrName) return null;
+      if (typeof idOrName === 'object' && idOrName.id) return idOrName;
       const q = String(idOrName || '').trim().toLowerCase();
-      return (db.programs || []).find(
-        (p) =>
-          p.id.toLowerCase() === q ||
-          p.name.toLowerCase() === q ||
-          String(p.acalog_poid) === q
+      return (
+        allProgs.find(
+          (p) =>
+            p.id.toLowerCase() === q ||
+            p.name.toLowerCase() === q ||
+            String(p.acalog_poid) === q
+        ) ||
+        (db.programs || []).find(
+          (p) =>
+            p.id.toLowerCase() === q ||
+            p.name.toLowerCase() === q ||
+            String(p.acalog_poid) === q
+        )
       );
     })
     .filter(Boolean);
 
-  if (selectedPrograms.length === 0 && db.programs?.length > 0) {
+  if (selectedPrograms.length === 0 && allProgs.length > 0) {
+    selectedPrograms.push(allProgs[0]);
+  } else if (selectedPrograms.length === 0 && db.programs?.length > 0) {
     selectedPrograms.push(db.programs[0]);
   }
 
@@ -995,12 +1082,22 @@ export function runWaterfallAudit(
     remainingCourseItems.push(ulItem);
   }
 
-  // 4. 120-Credit Total Graduation Safeguard (General Electives)
+  // 4. Dynamic Total Graduation Safeguard (General Electives)
+  let defaultBaseFloor = 120;
+  if (primaryProgram) {
+    if (typeof primaryProgram.totalRequiredCredits === 'number' && primaryProgram.totalRequiredCredits >= 90) {
+      defaultBaseFloor = primaryProgram.totalRequiredCredits;
+    } else if (typeof primaryProgram.total_degree_credits === 'number' && primaryProgram.total_degree_credits >= 90) {
+      defaultBaseFloor = primaryProgram.total_degree_credits;
+    }
+  }
+  const targetGraduationCredits = options.targetGraduationCredits || defaultBaseFloor;
+
   const remainingCreditsSoFar = remainingCourseItems.reduce((sum, c) => sum + c.credits, 0);
   const projectedTotalBeforeGeneralElectives =
     totalEarnedAndEnrolledCredits + remainingCreditsSoFar;
 
-  const generalElectiveDeficit = Math.max(0, 120 - projectedTotalBeforeGeneralElectives);
+  const generalElectiveDeficit = Math.max(0, targetGraduationCredits - projectedTotalBeforeGeneralElectives);
   const generalElectiveCount = Math.ceil(generalElectiveDeficit / 3);
   const generatedGeneralElectives = [];
 
@@ -1092,11 +1189,11 @@ export function runWaterfallAudit(
         EarnedPlusEnrolled: totalEarnedAndEnrolledCredits,
         remainingPlanned: totalRemainingPlannedCredits,
         projectedTotal: finalProjectedTotalCredits,
-        target: Math.max(120, finalProjectedTotalCredits),
-        minThreshold: 120,
+        target: targetGraduationCredits,
+        minThreshold: targetGraduationCredits,
         transferCredits: totalTransferCredits,
         univLulWaived,
-        satisfied: finalProjectedTotalCredits >= 120
+        satisfied: finalProjectedTotalCredits >= targetGraduationCredits
       },
       upperLevelCredits: {
         earnedAndEnrolled: earnedAndEnrolledUpperLevelCredits,
@@ -1227,11 +1324,14 @@ export function isAppliedToGraduation(course) {
  */
 export function orderDeclaredPrograms(declaredPrograms = [], catalogDb = masterDbDefault, primaryProgramId = null) {
   const db = catalogDb || masterDbDefault;
+  const allProgs = getAllCatalogPrograms(db);
   const resolved = [];
   const seen = new Set();
   for (const entry of declaredPrograms || []) {
     const prog =
-      typeof entry === 'string' ? (db.programs || []).find((p) => p.id === entry) : entry;
+      typeof entry === 'string'
+        ? allProgs.find((p) => p.id === entry) || (db.programs || []).find((p) => p.id === entry)
+        : entry;
     if (prog && prog.id && !seen.has(prog.id)) {
       seen.add(prog.id);
       resolved.push(prog);
@@ -1255,6 +1355,16 @@ export function orderDeclaredPrograms(declaredPrograms = [], catalogDb = masterD
 }
 
 /**
+ * Helper to extract program/major requirement load (distinct from 90/120+ degree conferral floors).
+ */
+export function getProgramRequirementCredits(prog) {
+  if (typeof prog?.total_program_credits === 'number') return prog.total_program_credits;
+  if (typeof prog?.total_major_credits === 'number') return prog.total_major_credits;
+  if (typeof prog?.totalRequiredCredits === 'number' && prog.totalRequiredCredits < 90) return prog.totalRequiredCredits;
+  return 0;
+}
+
+/**
  * E. Curricular Track Bifurcation.
  * Resolves flexible_elective_configurations tracks into stable ids (option_a, option_b, ...)
  * and reconfigures elective pool targets for the active track.
@@ -1275,7 +1385,7 @@ export function resolveTrackConfiguration(program, activeTrackId = null) {
         creditsRequired: Number(pool.credits_required) || 0
       })),
       totalElectiveCredits: pools.reduce((s, pool) => s + (Number(pool.credits_required) || 0), 0),
-      adjustedProgramCredits: Number(program?.total_program_credits || program?.total_major_credits || 0)
+      adjustedProgramCredits: getProgramRequirementCredits(program)
     };
   }
 
@@ -1301,7 +1411,7 @@ export function resolveTrackConfiguration(program, activeTrackId = null) {
   }));
 
   // Catalog total_program_credits reflects the largest track; re-base it on the active track.
-  const baseTotal = Number(program?.total_program_credits || program?.total_major_credits || 0);
+  const baseTotal = getProgramRequirementCredits(program);
   const maxTrackTotal = Math.max(...tracks.map((t) => t.totalElectiveCredits));
   const adjustedProgramCredits = Math.max(0, baseTotal - maxTrackTotal + activeTrack.totalElectiveCredits);
 
@@ -1377,7 +1487,7 @@ export function evaluateCompositionGatekeeper(courses = []) {
 function flattenApproved(category) {
   const out = [];
   const push = (list) => (Array.isArray(list) ? list.forEach((c) => out.push(toCompact(c))) : null);
-  const ac = category?.approved_courses;
+  const ac = category?.approved_courses || category?.courses;
   if (Array.isArray(ac)) push(ac);
   else if (ac && typeof ac === 'object') Object.values(ac).forEach(push);
   push(category?.approved_lab_courses);
@@ -1399,8 +1509,7 @@ export function auditGeneralEducationCategories({
   core42Completed = false
 } = {}) {
   const db = catalogDb || masterDbDefault;
-  const geRoot = db.general_education || {};
-  const yearSchema = geRoot[catalogYear] || geRoot['2026-2027'] || null;
+  const yearSchema = resolveGeMatrixForYear(catalogYear, db);
   const categoriesSchema = yearSchema?.categories || {};
   const totalRequired = Number(yearSchema?.total_credits_required) || 42;
   const catalogByCompact = new Map((db.courses || []).map((c) => [toCompact(c.code), c]));
@@ -1409,8 +1518,8 @@ export function auditGeneralEducationCategories({
     const categories = Object.entries(categoriesSchema).map(([id, cat]) => ({
       id,
       name: cat.name,
-      credits: Number(cat.credits) || 0,
-      earnedCredits: Number(cat.credits) || 0,
+      credits: Number(cat.credits ?? cat.credits_required) || 0,
+      earnedCredits: Number(cat.credits ?? cat.credits_required) || 0,
       remainingCredits: 0,
       satisfied: true,
       waived: true,
@@ -1448,7 +1557,7 @@ export function auditGeneralEducationCategories({
 
   const categories = [];
   for (const [id, cat] of Object.entries(categoriesSchema)) {
-    const credits = Number(cat.credits) || 0;
+    const credits = Number(cat.credits ?? cat.credits_required) || 0;
     const applied = [];
     let earned = 0;
 
@@ -1604,7 +1713,7 @@ export function buildProgramAuditLedgers(orderedPrograms = [], courses = [], cat
   const programAudits = orderedPrograms.map((prog, idx) => {
     const category = classifyCredential(prog);
     const track = resolveTrackConfiguration(prog, activeTrackId);
-    const requiredCredits = track.adjustedProgramCredits;
+    const requiredCredits = track.adjustedProgramCredits || getProgramRequirementCredits(prog);
     grossRequiredCredits += requiredCredits;
 
     let satisfiedCredits = 0;
@@ -1701,6 +1810,7 @@ export function buildProgramAuditLedgers(orderedPrograms = [], courses = [], cat
       entries: Array.from(sharedEntries.values()),
       grossRequiredCredits,
       crossCountedCredits,
+      totalDeductedOverlapCredits: crossCountedCredits,
       netRequiredCredits: Math.max(0, grossRequiredCredits - crossCountedCredits),
       uniqueAppliedCredits,
       appliedCourseCodes: Array.from(appliedCourseCodes.keys())
@@ -1722,16 +1832,21 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
   const options = { ...(auditOptions || {}) };
   const ordered = orderDeclaredPrograms(declaredPrograms, db, options.primaryProgramId);
   const orderedIds = ordered.length > 0 ? ordered.map((p) => p.id) : ['cybersecurity_bs_2026'];
-
-  // Baseline engine (unchanged contract) continues to drive Screen 2 legacy tables + Screen 3 scheduler
-  const baseline = runWaterfallAudit(studentRecord, orderedIds, db, options);
-  const programs = ordered.length > 0 ? ordered : baseline.selectedPrograms;
+  const allProgs = getAllCatalogPrograms(db);
+  const programs =
+    ordered.length > 0
+      ? ordered
+      : orderedIds
+          .map((id) => (typeof id === 'object' ? id : allProgs.find((p) => p.id === id) || (db.programs || []).find((p) => p.id === id)))
+          .filter(Boolean);
+  const primaryProgram = programs[0] || null;
 
   const courses = studentRecord?.validCourses || [];
   const catalogYear =
     options.catalogYear ||
     studentRecord?.studentMetadata?.catalogYear ||
     programs[0]?.catalog_year_id ||
+    programs[0]?.catalogYear ||
     '2026-2027';
 
   const trackHost = programs.find((p) => resolveTrackConfiguration(p).hasTracks) || null;
@@ -1755,6 +1870,86 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
   const upperDivisionGate = computeUpperDivisionGate(courses);
   const compositionGatekeeperAudit = evaluateCompositionGatekeeper(courses);
 
+  // ---------------------------------------------------------------------------
+  // Dynamic Graduation Finish Line Calculation
+  // ---------------------------------------------------------------------------
+  // 1. Dynamic Program Base Floor:
+  // Sourced from primaryProgram.totalRequiredCredits (e.g., 90, 120, 124, 128). If missing or undefined, fallback to 120.
+  let baseInstitutionalFloor = 120;
+  if (primaryProgram) {
+    if (typeof primaryProgram.totalRequiredCredits === 'number') {
+      if (primaryProgram.totalRequiredCredits >= 90 || primaryProgram.credentialType === 'ASSOCIATE' || primaryProgram.degree_type === 'AA' || primaryProgram.degree_type === 'AS') {
+        baseInstitutionalFloor = primaryProgram.totalRequiredCredits;
+      } else if (typeof primaryProgram.total_degree_credits === 'number' && primaryProgram.total_degree_credits >= 90) {
+        baseInstitutionalFloor = primaryProgram.total_degree_credits;
+      } else {
+        baseInstitutionalFloor = 120;
+      }
+    } else if (typeof primaryProgram.total_degree_credits === 'number' && primaryProgram.total_degree_credits >= 90) {
+      baseInstitutionalFloor = primaryProgram.total_degree_credits;
+    }
+  }
+
+  // 2. Net Multi-Credential Stack Floor:
+  // Calculate netRequiredStackCredits as the non-duplicative sum of:
+  // - General Education required credits (0 if CORE 42 completed, otherwise 42 minus prescribed GE waivers)
+  let prescribedGeWaivers = 0;
+  const countedPrescribed = new Set();
+  const catalogByCompact = new Map((db.courses || []).map((c) => [toCompact(c.code), c]));
+  for (const prog of programs || []) {
+    for (const [key, code] of Object.entries(prog?.requirements?.prescribed_ge_satisfactions || {})) {
+      const norm = normalizeCourseCode(code);
+      if (!norm) continue;
+      if (!countedPrescribed.has(norm.compact)) {
+        countedPrescribed.add(norm.compact);
+        const catCourse = catalogByCompact.get(norm.compact);
+        prescribedGeWaivers += catCourse ? Number(catCourse.credits) || 3 : 3;
+      }
+    }
+  }
+  const geRequiredCredits = options.core42Completed ? 0 : Math.max(0, 42 - prescribedGeWaivers);
+
+  // - Unique requirement credits across all declared credentials in the stack minus crossCountingLedger.totalDeductedOverlapCredits
+  const overlapCredits = crossCountingLedger?.totalDeductedOverlapCredits ?? crossCountingLedger?.crossCountedCredits ?? 0;
+  const grossProgramCredits = crossCountingLedger?.grossRequiredCredits ?? programs.reduce((sum, p) => {
+    return sum + getProgramRequirementCredits(p);
+  }, 0);
+  const uniqueProgramCredits = Math.max(0, grossProgramCredits - overlapCredits);
+  const netRequiredStackCredits = geRequiredCredits + uniqueProgramCredits;
+
+  // 3. Dynamic Target Resolution:
+  // targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits)
+  const targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits);
+
+  // Baseline engine (unchanged contract) continues to drive Screen 2 legacy tables + Screen 3 scheduler
+  const baseline = runWaterfallAudit(studentRecord, orderedIds, db, {
+    ...options,
+    targetGraduationCredits
+  });
+
+  const resolvedPrograms = ordered.length > 0 ? ordered : baseline.selectedPrograms;
+
+  const totalAppliedCredits = baseline.policyChecklist?.totalCredits?.EarnedPlusEnrolled ?? 0;
+  const totalCompletedCredits = baseline.policyChecklist?.totalCredits?.completed ?? 0;
+
+  // Remaining program requirements across all credential ledgers + remaining GE
+  const remainingProgramRequirements = programAudits.reduce((sum, pa) => {
+    const reqRemaining = pa.requirements.filter((r) => !r.satisfied).reduce((s, r) => s + r.credits, 0);
+    const poolRemaining = (pa.electivePools || []).reduce((s, p) => s + (p.remainingCredits || 0), 0);
+    return sum + reqRemaining + poolRemaining;
+  }, 0) + (generalEducationAudit?.remainingCredits || 0);
+
+  // Adjust Free Elective remaining calculation:
+  // remainingFreeElectives = Math.max(0, targetGraduationCredits - (totalAppliedCredits + remainingProgramRequirements))
+  const remainingFreeElectives = Math.max(0, targetGraduationCredits - (totalAppliedCredits + remainingProgramRequirements));
+
+  if (baseline.policyChecklist?.totalCredits) {
+    baseline.policyChecklist.totalCredits.target = targetGraduationCredits;
+    baseline.policyChecklist.totalCredits.minThreshold = targetGraduationCredits;
+    baseline.policyChecklist.totalCredits.satisfied =
+      (baseline.policyChecklist.totalCredits.projectedTotal || totalAppliedCredits) >= targetGraduationCredits;
+  }
+
   const advisingWarnings = [
     ...compositionGatekeeperAudit.warnings.map((w) => ({
       type: 'COMPOSITION_GATE',
@@ -1773,8 +1968,13 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
 
   return {
     ...baseline,
-    totalEarnedAndEnrolledCredits: baseline.policyChecklist?.totalCredits?.EarnedPlusEnrolled ?? 0,
-    declaredProgramsOrdered: programs.map((p) => p.id),
+    targetGraduationCredits,
+    netRequiredStackCredits,
+    baseInstitutionalFloor,
+    remainingFreeElectives,
+    totalEarnedAndEnrolledCredits: totalAppliedCredits,
+    totalCompletedCredits,
+    declaredProgramsOrdered: resolvedPrograms.map((p) => p.id),
     programAudits,
     crossCountingLedger,
     generalEducationAudit,

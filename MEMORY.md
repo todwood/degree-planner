@@ -1441,18 +1441,24 @@
      - Added 5 unit tests validating staging artifact presence, minimum threshold ($\ge 80+$; 249 harvested), schema and `_2024` slug formatting, CORE 42 matrix resolution, and tri-catalog coexistence.
      - Vitest suite result: **216 / 216 tests passing across 20 test files (100% green)**.
 
-### 83. Full 2023–2024 Undergraduate Degree & Program Harvester (Skill 1)
-- **Objective:** Harvest all undergraduate Majors, Minors, and Certificates for Academic Year 2023–2024 from Lindenwood University's SmartCatalog IQ platform (`https://lindenwood.smartcatalogiq.com`) with CORE 42 General Education extraction, unique slug generation ending in `_2023`, 4-year cumulative database coexistence, and zero-regression testing.
+### 84. Master 1,008-Program Database Integration, Dynamic Graduation Finish Line & Multi-Catalog GE Matrix Resolution
+- **Objective:** Wire the master 1,008-program dataset (`src/data/masterProgramsDatabase.json`) into Screen 1 (`src/components/Screen1Intake.jsx` and `src/components/ProgramCombobox.jsx`), dynamically filtering by catalog year (`2026-2027`, `2025-2026`, `2024-2025`, `2023-2024`). Dynamically resolve the GE matrix in `src/engine/waterfallAudit.js` across catalog years (`ge_2026_2027.json`, `ge_2025_2026.json`, `ge_2024_2025.json`, `ge_2023_2024.json`) while preserving Missouri CORE 42 waivers. Eliminate hardcoded 120 graduation ceilings using dynamic finish line math (`targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits)`).
 - **Architectural Implementation:**
-  1. *Platform Discovery:*
-     - Identified that Lindenwood utilized SmartCatalog IQ prior to the 2024–2025 Acalog migration. Resolved Programs of Study (`/programs-of-study`) and Academic Requirements (`/academic-requirements/general-education-ge-program`).
-  2. *Playwright Multi-Worker Harvester (`.tmp/harvest_full_catalog_2023.mjs`):*
-     - Crawled Academic Requirements and harvested official 2023–2024 CORE 42 General Education framework across all 8 distribution categories plus AA block transfer override. Saved to `src/data/ge_2023_2024.json`.
-     - Enumerated and filtered 244 candidate undergraduate credentials (127 Majors, 91 Minors, 26 Certificates).
-     - Crawled requirement blocks with 6 concurrent Playwright workers in 9.50 seconds with deterministic process teardown.
-  3. *Staging & Coexistence Integration:*
-     - Staged raw and parsed programs into `.tmp/programs_staging_2023_2024.json` (615.10 KB).
-     - Merged 2023–2024 programs into `src/data/masterProgramsDatabase.json` alongside 2026–2027, 2025–2026, and 2024–2025 programs, reaching **1,008 total catalog programs** spanning 4 complete academic years with unique `_2023`, `_2024`, `_2025`, and `_2026` slugs.
-  4. *Autonomous Verification (`tests/catalog2023Harvester.test.js`):*
-     - Added 5 unit tests validating staging artifact presence, minimum threshold ($\ge 80+$; 244 harvested), schema and `_2023` slug formatting, CORE 42 matrix resolution, and 4-year coexistence.
-     - Vitest suite result: **221 / 221 tests passing across 21 test files (100% green)**.
+  1. *Catalog Year Filtering on Screen 1:*
+     - `Screen1Intake.jsx` and `ProgramCombobox.jsx` dynamically filter available Majors, Minors, and Certificates based on the active `catalogYear` (264 for 2026–2027, 251 for 2025–2026, 249 for 2024–2025, 244 for 2023–2024).
+     - Catalog year selector in `CatalogYearCombobox.jsx` updated to support `2023-2024` with native hidden select compatibility and keyboard/click navigation.
+  2. *Dynamic GE Matrix Resolution (`src/engine/waterfallAudit.js`):*
+     - Implemented `resolveGeMatrixForYear(catalogYear, db)` to dynamically route audit calculations through the active catalog year's GE JSON matrix (`ge_2026_2027.json`, etc.) with full fallback compatibility.
+     - Preserved full Missouri CORE 42 / AA Block waiver logic across all catalog years.
+  3. *Dynamic Graduation Finish Line Math (`src/engine/waterfallAudit.js`):*
+     - Sourced `baseInstitutionalFloor` from `primaryProgram.totalRequiredCredits` (or 120 fallback).
+     - Calculated `netRequiredStackCredits = (core42Completed ? 0 : 42 - prescribedGeWaivers) + (grossProgramCredits - overlapCredits)`.
+     - Set `targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits)`.
+     - Calculated `remainingFreeElectives = Math.max(0, targetGraduationCredits - (totalAppliedCredits + remainingProgramRequirements))`.
+     - Updated Screen 2 summary metric (`[data-testid="audit-summary-metric"]`) to display `{completedCr} / {targetCr} Credits Completed` with dynamic progress line milestones.
+  4. *Autonomous Verification & Tests (`tests/catalogUiWiring.test.js` & `.tmp/verify_intake_to_audit_transition.mjs`):*
+     - Created 21-test Vitest suite in `tests/catalogUiWiring.test.js` verifying program counts, 120/90/135-credit dynamic targets, and multi-year GE resolution.
+     - Created headless Playwright verification script `.tmp/verify_intake_to_audit_transition.mjs` verifying catalog switching, search population, Brandon Paz transcript ingestion, transition to Screen 2, dynamic summary metrics, Upper-Division gate, requirement accordions, and Screen 3 proceed button.
+     - Vitest suite result: **242 / 242 tests passing across 22 test files (100% green)**.
+     - Headless Playwright suite: **100% passing with 0 console errors and clean process teardown**.
+

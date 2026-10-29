@@ -102,7 +102,8 @@ export default function App() {
       catalogDb: masterDb,
       auditOptions: {
         mathPlacementMet: true,
-        core42Completed: isCore42
+        core42Completed: isCore42,
+        catalogYear: parsed?.studentMetadata?.catalogYear || catalogYear
       }
     });
     audit.programLedgers = audit.programAudits;
@@ -144,7 +145,8 @@ export default function App() {
         catalogDb: masterDb,
         auditOptions: {
           mathPlacementMet: true,
-          core42Completed: Boolean(extractedState.parsedTranscript?.studentMetadata?.core42Completed)
+          core42Completed: Boolean(extractedState.parsedTranscript?.studentMetadata?.core42Completed),
+          catalogYear: extractedState.parsedTranscript?.studentMetadata?.catalogYear || catalogYear
         }
       });
       updatedAudit.programLedgers = updatedAudit.programAudits;
@@ -208,7 +210,10 @@ export default function App() {
       studentRecord: parsedTranscript,
       declaredPrograms: declared,
       catalogDb: masterDb,
-      auditOptions: mergedOptions
+      auditOptions: {
+        catalogYear,
+        ...mergedOptions
+      }
     });
     updatedAudit.programLedgers = updatedAudit.programAudits;
     updatedAudit.incomingTransfers = mergedOptions.incomingTransfers || [];

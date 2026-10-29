@@ -165,9 +165,11 @@ export function calculateStackOverlap(programs = [], masterDb = null) {
  * @returns {Array<string>} Remapped program IDs
  */
 export function remapStackForCatalogYear(declaredIds = [], targetYear, masterDb) {
-  if (!masterDb || !Array.isArray(masterDb.programs)) return declaredIds;
-  const allProgs = masterDb.programs;
-  const targetYearProgs = allProgs.filter((p) => p.catalog_year_id === targetYear);
+  if (!masterDb) return declaredIds;
+  const allProgs = Array.isArray(masterDb.programs)
+    ? masterDb.programs
+    : (masterDb.programs ? Object.values(masterDb.programs) : (Array.isArray(masterDb) ? masterDb : []));
+  const targetYearProgs = allProgs.filter((p) => p.catalog_year_id === targetYear || p.catalogYear === targetYear || p.catalog_year === targetYear);
   if (targetYearProgs.length === 0) return declaredIds;
 
   const remapped = [];
