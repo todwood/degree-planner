@@ -1440,3 +1440,19 @@
   4. *Autonomous Verification (`tests/catalog2024Harvester.test.js`):*
      - Added 5 unit tests validating staging artifact presence, minimum threshold ($\ge 80+$; 249 harvested), schema and `_2024` slug formatting, CORE 42 matrix resolution, and tri-catalog coexistence.
      - Vitest suite result: **216 / 216 tests passing across 20 test files (100% green)**.
+
+### 83. Full 2023–2024 Undergraduate Degree & Program Harvester (Skill 1)
+- **Objective:** Harvest all undergraduate Majors, Minors, and Certificates for Academic Year 2023–2024 from Lindenwood University's SmartCatalog IQ platform (`https://lindenwood.smartcatalogiq.com`) with CORE 42 General Education extraction, unique slug generation ending in `_2023`, 4-year cumulative database coexistence, and zero-regression testing.
+- **Architectural Implementation:**
+  1. *Platform Discovery:*
+     - Identified that Lindenwood utilized SmartCatalog IQ prior to the 2024–2025 Acalog migration. Resolved Programs of Study (`/programs-of-study`) and Academic Requirements (`/academic-requirements/general-education-ge-program`).
+  2. *Playwright Multi-Worker Harvester (`.tmp/harvest_full_catalog_2023.mjs`):*
+     - Crawled Academic Requirements and harvested official 2023–2024 CORE 42 General Education framework across all 8 distribution categories plus AA block transfer override. Saved to `src/data/ge_2023_2024.json`.
+     - Enumerated and filtered 244 candidate undergraduate credentials (127 Majors, 91 Minors, 26 Certificates).
+     - Crawled requirement blocks with 6 concurrent Playwright workers in 9.50 seconds with deterministic process teardown.
+  3. *Staging & Coexistence Integration:*
+     - Staged raw and parsed programs into `.tmp/programs_staging_2023_2024.json` (615.10 KB).
+     - Merged 2023–2024 programs into `src/data/masterProgramsDatabase.json` alongside 2026–2027, 2025–2026, and 2024–2025 programs, reaching **1,008 total catalog programs** spanning 4 complete academic years with unique `_2023`, `_2024`, `_2025`, and `_2026` slugs.
+  4. *Autonomous Verification (`tests/catalog2023Harvester.test.js`):*
+     - Added 5 unit tests validating staging artifact presence, minimum threshold ($\ge 80+$; 244 harvested), schema and `_2023` slug formatting, CORE 42 matrix resolution, and 4-year coexistence.
+     - Vitest suite result: **221 / 221 tests passing across 21 test files (100% green)**.
