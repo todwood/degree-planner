@@ -1424,3 +1424,19 @@
   4. *Autonomous Verification (`tests/catalog2025Harvester.test.js`):*
      - Added 5 unit tests validating staging artifact presence, minimum threshold ($\ge 80+$; 251 harvested), schema and `_2025` slug formatting, CORE 42 matrix resolution, and multi-year coexistence.
      - Vitest suite result: **211 / 211 tests passing across 19 test files (100% green)**.
+
+### 82. Full 2024–2025 Undergraduate Degree & Program Harvester (Skill 1)
+- **Objective:** Harvest all undergraduate Majors, Minors, and Certificates for Academic Year 2024–2025 directly from the archived Lindenwood University catalog (Acalog `catoid=7`) with CORE 42 General Education extraction, unique slug generation ending in `_2024`, tri-catalog database coexistence, and zero-regression testing.
+- **Architectural Implementation:**
+  1. *Catalog Discovery:*
+     - Discovered target `catoid=7` (`2024-2025 Undergraduate Catalog [ARCHIVED CATALOG]`), Programs A–Z directory (`navoid=174`), and Academic Requirements (`navoid=166`).
+  2. *Playwright Multi-Worker Harvester (`.tmp/harvest_full_catalog_2024.mjs`):*
+     - Crawled Academic Requirements (`catoid=7&navoid=166`) and harvested official 2024–2025 CORE 42 General Education framework across all 8 distribution categories plus AA block transfer override. Saved to `src/data/ge_2024_2025.json`.
+     - Enumerated and filtered 249 candidate undergraduate credentials (134 Majors, 89 Minors, 26 Certificates).
+     - Crawled requirement blocks with 6 concurrent Playwright workers in 83.20 seconds with deterministic process teardown.
+  3. *Staging & Coexistence Integration:*
+     - Staged raw and parsed programs into `.tmp/programs_staging_2024_2025.json` (592.07 KB).
+     - Merged 2024–2025 programs into `src/data/masterProgramsDatabase.json` alongside 2026–2027 and 2025–2026 programs, reaching 764 total catalog programs with unique `_2024`, `_2025`, and `_2026` slugs.
+  4. *Autonomous Verification (`tests/catalog2024Harvester.test.js`):*
+     - Added 5 unit tests validating staging artifact presence, minimum threshold ($\ge 80+$; 249 harvested), schema and `_2024` slug formatting, CORE 42 matrix resolution, and tri-catalog coexistence.
+     - Vitest suite result: **216 / 216 tests passing across 20 test files (100% green)**.

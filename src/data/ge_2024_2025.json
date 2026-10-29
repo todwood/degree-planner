@@ -1,0 +1,190 @@
+{
+  "catalog_year": "2024-2025",
+  "catoid": 7,
+  "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=7&navoid=166",
+  "last_harvested_iso": "2026-10-29T14:07:37.736Z",
+  "framework_title": "Missouri Higher Education Core Transfer Curriculum (CORE 42) & Lindenwood General Education Program",
+  "total_credits_required": 42,
+  "aa_transfer_block_override": {
+    "policy_title": "Associate of Arts (AA) / Missouri CORE 42 Block Transfer Exemption",
+    "status": "OFFICIALLY_RECOGNIZED",
+    "credits_satisfied": 42,
+    "bypasses_category_audits": true,
+    "preserves_major_prerequisites": true,
+    "human_diversity_requirement_retained": true,
+    "policy_statement": "An official Associate of Arts (AA) degree or Missouri \"CORE 42 Completed\" transcript notation satisfies the 42-credit lower-division General Education requirement in its entirety, bypassing individual category distribution audits while preserving major-specific prerequisite courses and the 2-course Human Diversity (/HD) graduation overlay."
+  },
+  "distribution_categories": {
+    "written_communication": {
+      "category_id": "WRITTEN_COMM",
+      "name": "Written Communication",
+      "credits_required": 6,
+      "minimum_grade": "C",
+      "courses": [
+        "ENGL 15000",
+        "EPP 15000",
+        "ENGL 17000"
+      ],
+      "motr_mappings": [
+        "MOTR ENGL 100",
+        "MOTR ENGL 200"
+      ]
+    },
+    "oral_communication": {
+      "category_id": "ORAL_COMM",
+      "name": "Oral Communication",
+      "credits_required": 3,
+      "minimum_grade": "D",
+      "courses": [
+        "COM 11000",
+        "COM 10200",
+        "COM 10500",
+        "ENGL 23000",
+        "SW 20000"
+      ],
+      "motr_mappings": [
+        "MOTR COMM 100",
+        "MOTR COMM 110"
+      ]
+    },
+    "mathematics": {
+      "category_id": "MATHEMATICS",
+      "name": "Mathematics",
+      "credits_required": 3,
+      "minimum_grade": "D",
+      "courses": [
+        "MTH 14100",
+        "MTH 15100",
+        "MTH 15110",
+        "MTH 15200",
+        "MTH 17300",
+        "MTH 17500",
+        "MTH 24100",
+        "MTH 27100",
+        "MTH 27200"
+      ],
+      "motr_mappings": [
+        "MOTR MATH 110",
+        "MOTR MATH 120",
+        "MOTR MATH 130",
+        "MOTR MATH 150"
+      ]
+    },
+    "civics": {
+      "category_id": "CIVICS",
+      "name": "Civics (U.S. History and Government)",
+      "credits_required": 3,
+      "minimum_grade": "D",
+      "courses": [
+        "HIST 10500",
+        "HIST 10600",
+        "PS 15500",
+        "PS 15600"
+      ],
+      "motr_mappings": [
+        "MOTR HIST 101",
+        "MOTR HIST 102",
+        "MOTR POSC 101"
+      ]
+    },
+    "social_behavioral_sciences": {
+      "category_id": "SOCIAL_BEHAVIORAL_SCIENCES",
+      "name": "Social & Behavioral Sciences",
+      "credits_required": 9,
+      "minimum_grade": "D",
+      "notes": "Requires 3cr Civics + 6cr across 2+ social science disciplines.",
+      "courses": [
+        "ANT 11200",
+        "CCJ 20000",
+        "ECON 23010",
+        "ECON 23020",
+        "ECON 23030",
+        "GEO 20000",
+        "PSY 10000",
+        "SOC 10200",
+        "SW 20000"
+      ],
+      "motr_mappings": [
+        "MOTR ANTH",
+        "MOTR CRJS",
+        "MOTR ECON",
+        "MOTR PSYC",
+        "MOTR SOCI"
+      ]
+    },
+    "humanities_fine_arts": {
+      "category_id": "HUMANITIES_FINE_ARTS",
+      "name": "Humanities & Fine Arts",
+      "credits_required": 9,
+      "minimum_grade": "D",
+      "notes": "Requires 3cr Arts, 3cr Literature, and 3cr Non-Literature/Non-Arts across 2+ disciplines.",
+      "sub_groups": {
+        "arts": [
+          "ART 10000",
+          "ART 18100",
+          "DAN 10100",
+          "MUS 10000",
+          "TA 11700"
+        ],
+        "literature": [
+          "ENGL 20100",
+          "ENGL 20200",
+          "ENGL 21600"
+        ],
+        "human_culture": [
+          "HIST 10000",
+          "PHL 10000",
+          "PHL 10200",
+          "REL 10000",
+          "REL 20000",
+          "SPA 10100",
+          "SPA 10200",
+          "FRE 10100"
+        ]
+      },
+      "motr_mappings": [
+        "MOTR ARTS",
+        "MOTR LITR",
+        "MOTR PHIL",
+        "MOTR RELG",
+        "MOTR LANG"
+      ]
+    },
+    "natural_sciences": {
+      "category_id": "NATURAL_SCIENCES",
+      "name": "Natural Sciences",
+      "credits_required": 7,
+      "minimum_grade": "D",
+      "notes": "Requires at least 1 Lab course (4cr) + 1 Non-Lab course across 2 distinct disciplines.",
+      "approved_lab_courses": [
+        "BSC 10000",
+        "BSC 11200",
+        "BSC 23400",
+        "CHM 10000",
+        "CHM 23000",
+        "ESC 10000",
+        "PHY 25100",
+        "PHY 30100"
+      ],
+      "approved_non_lab_courses": [
+        "AST 10000",
+        "BSC 10700",
+        "ESC 11100",
+        "SCI 10500"
+      ],
+      "motr_mappings": [
+        "MOTR BIOL",
+        "MOTR CHEM",
+        "MOTR PHYS",
+        "MOTR GEOL"
+      ]
+    },
+    "additional_ge_electives": {
+      "category_id": "ADDITIONAL_GE_ELECTIVES",
+      "name": "Additional General Education Electives",
+      "credits_required": 2,
+      "minimum_grade": "D",
+      "notes": "Any remaining course with a General Education designation or MOTR transfer code to complete the 42-credit framework."
+    }
+  }
+}
