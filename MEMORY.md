@@ -1387,3 +1387,24 @@
   - *Production Build:* Vite production build succeeded cleanly with 0 errors in 5.38s.
   - *Playwright Headless Verification (`.tmp/verify_screen1_overhaul.mjs`):* Verified 3-card structure, empty initial identity inputs with placeholders and `@lindenwood.edu` addon, Card 3 Full-Time/Part-Time options, overload notice at 21 cr, dynamic summer cap dropdown, Modal B registration start term confirmation, Brandon Paz transcript upload, Minimal Parsed Telemetry Panel, Modal A catalog course search, zero console errors, and clean process teardown inside `finally` block.
   - *Live Production Release:* Deployed to GitHub Pages via `node execution/deploy_to_github_pages.js --live` and verified end-to-end via `node execution/verify_live_pages.js` with 0 console errors.
+
+### 80. Full 2026–2027 Undergraduate Degree & Program Harvester (Skill 1)
+- **Objective:** Harvest all undergraduate Majors, Minors, and Certificates for Academic Year 2026–2027 directly from the live Lindenwood University catalog (Acalog `catoid=12`) with CORE 42 General Education extraction, incremental staging, schema validation, zero-regression unit testing, and clean process teardown.
+- **Architectural Implementation:**
+  1. *Playwright Multi-Worker Harvester (`.tmp/harvest_full_catalog_2026.mjs`):*
+     - Crawled Academic Requirements (`catoid=12&navoid=319`) and harvested the official 2026–2027 CORE 42 General Education framework across all 8 state-aligned distribution categories plus Missouri Associate of Arts (AA) / CORE 42 completed block transfer override. Saved to `src/data/ge_2026_2027.json`.
+     - Crawled Programs A–Z directory (`catoid=12&navoid=327`) and extracted 264 candidate undergraduate credentials (152 Majors, 85 Minors, 27 Certificates).
+     - Executed a 6-worker concurrent Playwright Chromium pool parsing each program's `div.acalog-core` requirement blocks into canonical curricular primitives: `major_core`, `choice_groups`, `paired_sequences`, `elective_pools`, and `prescribed_ge_satisfactions`. Completed all 264 programs in 85.56 seconds.
+     - Handled process teardown deterministically inside a `finally` block before calling `process.exit(0)`.
+  2. *Staging & Dual Catalog Isolation:*
+     - Staged raw and parsed programs into `.tmp/programs_staging_2026_2027.json` (639.44 KB).
+     - Generated full catalog repository `src/data/masterProgramsDatabase.json` (685.09 KB, 264 programs).
+     - Preserved all 33 existing hand-calibrated fixtures in `src/data/masterDatabase.json` without mutations, ensuring complete isolation and regression prevention.
+  3. *Autonomous Verification (`tests/catalog2026Harvester.test.js`):*
+     - Added 5 unit tests validating:
+       - Artifact existence & non-empty staging files.
+       - Corpus size ($\ge 80+$ programs; 264 harvested across Majors, Minors, and Certificates).
+       - Schema conformance, integer credit values, unique IDs, and requirement primitives.
+       - CORE 42 General Education matrix resolution and AA block transfer override.
+       - Master database fixture preservation.
+     - Vitest suite result: **206 / 206 tests passing across 18 test files (100% green)**.
