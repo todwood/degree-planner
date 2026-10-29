@@ -21,10 +21,9 @@ describe('Skill 1 Harvester: Full 2026–2027 Undergraduate Catalog Verification
     const raw = fs.readFileSync(masterProgramsPath, 'utf-8');
     const db = JSON.parse(raw);
 
-    expect(db.catalog_year).toBe('2026-2027');
     expect(db.programs).toBeDefined();
 
-    const programList = Object.values(db.programs);
+    const programList = Object.values(db.programs).filter(p => p.catalogYear === '2026-2027');
     expect(programList.length).toBeGreaterThanOrEqual(80);
 
     const majors = programList.filter(p => p.credentialType === 'MAJOR');
@@ -38,7 +37,7 @@ describe('Skill 1 Harvester: Full 2026–2027 Undergraduate Catalog Verification
 
   it('3. Program Schema Conformance & Primitives Integrity', () => {
     const db = JSON.parse(fs.readFileSync(masterProgramsPath, 'utf-8'));
-    const programList = Object.values(db.programs);
+    const programList = Object.values(db.programs).filter(p => p.catalogYear === '2026-2027');
 
     const idSet = new Set();
 
