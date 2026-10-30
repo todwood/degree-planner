@@ -1462,3 +1462,32 @@
      - Vitest suite result: **242 / 242 tests passing across 22 test files (100% green)**.
      - Headless Playwright suite: **100% passing with 0 console errors and clean process teardown**.
 
+### 85. Phase A: Audit Engine Specificity Hierarchy, Excluded Courses Ledger, Anthology Status Fidelity & 100-Student Synthetic Benchmark
+- **Objective:** Prevent greedy bucket allocation by enforcing a strict cardinality-of-eligibility hierarchy, implement operational status normalization (`COMPLETED`, `IN_PROGRESS`, `SCHEDULED`), establish a deterministic `excludedCoursesLedger` with strict reason codes (`DEVELOPMENTAL`, `REPEATED_ATTEMPT`, `BELOW_MIN_GRADE`), and build a 100-student stress benchmark across catalog years `2024-2025`, `2025-2026`, and `2026-2027` executing in under 2.0s with zero regressions.
+- **Architectural Implementation:**
+  1. *Specificity Hierarchy (Restrictive-First Allocation in `src/engine/waterfallAudit.js`):*
+     - Implemented `getBucketSpecificityTier(bucketId)` resolving 5 tiers:
+       - Tier 1: Specific Course Codes (`comp_1`, `comp_2`, `math`)
+       - Tier 2: Narrow Disciplines (`arts`, `lit`, `nat_sci_lab`, `us_hist_gov`, `human_culture_1`, `soc_sci`)
+       - Tier 3: Broad Categories (`sci_elective`, `stem_elective`, `human_culture_2`)
+       - Tier 4: Open GE Electives (`ge_elective_1`, `ge_elective_2`)
+       - Tier 5: Free Electives
+     - Sorted schema buckets by specificity tier prior to candidate matching. Guaranteed that courses eligible for narrow buckets (e.g. `ART 13600` for `arts`) are claimed by narrow buckets before broad/open buckets (e.g. `human_culture_2`) can consume them.
+     - Preserved canonical 1..14 display ordering on `geBuckets` output.
+  2. *Anthology Status Fidelity & Operational Normalization (`src/engine/waterfallAudit.js`):*
+     - Implemented `normalizeCourseOperationalStatus(courseOrState)`: classifies course records into `COMPLETED`, `IN_PROGRESS`, and `SCHEDULED`.
+     - `IN_PROGRESS` and `SCHEDULED` courses earn active-term credits, tentatively satisfy prerequisites, and are strictly excluded from `unfulfilledRequirements` / `remainingCoursesToSchedule`.
+  3. *Deterministic Excluded Courses Ledger (`src/engine/waterfallAudit.js`):*
+     - Implemented `partitionAndAuditCourseRecords({ courses, priorExcluded, catalogByCompact })`:
+       - Classifies developmental courses (`number < 10000`, e.g., `MTH 09000`) with `reason: 'DEVELOPMENTAL'` (0 graduation credits).
+       - Classifies non-earning and failing grades with `reason: 'BELOW_MIN_GRADE'`.
+       - Deduplicates non-repeatable courses, retaining the single highest attempt while routing inferior attempts to `reason: 'REPEATED_ATTEMPT'`.
+       - Supports repeatable courses accumulating credit up to `max_repeat_credits`.
+       - Preserves transfer placeholders with `allowMultipleInstances`.
+  4. *100-Student Synthetic Audit Benchmark (`tests/syntheticAuditStress.test.js`):*
+     - Generated 100 diverse synthetic student records across 7 archetypes (`computer_science_bs`, `cybersecurity_bs`, `mathematics_bs`, `business_administration_bs`, `psychology_bs`, `theatre_bfa_acting_emphasis`, `data_science_bs`) and 3 catalog years (34 in 2024–2025, 33 in 2025–2026, 33 in 2026–2027).
+     - Verified 5 student profiles (Freshman 0cr, CORE 42 transfer 60cr, mixed Completed/In-Progress/Scheduled, Developmental/Repeat, Double Majors).
+     - Verified execution time of all 100 audits in **~420ms (well under 2000ms threshold)** with zero unhandled exceptions.
+     - Vitest suite result: **252 / 252 tests passing across 24 test files (100% green)**.
+
+

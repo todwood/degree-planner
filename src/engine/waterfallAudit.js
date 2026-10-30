@@ -21,7 +21,9 @@ import ge2023 from '../data/ge_2023_2024.json' with { type: 'json' };
 import {
   normalizeCourseCode,
   isGradeCOrHigher,
-  isTransferPlaceholder
+  isTransferPlaceholder,
+  GRADE_RANK,
+  EXCLUDED_GRADES
 } from './transcriptParser.js';
 
 export const GE_MATRICES_BY_YEAR = {
@@ -125,6 +127,246 @@ const KNOWN_HD_COMPACT_CODES = new Set([
   'REL20000',
   'ANT11200'
 ]);
+
+export const NON_EARNING_GRADES = new Set([
+  'F', 'W', 'AF', 'WF', 'INC', 'I', 'NP', 'NC', 'U', 'DROPPED', 'DROPPED-W', 'DROP',
+  'WITHDRAWN', 'AUDIT', 'AU', 'NG', 'TR-F', 'TR-W', 'TR-WF', 'TR-NC'
+]);
+export const D_RANGE_GRADES = new Set(['D+', 'D', 'D-', 'DH']);
+export const IN_PROGRESS_STATES = new Set(['Current', 'CURRENT', 'Scheduled', 'SCHEDULED', 'In-Progress', 'IN_PROGRESS', 'IN-PROGRESS', 'IP']);
+export const COMPLETED_STATES = new Set(['Completed', 'COMPLETED', 'Complete', 'COMPLETE', 'TR', 'Transfer', 'TRANSFER']);
+
+export function toCompact(code) {
+  const norm = normalizeCourseCode(code);
+  return norm ? norm.compact : String(code || '').replace(/\s+/g, '').toUpperCase();
+}
+
+export function upperGrade(grade) {
+  return String(grade || '').trim().toUpperCase();
+}
+
+/**
+ * Normalizes course operational status into three canonical states:
+ * - COMPLETED: Graded historical coursework with earned credits.
+ * - IN_PROGRESS: Course actively underway in the current active semester.
+ * - SCHEDULED: Course pre-registered for an upcoming sub-session.
+ */
+export function normalizeCourseOperationalStatus(courseOrState) {
+  if (!courseOrState) return 'COMPLETED';
+  const str = typeof courseOrState === 'string'
+    ? courseOrState.trim().toUpperCase()
+    : `${courseOrState.operationalStatus || ''} ${courseOrState.state || ''} ${courseOrState.status || ''} ${courseOrState.grade || ''}`.trim().toUpperCase();
+
+  if (
+    str.includes('SCHEDULED') ||
+    str.includes('SCHED') ||
+    str.includes('PREREG') ||
+    str.includes('REGISTERED')
+  ) {
+    return 'SCHEDULED';
+  }
+
+  if (
+    str.includes('IN_PROGRESS') ||
+    str.includes('IN-PROGRESS') ||
+    str.includes('IN PROGRESS') ||
+    str.includes('CURRENT') ||
+    str.includes('IP') ||
+    str.includes('ENROLLED') ||
+    str.includes('ACTIVE')
+  ) {
+    return 'IN_PROGRESS';
+  }
+
+  return 'COMPLETED';
+}
+
+/**
+ * Resolves cardinality of eligibility (degree of restriction) for General Education buckets.
+ * Lower number = higher specificity / more restrictive.
+ * Tier 1: Specific Course Codes (cardinality = 1, e.g. MTH 14100, ENGL 15000, ENGL 17000)
+ * Tier 2: Narrow Disciplines / Category Buckets (e.g. Arts, Literature, NatSci with Lab, Civics, Non-Lit/Non-Art Human Culture, Social Science)
+ * Tier 3: Broad Category Buckets (e.g. GE-Human Culture (Any), GE-Social Science (Any), STEM Elective Pool)
+ * Tier 4: Open GE Electives (GE Elective 1, GE Elective 2)
+ * Tier 5: Free Electives (open / unassigned)
+ */
+export function getBucketSpecificityTier(bucketId) {
+  switch (bucketId) {
+    case 'comp_1':
+    case 'comp_2':
+    case 'math':
+      return 1;
+    case 'arts':
+    case 'lit':
+    case 'nat_sci_lab':
+    case 'us_hist_gov':
+    case 'human_culture_1':
+    case 'soc_sci':
+      return 2;
+    case 'sci_elective':
+    case 'stem_elective':
+    case 'human_culture_2':
+      return 3;
+    case 'ge_elective_1':
+    case 'ge_elective_2':
+      return 4;
+    default:
+      return 5;
+  }
+}
+
+/**
+ * Partitions raw incoming student course records and prior excluded rows into:
+ * 1. validRetainedCourses: Earning attempts and active-term courses with normalized operational status.
+ * 2. excludedCoursesLedger: Detailed audit records for developmental, repeated, and failing/unearned courses.
+ */
+export function partitionAndAuditCourseRecords({
+  courses = [],
+  priorExcluded = [],
+  catalogByCompact = new Map()
+} = {}) {
+  const excludedCoursesLedger = [];
+  const seenExcluded = new Set();
+
+  function addExcluded(c, reason) {
+    const norm = normalizeCourseCode(c.code);
+    const code = norm ? norm.canonical : (c.code || (c.department && c.number ? `${c.department} ${c.number}` : 'UNKNOWN'));
+    const term = c.term || c.termInfo?.displayTerm || c.termInfo?.raw || 'N/A';
+    const grade = c.grade || c.rawGrade || 'N/A';
+    const sig = `${norm ? norm.compact : code}_${term}_${grade}_${reason}`;
+    if (seenExcluded.has(sig)) return;
+    seenExcluded.add(sig);
+
+    excludedCoursesLedger.push({
+      code,
+      title: c.title || c.courseName || code,
+      credits: Number(c.credits) || 0,
+      term,
+      grade,
+      reason // Strictly 'DEVELOPMENTAL' | 'REPEATED_ATTEMPT' | 'BELOW_MIN_GRADE'
+    });
+  }
+
+  // 1. Ingest prior excluded courses (e.g. from transcriptParser or external studentRecord)
+  for (const c of priorExcluded || []) {
+    if (!c) continue;
+    const norm = normalizeCourseCode(c.code);
+    const num = Number(c.number) || norm?.number || 0;
+    const isDev = (num > 0 && num < 10000) || /Sub-10000|Preparatory|Developmental/i.test(c.excludeReason || c.reason || '');
+    const isRepeat = /Repeat|Retake|Superseded/i.test(c.excludeReason || c.reason || '');
+
+    if (isDev) {
+      addExcluded(c, 'DEVELOPMENTAL');
+    } else if (isRepeat) {
+      addExcluded(c, 'REPEATED_ATTEMPT');
+    } else {
+      addExcluded(c, 'BELOW_MIN_GRADE');
+    }
+  }
+
+  // 2. Filter raw course candidates
+  const candidateCourses = [];
+  for (const c of courses || []) {
+    if (!c) continue;
+    const norm = normalizeCourseCode(c.code);
+    const num = Number(c.number) || norm?.number || 0;
+
+    // Reason 1: Developmental (< 10000 level, e.g. MTH 09000). Earns 0 graduation credits.
+    if (num > 0 && num < 10000) {
+      addExcluded(c, 'DEVELOPMENTAL');
+      continue;
+    }
+
+    const g = upperGrade(c.grade);
+    const st = String(c.status || '').toUpperCase();
+    const isFailing = NON_EARNING_GRADES.has(g) || /DROP|WITHDRAW|EXCLUDED/i.test(st);
+
+    // Reason 3: Below Min Grade / Unearned (F, W, WF, AU, I, etc.)
+    if (isFailing) {
+      addExcluded(c, 'BELOW_MIN_GRADE');
+      continue;
+    }
+
+    // Operational status normalization
+    const opStatus = normalizeCourseOperationalStatus(c);
+    const normalizedState =
+      opStatus === 'IN_PROGRESS'
+        ? 'Current'
+        : opStatus === 'SCHEDULED'
+        ? 'Scheduled'
+        : (c.state === 'TR' || c.state === 'Transfer' ? 'TR' : 'Completed');
+
+    candidateCourses.push({
+      ...c,
+      code: norm ? norm.canonical : c.code,
+      compactCode: norm ? norm.compact : toCompact(c.code),
+      department: norm ? norm.department : (c.department || ''),
+      number: num,
+      operationalStatus: opStatus,
+      state: normalizedState
+    });
+  }
+
+  // 3. Repeat & Retake Deduplication
+  const validRetainedCourses = [];
+  const groupedByCompact = new Map();
+
+  for (let i = 0; i < candidateCourses.length; i++) {
+    const c = candidateCourses[i];
+    const placeholderMeta = isTransferPlaceholder(c);
+    // Transfer placeholders with allowMultipleInstances are never deduplicated as repeats
+    const groupKey = placeholderMeta?.allowMultipleInstances
+      ? `${c.compactCode}_${c.term || 'TR'}_${c.grade || ''}_${i}`
+      : c.compactCode;
+
+    if (!groupedByCompact.has(groupKey)) {
+      groupedByCompact.set(groupKey, []);
+    }
+    groupedByCompact.get(groupKey).push(c);
+  }
+
+  for (const [, group] of groupedByCompact.entries()) {
+    if (group.length === 1) {
+      validRetainedCourses.push(group[0]);
+      continue;
+    }
+
+    // Check if course is catalog-repeatable up to max_repeat_credits
+    const firstCourse = group[0];
+    const cat = catalogByCompact.get(firstCourse.compactCode);
+    if (cat?.repeatable === true) {
+      const maxCap = Number(cat.max_repeat_credits) || Infinity;
+      let accumulatedCredits = 0;
+      for (const item of group) {
+        const cr = Number(item.credits) || 3;
+        if (accumulatedCredits + cr <= maxCap) {
+          accumulatedCredits += cr;
+          validRetainedCourses.push(item);
+        } else {
+          addExcluded(item, 'REPEATED_ATTEMPT');
+        }
+      }
+      continue;
+    }
+
+    // Non-repeatable course: Keep the single highest attempt; route inferior to REPEATED_ATTEMPT
+    // Priority order: Completed/TR with highest grade, then In-Progress, then Scheduled
+    const getAttemptRank = (item) => {
+      const gRank = GRADE_RANK[upperGrade(item.grade)] ?? (item.operationalStatus === 'IN_PROGRESS' ? 0.5 : 0.2);
+      const stateRank = item.operationalStatus === 'COMPLETED' ? 300 : (item.operationalStatus === 'IN_PROGRESS' ? 200 : 100);
+      return stateRank + gRank;
+    };
+
+    const sorted = [...group].sort((a, b) => getAttemptRank(b) - getAttemptRank(a));
+    validRetainedCourses.push(sorted[0]);
+
+    for (let j = 1; j < sorted.length; j++) {
+      addExcluded(sorted[j], 'REPEATED_ATTEMPT');
+    }
+  }
+
+  return { validRetainedCourses, excludedCoursesLedger };
+}
 
 export const BUCKET_TO_CANONICAL_TOKEN = {
   comp_1: 'ENGL 15000',
@@ -372,13 +614,27 @@ export function runWaterfallAudit(
     };
   });
 
-  const allStudentCourses = [...(parsedTranscript?.validCourses || []), ...incomingList].map(
+  const rawStudentCourses = Array.isArray(parsedTranscript)
+    ? parsedTranscript
+    : (parsedTranscript?.validCourses || []);
+  const rawPriorExcluded = Array.isArray(parsedTranscript?.excludedCourses)
+    ? parsedTranscript.excludedCourses
+    : [];
+
+  const { validRetainedCourses, excludedCoursesLedger } = partitionAndAuditCourseRecords({
+    courses: rawStudentCourses,
+    priorExcluded: rawPriorExcluded,
+    catalogByCompact
+  });
+
+  const allStudentCourses = [...validRetainedCourses, ...incomingList].map(
     (c) => {
       const cat = catalogByCompact.get(c.compactCode);
       return {
         ...c,
         title: c.title || cat?.title || c.code,
-        hasHDAttribute: hasHumanDiversityAttribute(c, cat)
+        hasHDAttribute: hasHumanDiversityAttribute(c, cat),
+        operationalStatus: c.operationalStatus || normalizeCourseOperationalStatus(c)
       };
     }
   );
@@ -562,7 +818,12 @@ export function runWaterfallAudit(
   // LAYER 1 & LAYER 4: 14-Bucket (42-Credit) General Education Waterfall
   // =========================================================================
   const geBucketsResult = [];
-  const schemaBuckets = [...(db.ge_waterfall_schema || [])].sort((a, b) => a.order - b.order);
+  const schemaBuckets = [...(db.ge_waterfall_schema || [])].sort((a, b) => {
+    const tierA = getBucketSpecificityTier(a.bucket_id);
+    const tierB = getBucketSpecificityTier(b.bucket_id);
+    if (tierA !== tierB) return tierA - tierB;
+    return a.order - b.order;
+  });
 
   // Track dual-counted Major Math requirements
   let mth14100MatchedCourse = null;
@@ -771,6 +1032,9 @@ export function runWaterfallAudit(
       state: matched ? matched.state : waivedByCore42 ? 'Waived (CORE 42)' : 'Remaining'
     });
   }
+
+  // Restore canonical 1..14 display order
+  geBucketsResult.sort((a, b) => a.order - b.order);
 
   // Record Dual-Satisfied Major Math status inside majorRequirements
   const majorMathRequirements = [
@@ -1171,7 +1435,15 @@ export function runWaterfallAudit(
     generatedUpperLevelElectives,
     generatedGeneralElectives,
     remainingCourseItems,
+    unfulfilledRequirements: remainingCourseItems,
+    remainingCoursesToSchedule: remainingCourseItems,
+    dynamicGraduationTarget: targetGraduationCredits,
+    targetGraduationCredits,
     excludedCourses: parsedTranscript?.excludedCourses || [],
+    excludedCoursesLedger,
+    allStudentCourses,
+    artsBucket: geBucketsResult.find((b) => b.bucket_id === 'arts') || null,
+    artsSatisfied: Boolean(geBucketsResult.find((b) => b.bucket_id === 'arts')?.fulfilled),
     warnings: {
       compositionGatekeeperWarnings,
       advisorRecommendations
@@ -1258,14 +1530,6 @@ export const COMPOSITION_RETAKE_WARNING =
   'Grade of C or higher required to satisfy Composition GE. Course eligible for retake.';
 export const UPPER_DIVISION_REQUIRED_CREDITS = 42;
 
-const NON_EARNING_GRADES = new Set([
-  'F', 'W', 'AF', 'WF', 'INC', 'I', 'NP', 'NC', 'U', 'DROPPED', 'DROPPED-W', 'DROP',
-  'WITHDRAWN', 'AUDIT', 'AU', 'NG'
-]);
-const D_RANGE_GRADES = new Set(['D+', 'D', 'D-', 'DH']);
-const IN_PROGRESS_STATES = new Set(['Current', 'Scheduled']);
-const COMPLETED_STATES = new Set(['Completed', 'Complete', 'TR', 'Transfer']);
-
 const PRESCRIBED_GE_KEY_MAP = {
   math: 'mathematics',
   mathematics: 'mathematics',
@@ -1282,15 +1546,6 @@ const PRESCRIBED_GE_KEY_MAP = {
 
 const CATEGORY_RANK = { Major: 0, 'Major - Track': 0, Minor: 1, Certificate: 2 };
 
-function toCompact(code) {
-  const norm = normalizeCourseCode(code);
-  return norm ? norm.compact : String(code || '').replace(/\s+/g, '').toUpperCase();
-}
-
-function upperGrade(grade) {
-  return String(grade || '').trim().toUpperCase();
-}
-
 /** Credential category (kept local to avoid an engine -> utils dependency). */
 export function classifyCredential(program) {
   if (!program) return 'Major';
@@ -1302,19 +1557,25 @@ export function classifyCredential(program) {
   return 'Major';
 }
 
-/** True when a course attempt earns graduation credit (completed with a non-failing grade). */
+/** True when a course attempt earns graduation credit (completed with a non-failing grade and non-developmental). */
 export function isEarningAttempt(course) {
   if (!course) return false;
-  if (IN_PROGRESS_STATES.has(course.state)) return false;
+  const num = Number(course.number) || normalizeCourseCode(course.code)?.number || 0;
+  if (num > 0 && num < 10000) return false;
+  const op = course.operationalStatus || normalizeCourseOperationalStatus(course);
+  if (op === 'IN_PROGRESS' || op === 'SCHEDULED' || IN_PROGRESS_STATES.has(course.state)) return false;
   const g = upperGrade(course.grade);
   if (NON_EARNING_GRADES.has(g)) return false;
-  return COMPLETED_STATES.has(course.state) || Boolean(g);
+  return COMPLETED_STATES.has(course.state) || op === 'COMPLETED' || Boolean(g);
 }
 
-/** True when a course is applied to the graduation record (earned or in progress). */
+/** True when a course is applied to the graduation record (earned or in progress, non-developmental). */
 export function isAppliedToGraduation(course) {
   if (!course) return false;
-  if (IN_PROGRESS_STATES.has(course.state)) return true;
+  const num = Number(course.number) || normalizeCourseCode(course.code)?.number || 0;
+  if (num > 0 && num < 10000) return false;
+  const op = course.operationalStatus || normalizeCourseOperationalStatus(course);
+  if (op === 'IN_PROGRESS' || op === 'SCHEDULED' || IN_PROGRESS_STATES.has(course.state)) return true;
   return isEarningAttempt(course);
 }
 
@@ -1490,6 +1751,9 @@ function flattenApproved(category) {
   const ac = category?.approved_courses || category?.courses;
   if (Array.isArray(ac)) push(ac);
   else if (ac && typeof ac === 'object') Object.values(ac).forEach(push);
+  if (category?.sub_groups && typeof category.sub_groups === 'object') {
+    Object.values(category.sub_groups).forEach(push);
+  }
   push(category?.approved_lab_courses);
   push(category?.approved_non_lab_courses);
   return out;
@@ -1594,16 +1858,35 @@ export function auditGeneralEducationCategories({
     const pendingPrescribed = [];
 
     // Prescribed courses first, then approved list / open GE electives
-    const ordered = [
+    let ordered = [
       ...indexed.filter((x) => prescribed.includes(x.compact)),
       ...indexed.filter((x) => !prescribed.includes(x.compact))
     ];
+
+    if (id === 'humanities_fine_arts') {
+      const isArts = (x) => ['ART', 'TA', 'MUS', 'DAN'].includes(x.c.department || x.compact.replace(/\d.*$/, '')) || /:Art|FineArts|\bArt\b/i.test(x.c.title || '');
+      const isLit = (x) => (x.c.department === 'ENGL' && Number(x.c.number) >= 20000 && Number(x.c.number) < 30000) || /:Lit|Literature/i.test(x.c.title || '');
+      ordered = [
+        ...indexed.filter((x) => prescribed.includes(x.compact)),
+        ...indexed.filter((x) => !prescribed.includes(x.compact) && isArts(x)),
+        ...indexed.filter((x) => !prescribed.includes(x.compact) && isLit(x)),
+        ...indexed.filter((x) => !prescribed.includes(x.compact) && !isArts(x) && !isLit(x))
+      ];
+    }
+
     for (const x of ordered) {
       if (earned >= credits) break;
       if (used.has(x.key)) continue;
+      const isSpecialCatEligible =
+        (id === 'humanities_fine_arts' && (
+          ['ART', 'TA', 'MUS', 'DAN', 'HIST', 'PHL', 'REL', 'FRN', 'SPA'].includes(x.c.department || x.compact.replace(/\d.*$/, '')) ||
+          (x.c.department === 'ENGL' && Number(x.c.number) >= 20000 && Number(x.c.number) < 30000) ||
+          /:Art|:Lit|GE-Art|GE-Lit|GE-HC|Human Culture/i.test(x.c.title || '')
+        ));
+
       const eligible = isOpenElective
         ? GE_DEPARTMENTS.has(x.c.department || x.compact.replace(/\d.*$/, '')) && !isUpperDivisionCourse(x.c)
-        : approved.has(x.compact);
+        : (approved.has(x.compact) || isSpecialCatEligible);
       if (!eligible) continue;
       used.add(x.key);
       applied.push(x.c.code);
@@ -1619,7 +1902,7 @@ export function auditGeneralEducationCategories({
     }
 
     const satisfied = earned >= credits;
-    categories.push({
+    const catEntry = {
       id,
       name: cat.name,
       credits,
@@ -1637,7 +1920,21 @@ export function auditGeneralEducationCategories({
       appliedCourses: applied,
       prescribedCourses: prescribed.map((c) => catalogByCompact.get(c)?.code || c),
       pendingPrescribedCourses: pendingPrescribed
-    });
+    };
+
+    if (id === 'humanities_fine_arts') {
+      const artsCourses = applied.filter((c) => ['ART', 'TA', 'MUS', 'DAN'].includes(c.split(' ')[0]) || /:Art|FineArts|\bArt\b/i.test(c));
+      const litCourses = applied.filter((c) => c.startsWith('ENGL 2') || /:Lit|Literature/i.test(c));
+      const hcCourses = applied.filter((c) => !artsCourses.includes(c) && !litCourses.includes(c));
+      catEntry.subGroups = {
+        arts: { satisfied: artsCourses.length > 0, appliedCourses: artsCourses },
+        literature: { satisfied: litCourses.length > 0, appliedCourses: litCourses },
+        humanCulture: { satisfied: hcCourses.length > 0, appliedCourses: hcCourses }
+      };
+      catEntry.artsSatisfied = artsCourses.length > 0;
+    }
+
+    categories.push(catEntry);
   }
 
   const earnedCredits = categories.reduce((s, c) => s + Math.min(c.credits, c.earnedCredits), 0);
@@ -1841,7 +2138,6 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
           .filter(Boolean);
   const primaryProgram = programs[0] || null;
 
-  const courses = studentRecord?.validCourses || [];
   const catalogYear =
     options.catalogYear ||
     studentRecord?.studentMetadata?.catalogYear ||
@@ -1852,23 +2148,30 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
   const trackHost = programs.find((p) => resolveTrackConfiguration(p).hasTracks) || null;
   const trackConfiguration = trackHost ? resolveTrackConfiguration(trackHost, options.activeTrackId) : null;
 
+  // 1. Run baseline engine first to partition courses, evaluate GE, and compute clean student courses
+  const baseline = runWaterfallAudit(studentRecord, orderedIds, db, {
+    ...options
+  });
+
+  const cleanCourses = baseline.allStudentCourses || [];
+
   const { programAudits, crossCountingLedger } = buildProgramAuditLedgers(
     programs,
-    courses,
+    cleanCourses,
     db,
     trackConfiguration?.activeTrackId || options.activeTrackId || null
   );
 
   const generalEducationAudit = auditGeneralEducationCategories({
-    courses,
+    courses: cleanCourses,
     catalogDb: db,
     catalogYear,
     programs,
     core42Completed: Boolean(options.core42Completed)
   });
 
-  const upperDivisionGate = computeUpperDivisionGate(courses);
-  const compositionGatekeeperAudit = evaluateCompositionGatekeeper(courses);
+  const upperDivisionGate = computeUpperDivisionGate(cleanCourses);
+  const compositionGatekeeperAudit = evaluateCompositionGatekeeper(cleanCourses);
 
   // ---------------------------------------------------------------------------
   // Dynamic Graduation Finish Line Calculation
@@ -1921,12 +2224,6 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
   // targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits)
   const targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits);
 
-  // Baseline engine (unchanged contract) continues to drive Screen 2 legacy tables + Screen 3 scheduler
-  const baseline = runWaterfallAudit(studentRecord, orderedIds, db, {
-    ...options,
-    targetGraduationCredits
-  });
-
   const resolvedPrograms = ordered.length > 0 ? ordered : baseline.selectedPrograms;
 
   const totalAppliedCredits = baseline.policyChecklist?.totalCredits?.EarnedPlusEnrolled ?? 0;
@@ -1968,6 +2265,7 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
 
   return {
     ...baseline,
+    dynamicGraduationTarget: targetGraduationCredits,
     targetGraduationCredits,
     netRequiredStackCredits,
     baseInstitutionalFloor,
@@ -1983,6 +2281,11 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
     advisingWarnings,
     trackConfiguration,
     activeTrackId: trackConfiguration?.activeTrackId || null,
-    flags: { ...baseline.flags, core42Completed: Boolean(options.core42Completed) }
+    flags: { ...baseline.flags, core42Completed: Boolean(options.core42Completed) },
+    unfulfilledRequirements: baseline.remainingCourseItems,
+    remainingCoursesToSchedule: baseline.remainingCourseItems,
+    excludedCoursesLedger: baseline.excludedCoursesLedger,
+    artsBucket: baseline.geBuckets?.find((b) => b.bucket_id === 'arts') || null,
+    artsSatisfied: Boolean(baseline.geBuckets?.find((b) => b.bucket_id === 'arts')?.fulfilled)
   };
 }
