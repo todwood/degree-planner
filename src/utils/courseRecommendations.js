@@ -405,9 +405,10 @@ function getMandatoryProgramCourseCodes(activeProgram, catalogCourses) {
       const catCompact = (cat.compactCode || cat.code || '').replace(/\s+/g, '').toUpperCase();
       if (mandatoryCodes.has(catCode) || mandatoryCodes.has(catCompact)) {
         (cat.prereqs || []).forEach((pr) => {
-          if (typeof pr === 'string') {
-            mandatoryCodes.add(pr.toUpperCase());
-            mandatoryCodes.add(pr.replace(/\s+/g, '').toUpperCase());
+          const code = typeof pr === 'string' ? pr : (pr && pr.code);
+          if (code) {
+            mandatoryCodes.add(code.toUpperCase());
+            mandatoryCodes.add(code.replace(/\s+/g, '').toUpperCase());
           }
         });
       }

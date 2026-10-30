@@ -266,7 +266,9 @@ export default function SharedDatabaseModal({ isOpen, onClose, masterDb }) {
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">Delivery Modality</span>
                   <span className="font-semibold text-neutral-800">
-                    {inspectedCourse.modality || 'Both (Online / OnGround)'}
+                    {Array.isArray(inspectedCourse.modalities) && inspectedCourse.modalities.length > 0
+                      ? inspectedCourse.modalities.join(' & ')
+                      : inspectedCourse.modality || 'On-Ground'}
                   </span>
                 </div>
               </div>

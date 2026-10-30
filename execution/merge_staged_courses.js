@@ -156,11 +156,40 @@ export function mergeStagedCourses({
         existing.description = staged.description.trim();
       }
 
+      // Title reconciliation with GE markers
+      if (staged.title && typeof staged.title === 'string' && staged.title.trim()) {
+        if (!/\(GE[-:][^)]+\)/i.test(existing.title) && /\(GE[-:][^)]+\)/i.test(staged.title)) {
+          existing.title = staged.title.trim();
+        } else if (!/\(GE[-:][^)]+\)/i.test(existing.title) && !/\(GE[-:][^)]+\)/i.test(staged.title)) {
+          existing.title = staged.title.trim();
+        }
+      }
+
       if (staged.credits !== undefined && staged.credits !== null && !isNaN(Number(staged.credits))) {
         existing.credits = Number(staged.credits);
       }
 
-      // Prerequisites & corequisites updates: preserve verified existing logic if staged has empty values
+      // Variable Credits & Repeatability
+      if (staged.is_variable_credit !== undefined) {
+        existing.is_variable_credit = Boolean(staged.is_variable_credit);
+        existing.min_credits = staged.min_credits !== undefined ? staged.min_credits : null;
+        existing.max_credits = staged.max_credits !== undefined ? staged.max_credits : null;
+      }
+      if (staged.variable_credits) {
+        existing.variable_credits = staged.variable_credits;
+      }
+      if (staged.repeatable !== undefined) {
+        existing.repeatable = Boolean(staged.repeatable);
+        existing.max_repeat_credits = staged.max_repeat_credits !== undefined ? staged.max_repeat_credits : null;
+      }
+
+      // Discrete Corequisite & Prerequisite Schema
+      if (Array.isArray(staged.strict_concurrent_coreqs)) {
+        existing.strict_concurrent_coreqs = staged.strict_concurrent_coreqs;
+      }
+      if (Array.isArray(staged.prereq_or_coreqs)) {
+        existing.prereq_or_coreqs = staged.prereq_or_coreqs;
+      }
       if (Array.isArray(staged.prereqs) && staged.prereqs.length > 0) {
         existing.prereqs = staged.prereqs;
       }
@@ -170,11 +199,20 @@ export function mergeStagedCourses({
       if (staged.prereq_logic) {
         existing.prereq_logic = staged.prereq_logic;
       }
-      if (Array.isArray(staged.coreqs) && staged.coreqs.length > 0) {
-        existing.coreq_codes = staged.coreqs;
-      } else if (Array.isArray(staged.coreq_codes) && staged.coreq_codes.length > 0) {
-        existing.coreq_codes = staged.coreq_codes;
+
+      // Corequisite codes: preserve existing verified or union with discrete coreqs
+      const mergedCoreqs = new Set(existing.coreq_codes || []);
+      if (Array.isArray(staged.strict_concurrent_coreqs)) {
+        staged.strict_concurrent_coreqs.forEach(c => mergedCoreqs.add(c));
       }
+      if (Array.isArray(staged.prereq_or_coreqs)) {
+        staged.prereq_or_coreqs.forEach(c => mergedCoreqs.add(c));
+      }
+      if (Array.isArray(staged.coreqs)) {
+        staged.coreqs.forEach(c => mergedCoreqs.add(c));
+      }
+      existing.coreq_codes = Array.from(mergedCoreqs);
+
       if (Array.isArray(staged.grade_prereq_rules) && staged.grade_prereq_rules.length > 0) {
         existing.grade_prereq_rules = staged.grade_prereq_rules;
       }
@@ -188,10 +226,16 @@ export function mergeStagedCourses({
         existing.offered_sessions = deriveOfferedSessions(staged.offerings, existing.offered_sessions);
         const bools = deriveSessionBooleans(staged.offerings, existing.offered_sessions);
         Object.assign(existing, bools);
+      } else if (staged.schedule_telemetry?.total_sections_observed === 0) {
+        existing.offerings = [];
+        existing.annual_session_availability = null;
       }
 
-      // Modalities
-      if (Array.isArray(staged.modalities) && staged.modalities.length > 0) {
+      // Modalities and Zero Section Handling
+      if (staged.schedule_telemetry?.total_sections_observed === 0) {
+        existing.modalities = ['On-Ground'];
+        existing.annual_session_availability = null;
+      } else if (Array.isArray(staged.modalities) && staged.modalities.length > 0) {
         existing.modalities = staged.modalities;
       } else if (staged.schedule_telemetry?.modalities?.length > 0) {
         existing.modalities = staged.schedule_telemetry.modalities;
@@ -200,6 +244,9 @@ export function mergeStagedCourses({
       // Append schedule_telemetry
       if (staged.schedule_telemetry) {
         existing.schedule_telemetry = staged.schedule_telemetry;
+        if (staged.schedule_telemetry.total_sections_observed === 0) {
+          existing.schedule_telemetry.modalities = ['On-Ground'];
+        }
       }
 
       totalUpdated++;
@@ -219,23 +266,40 @@ export function mergeStagedCourses({
         credits: !isNaN(Number(staged.credits)) ? Number(staged.credits) : 3,
         level: Number(staged.level) || parseInt(num, 10) || 10000,
         description: staged.description || '',
+        is_variable_credit: Boolean(staged.is_variable_credit),
+        min_credits: staged.min_credits !== undefined ? staged.min_credits : null,
+        max_credits: staged.max_credits !== undefined ? staged.max_credits : null,
+        variable_credits: staged.variable_credits || null,
+        repeatable: Boolean(staged.repeatable),
+        max_repeat_credits: staged.max_repeat_credits !== undefined ? staged.max_repeat_credits : null,
+        annual_session_availability: staged.annual_session_availability ?? null,
         fee_info: staged.fee_info || '$0',
         offered_sessions: offeredSessions,
         ...sessionBools,
         offerings: offerings,
-        modalities: Array.isArray(staged.modalities)
+        modalities: staged.schedule_telemetry?.total_sections_observed === 0
+          ? ['On-Ground']
+          : Array.isArray(staged.modalities)
           ? staged.modalities
           : staged.schedule_telemetry?.modalities || ['On-Ground', 'Online'],
         prereq_logic: staged.prereq_logic || null,
         prereq_display:
           staged.prereq_display ||
           (Array.isArray(staged.prereqs) && staged.prereqs.length > 0
-            ? staged.prereqs.join(', ')
+            ? staged.prereqs.map(p => typeof p === 'string' ? p : p.code + (p.min_grade ? ` (${p.min_grade})` : '')).join(', ')
             : 'None'),
+        strict_concurrent_coreqs: Array.isArray(staged.strict_concurrent_coreqs)
+          ? staged.strict_concurrent_coreqs
+          : [],
+        prereq_or_coreqs: Array.isArray(staged.prereq_or_coreqs)
+          ? staged.prereq_or_coreqs
+          : [],
         prereqs: Array.isArray(staged.prereqs) ? staged.prereqs : [],
-        coreq_codes: Array.isArray(staged.coreqs)
-          ? staged.coreqs
-          : staged.coreq_codes || [],
+        coreq_codes: Array.from(new Set([
+          ...(Array.isArray(staged.coreqs) ? staged.coreqs : staged.coreq_codes || []),
+          ...(Array.isArray(staged.strict_concurrent_coreqs) ? staged.strict_concurrent_coreqs : []),
+          ...(Array.isArray(staged.prereq_or_coreqs) ? staged.prereq_or_coreqs : [])
+        ])),
         grade_prereq_rules: Array.isArray(staged.grade_prereq_rules)
           ? staged.grade_prereq_rules
           : [],
@@ -343,9 +407,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename
 
   if (!stagingArg) {
     // Default fallback checks
+    const candidatePrimary = path.resolve(__dirname, '../.tmp/courses_staging_all.json');
     const candidateA = path.resolve(__dirname, '../.tmp/courses_staging_all_2026.json');
     const candidateB = path.resolve(__dirname, '../.tmp/courses_staging_mth.json');
-    if (fs.existsSync(candidateA)) {
+    if (fs.existsSync(candidatePrimary)) {
+      stagingArg = candidatePrimary;
+    } else if (fs.existsSync(candidateA)) {
       stagingArg = candidateA;
     } else if (fs.existsSync(candidateB)) {
       stagingArg = candidateB;
