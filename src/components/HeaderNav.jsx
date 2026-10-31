@@ -60,7 +60,7 @@ export default function HeaderNav({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [ferpaHovered, setFerpaHovered] = useState(false);
   const [clearModalOpen, setClearModalOpen] = useState(false);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
 
   // 3-Second Sign-Out Confirmation Modal State
   const [signOutModalOpen, setSignOutModalOpen] = useState(false);
@@ -106,11 +106,11 @@ export default function HeaderNav({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen]);
 
-  // 5-Second Countdown Safety Guard for Clear Student Record Modal
+  // 3-Second Countdown Safety Guard for Clear Student Record Modal
   useEffect(() => {
     let intervalId;
     if (clearModalOpen) {
-      setCountdown(5);
+      setCountdown(3);
       intervalId = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -436,60 +436,64 @@ export default function HeaderNav({
         </div>
       )}
 
-      {/* Active Record Clear Confirmation Modal with 5-Second Countdown */}
+      {/* Active Record Clear Confirmation Modal with 3-Second Countdown */}
       {clearModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150"
+          id="header-clear-student-modal"
+          data-testid="header-clear-student-modal"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-150"
           role="dialog"
           aria-modal="true"
           aria-labelledby="clear-active-record-title"
           onClick={() => setClearModalOpen(false)}
         >
           <div
-            className="bg-neutral-900 border border-[#B5A36A]/60 rounded-xl max-w-md w-full p-6 text-white shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-150"
+            className="bg-white border border-neutral-200 rounded-xl max-w-md w-full p-6 text-neutral-900 shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start space-x-3">
-              <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 flex-shrink-0">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
+              <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
               <div className="space-y-1">
                 <h3
                   id="clear-active-record-title"
-                  className="text-base font-bold text-white tracking-tight"
+                  className="text-base font-bold text-neutral-900 tracking-tight"
                 >
                   Clear Active Student Record?
                 </h3>
-                <p className="text-xs text-neutral-300 leading-relaxed">
-                  This will clear all degree audit results, customized schedules, and uploaded files. You will be returned to the intake workspace.
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  This will clear all 1. Student Intake information, 2. Degree Audit insights, and 3. Degree Planner Schedule. You will be returned to an empty student intake workspace.
                 </p>
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-end space-x-3 border-t border-neutral-800">
+            <div className="pt-3 flex items-center justify-end space-x-3 border-t border-neutral-100">
               <button
                 type="button"
+                id="header-cancel-clear-btn"
                 onClick={() => setClearModalOpen(false)}
-                className="px-4 py-2 text-xs font-semibold rounded-lg border border-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-800 transition"
+                className="px-4 py-2 text-sm font-semibold rounded-lg border border-neutral-300 text-neutral-700 bg-neutral-100 hover:bg-neutral-200 transition cursor-pointer"
               >
                 Cancel
               </button>
 
               <button
                 type="button"
+                id="header-confirm-clear-btn"
                 disabled={countdown > 0}
                 onClick={() => {
                   setClearModalOpen(false);
                   onClearActiveRecord?.();
                 }}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition flex items-center space-x-1.5 ${
+                className={`px-4 py-2 text-sm font-bold rounded-lg transition flex items-center space-x-1.5 ${
                   countdown > 0
-                    ? 'bg-neutral-800 text-neutral-500 border border-neutral-700/60 cursor-not-allowed'
+                    ? 'opacity-50 cursor-not-allowed bg-red-400 text-white'
                     : 'bg-red-600 hover:bg-red-700 text-white shadow-md cursor-pointer'
                 }`}
               >
                 <span>
-                  {countdown > 0 ? `Confirm Clear (${countdown}s)` : 'Confirm Clear Record'}
+                  {countdown > 0 ? `Confirm Clear (${countdown}s)` : 'Confirm Clear'}
                 </span>
               </button>
             </div>
