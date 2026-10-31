@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import HeaderNav from './components/HeaderNav.jsx';
 import Screen0Login from './components/Screen0Login.jsx';
+import { clearAdvisorSession } from './utils/authHelpers.js';
 import Screen1Intake from './components/Screen1Intake.jsx';
 import Screen2Audit from './components/Screen2Audit.jsx';
 import Screen3ScheduleBoard from './components/Screen3ScheduleBoard.jsx';
@@ -25,18 +26,28 @@ export const DEFAULT_CONSTRAINTS = {
 };
 
 export default function App() {
-  // Start with default verified faculty profile for smooth workflow
-  const [facultyProfile, setFacultyProfile] = useState({
-    email: 'mwood@lindenwood.edu',
-    username_prefix: 'mwood',
-    first_name: 'Matthias',
-    last_name: 'Wood',
-    position_title: 'Senior Instructor, Mathematics',
-    department: 'College of Science, Technology, and Health',
-    photo_url: ''
+  // Initialize faculty profile from session storage if active
+  const [facultyProfile, setFacultyProfile] = useState(() => {
+    try {
+      const session = localStorage.getItem('lu_advisor_session');
+      if (session) {
+        return JSON.parse(session);
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
   });
 
-  const [currentScreen, setCurrentScreen] = useState(1); // 0, 1, 2, 3
+  const [currentScreen, setCurrentScreen] = useState(() => {
+    try {
+      const session = localStorage.getItem('lu_advisor_session');
+      if (session) return 1;
+    } catch (e) {
+      // ignore
+    }
+    return 0;
+  });
   const [sharedDbModalOpen, setSharedDbModalOpen] = useState(false);
 
   // Core application state
@@ -304,7 +315,9 @@ export default function App() {
             null
           }
           onLogout={() => {
+            clearAdvisorSession();
             setFacultyProfile(null);
+            handleClearActiveRecord();
             setCurrentScreen(0);
           }}
           onOpenSharedDb={() => setSharedDbModalOpen(true)}

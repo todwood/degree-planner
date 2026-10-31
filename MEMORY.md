@@ -1538,3 +1538,31 @@
   7. *Verification & Tests:*
      - Vitest suite: **252 / 252 tests passing (100% green)** across all 24 test suites (`npm test`).
      - Headless Playwright suite (`.tmp/verify_screen1_refinements.mjs`): All 10 checks verified with clean child preview server process teardown.
+
+
+### 88. Profile Avatar Popover, Master Catalog Launcher, 3-Second Sign-Out Lock & Pre-Filled Login Screen
+- **Objective:** Implement dedicated advisor profile management, instant Master Curriculum Catalog access, safe sign-out with a 3-second lockout countdown, and frictionless device authorization memory.
+- **Architectural Implementation:**
+  1. *Local Storage State Separation (`src/utils/authHelpers.js`):*
+     - `lu_device_authorized: 'true'`: Set once department passphrase `"lionsplanahead"` is entered. Persists across sessions and sign-outs so authorized devices are never prompted for passphrases again.
+     - `lu_advisor_session`: Active advisor session payload. Cleared on sign-out to guarantee security while leaving device authorization intact.
+     - `lu_last_advisor_persona`: Stores `{ advisorName, advisorUsername, advisorEmail }` to pre-fill returning login screens while remaining fully editable for colleague handoffs.
+  2. *Advisor Access Modal (`src/components/AdvisorAccessModal.jsx` & `Screen0Login.jsx`):*
+     - If device is authorized: Passphrase input is disabled, visually masked (`••••••••••••`), and flagged with `✓ Device Authorized`. Persona fields pre-filled from last session.
+     - If first-time visitor: Passphrase input is enabled, requiring `"lionsplanahead"` (case-insensitive).
+     - Clicking `[ Launch Degree Planner → ]` saves persona to session, marks device as authorized, and enters Screen 1.
+  3. *Profile Avatar Popover (`src/components/HeaderNav.jsx`):*
+     - Replaced inline name/email clutter in header bar with a single clean circular profile avatar button `[ 👤 ]` (`data-testid="profile-avatar-btn"`).
+     - Floating popover menu displays:
+       - Header: `Advisor Workspace` (subtle uppercase), bold advisor name, muted email.
+       - Action Item 1: `View List of all Current Courses` / `Inspect Master Curriculum Catalog`, triggering `SharedDatabaseModal`.
+       - Action Item 2: `Sign Out of Degree Planner` (red hover styling), triggering the 3-second lockout confirmation modal.
+     - Includes outside click/escape key dismissal.
+  4. *3-Second Sign-Out Confirmation Modal (`src/components/HeaderNav.jsx`):*
+     - Centered modal warning about unsaved student session resets.
+     - Confirmation button `[ Confirm Sign Out (3s) ]` is strictly disabled, counting down 1000ms ticks before becoming enabled as `[ Confirm Sign Out ]`.
+     - Confirm action purges active student data and `lu_advisor_session`, redirects to Screen 0 with pre-filled persona and masked passphrase.
+  5. *Verification & Tests:*
+     - Vitest suite (`tests/profilePopoverAndLogout.test.js`): 12 comprehensive unit tests verifying popover management, 3s countdown lockout, storage state separation, and pre-filled persona rendering.
+     - Total Vitest suite: **264 / 264 tests passing (100% green)** across all 25 test suites (`npm test`).
+     - Headless Playwright suite (`.tmp/verify_profile_popover.mjs`): Verified full lifecycle across cleared state, login, clean header avatar, popover open/content, catalog modal launch, 3-second lockout countdown, and returning authorized login screen with zero console errors.

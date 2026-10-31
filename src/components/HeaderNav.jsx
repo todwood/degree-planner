@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { LogOut, Database, ChevronDown, ShieldCheck, Info, X, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { LogOut, Database, User, BookOpen, ShieldCheck, Info, X, AlertTriangle } from 'lucide-react';
 
 /**
  * Deterministic Name Parser for Active Record Badge:
@@ -62,7 +62,51 @@ export default function HeaderNav({
   const [clearModalOpen, setClearModalOpen] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
-  // 5-Second Countdown Safety Guard for Clear Modal
+  // 3-Second Sign-Out Confirmation Modal State
+  const [signOutModalOpen, setSignOutModalOpen] = useState(false);
+  const [signOutCountdown, setSignOutCountdown] = useState(3);
+
+  const popoverRef = useRef(null);
+  const avatarBtnRef = useRef(null);
+
+  // 3-Second Countdown Safety Guard for Sign Out Modal
+  useEffect(() => {
+    let intervalId;
+    if (signOutModalOpen) {
+      setSignOutCountdown(3);
+      intervalId = setInterval(() => {
+        setSignOutCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalId);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [signOutModalOpen]);
+
+  // Click-outside listener for Profile Popover
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        dropdownOpen &&
+        popoverRef.current &&
+        !popoverRef.current.contains(event.target) &&
+        avatarBtnRef.current &&
+        !avatarBtnRef.current.contains(event.target)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dropdownOpen]);
+
+  // 5-Second Countdown Safety Guard for Clear Student Record Modal
   useEffect(() => {
     let intervalId;
     if (clearModalOpen) {
@@ -82,145 +126,149 @@ export default function HeaderNav({
     };
   }, [clearModalOpen]);
 
-  // Close modal on Escape key
+  // Close modals on Escape key
   useEffect(() => {
-    if (!clearModalOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setClearModalOpen(false);
+        if (signOutModalOpen) setSignOutModalOpen(false);
+        if (clearModalOpen) setClearModalOpen(false);
+        if (dropdownOpen) setDropdownOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [clearModalOpen]);
+  }, [signOutModalOpen, clearModalOpen, dropdownOpen]);
 
-  const initials = facultyProfile
-    ? `${facultyProfile.first_name?.[0] || 'M'}${facultyProfile.last_name?.[0] || 'W'}`
-    : 'DP';
+  const displayAdvisorName =
+    facultyProfile?.advisorName ||
+    (facultyProfile?.first_name && facultyProfile?.last_name
+      ? `${facultyProfile.first_name} ${facultyProfile.last_name}`
+      : 'Prof Wood');
+
+  const displayAdvisorEmail =
+    facultyProfile?.advisorEmail ||
+    facultyProfile?.email ||
+    'mwood@lindenwood.edu';
 
   return (
     <>
       <header className="bg-black text-white h-16 border-b-[3px] border-[#B5A36A] flex items-center justify-between px-3 sm:px-6 select-none sticky top-0 z-50 shadow-md">
         {/* Left: Brand Home Navigation & Responsive FERPA Pill */}
         <div className="flex items-center space-x-2.5 sm:space-x-3.5 flex-shrink-0">
-          {/* Brand Mark & Title (Clickable: returns to Screen 1) */}
           <div
-            className="flex items-center space-x-2 sm:space-x-2.5 cursor-pointer select-none hover:opacity-90 transition-opacity"
-            onClick={() => setCurrentScreen(1)}
-            role="button"
-            tabIndex={0}
-            title="Degree Planner — Return to Student Intake"
+            onClick={() => setCurrentScreen?.(1)}
+            className="flex items-center space-x-2.5 cursor-pointer group"
+            title="Return to Student Intake (Screen 1)"
           >
             <img
-              src="./assets/logos/lu-icon.svg"
-              alt="DP"
-              className="h-8 w-8 flex-shrink-0"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
+              src="./assets/logos/lu-primary-reversed.svg"
+              alt="Lindenwood University"
+              className="h-8 sm:h-9 w-auto transition-transform group-hover:scale-105"
             />
-            <span className="font-sans font-extrabold text-white text-base tracking-tight leading-tight whitespace-nowrap">
+            <span className="font-display font-extrabold text-white tracking-tight text-sm sm:text-base hidden md:inline">
               Degree Planner
             </span>
           </div>
 
-          {/* FERPA Compliance Pill with Detailed Hover Popover */}
-          <div
-            className="hidden md:inline-flex relative items-center"
-            onMouseEnter={() => setFerpaHovered(true)}
-            onMouseLeave={() => setFerpaHovered(false)}
-          >
+          {/* FERPA Compliance Pill */}
+          <div className="relative">
             <div
-              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-[#B5A36A]/40 hover:border-[#B5A36A] text-[#B5A36A] transition cursor-help text-[11px] font-medium select-none shadow-2xs whitespace-nowrap"
-              role="button"
-              tabIndex={0}
-              aria-label="Built to Support FERPA-Compliant Advising"
+              onMouseEnter={() => setFerpaHovered(true)}
+              onMouseLeave={() => setFerpaHovered(false)}
+              className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-neutral-900 border border-[#B5A36A]/50 text-neutral-300 text-[10px] sm:text-xs cursor-help transition hover:border-[#B5A36A] hover:text-white"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-[#B5A36A] flex-shrink-0" />
-              <span className="hidden xl:inline tracking-tight">Built to Support FERPA-Compliant Advising</span>
-              <span className="text-neutral-500">•</span>
-              <Info className="w-3 h-3 text-[#B5A36A]/80 flex-shrink-0" />
+              <span className="font-semibold hidden lg:inline">Built to Support FERPA-Compliant Advising</span>
+              <span className="font-semibold lg:hidden">FERPA Compliant</span>
+              <Info className="w-3 h-3 text-neutral-400" />
             </div>
 
-            {/* Hover Popover Tooltip */}
+            {/* Hover Tooltip */}
             {ferpaHovered && (
-              <div
-                role="tooltip"
-                className="absolute left-0 top-full mt-2 w-80 sm:w-88 bg-neutral-900 text-white border border-[#B5A36A] p-3.5 rounded-lg shadow-xl text-xs max-w-sm z-50 pointer-events-none"
-              >
-                <div className="flex items-start space-x-2.5">
-                  <ShieldCheck className="w-4 h-4 text-[#B5A36A] flex-shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-white text-xs leading-snug">
-                      Local processing protects student information
-                    </h4>
-                    <p className="text-neutral-300 text-[11px] leading-relaxed">
-                      The application processes student information within your web browser. It does not transmit student names or other identifying information to our servers, and no student-identifying information is stored in the cloud.
-                    </p>
-                  </div>
-                </div>
+              <div className="absolute left-0 top-full mt-2 w-72 sm:w-80 p-3 bg-neutral-900 border border-[#B5A36A] text-white text-[11px] rounded-lg shadow-2xl z-50 pointer-events-none animate-in fade-in duration-150">
+                <p className="font-bold text-[#B5A36A] mb-1">Zero-Cloud Student Data Invariant</p>
+                <p className="text-neutral-300 leading-relaxed">
+                  Student transcripts, grades, and degree audits are parsed and stored strictly inside your browser memory. No student PII leaves this device.
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Section: Workflow Stepper, Active Record Pill, and Faculty Profile */}
-        <div className="flex items-center space-x-2 sm:space-x-3 text-xs font-semibold flex-shrink-0">
-          {/* Stepper: Condenses to 1, 2, 3 on screens < lg */}
-          <div className="flex items-center space-x-1 sm:space-x-1.5">
-            <button
-              onClick={() => setCurrentScreen(1)}
-              className={`px-2 sm:px-2.5 py-1.5 rounded transition flex items-center space-x-1 whitespace-nowrap ${
-                currentScreen === 1
-                  ? 'bg-[#857542] text-white shadow-xs'
-                  : 'text-neutral-300 hover:text-white hover:bg-neutral-900'
-              }`}
-              title="Step 1: Student Intake"
-            >
-              <span className="font-bold">1.</span>
-              <span className="hidden lg:inline">Student Intake</span>
-            </button>
+        {/* Center: Stepper (1. Student Intake -> 2. Degree Audit -> 3. Degree Plan) */}
+        <nav className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm font-semibold">
+          {/* Step 1 */}
+          <button
+            onClick={() => setCurrentScreen(1)}
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 cursor-pointer ${
+              currentScreen === 1
+                ? 'bg-[#857542] text-white font-bold shadow'
+                : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
+            }`}
+          >
+            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">1</span>
+            <span className="hidden sm:inline">Student Intake</span>
+            <span className="sm:hidden">Intake</span>
+          </button>
 
-            <button
-              onClick={() => setCurrentScreen(2)}
-              className={`px-2 sm:px-2.5 py-1.5 rounded transition flex items-center space-x-1 whitespace-nowrap ${
-                currentScreen === 2
-                  ? 'bg-[#857542] text-white shadow-xs'
-                  : 'text-neutral-300 hover:text-white hover:bg-neutral-900'
-              }`}
-              title="Step 2: Degree Audit"
-            >
-              <span className="font-bold">2.</span>
-              <span className="hidden lg:inline">Degree Audit</span>
-            </button>
+          <span className="text-neutral-600 text-xs">•</span>
 
-            <button
-              onClick={() => setCurrentScreen(3)}
-              className={`px-2 sm:px-2.5 py-1.5 rounded transition flex items-center space-x-1 whitespace-nowrap ${
-                currentScreen === 3
-                  ? 'bg-[#857542] text-white shadow-xs'
-                  : 'text-neutral-300 hover:text-white hover:bg-neutral-900'
-              }`}
-              title="Step 3: Degree Plan"
-            >
-              <span className="font-bold">3.</span>
-              <span className="hidden lg:inline">Degree Plan</span>
-            </button>
-          </div>
+          {/* Step 2 */}
+          <button
+            onClick={() => setCurrentScreen(2)}
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 cursor-pointer ${
+              currentScreen === 2
+                ? 'bg-[#857542] text-white font-bold shadow'
+                : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
+            }`}
+          >
+            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">2</span>
+            <span className="hidden sm:inline">Degree Audit</span>
+            <span className="sm:hidden">Audit</span>
+          </button>
 
-          {/* Active Record Badge with [X] Clear Button */}
+          <span className="text-neutral-600 text-xs">•</span>
+
+          {/* Step 3 */}
+          <button
+            onClick={() => setCurrentScreen(3)}
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 cursor-pointer ${
+              currentScreen === 3
+                ? 'bg-[#857542] text-white font-bold shadow'
+                : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
+            }`}
+          >
+            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">3</span>
+            <span className="hidden sm:inline">Degree Plan</span>
+            <span className="sm:hidden">Plan</span>
+          </button>
+        </nav>
+
+        {/* Right Section: Active Student Pill + Profile Avatar Icon Button */}
+        <div className="flex items-center space-x-2.5 sm:space-x-3 flex-shrink-0">
+          {/* Active Record Badge (When student is loaded) */}
           {activeStudentName && (
-            <div className="inline-flex items-center px-2 sm:px-2.5 py-1 rounded bg-neutral-900 border border-neutral-700 text-xs text-[#B5A36A] font-semibold whitespace-nowrap shadow-2xs flex-shrink-0">
-              <span className="hidden sm:inline">Active Record:</span>
-              <span className="text-white sm:ml-1 font-bold">
+            <div
+              id="active-student-badge"
+              data-testid="active-student-badge"
+              className="flex items-center bg-neutral-900 border border-neutral-700/80 rounded-full pl-2.5 pr-1.5 py-0.5 text-xs text-neutral-200 shadow-2xs max-w-[140px] sm:max-w-[200px]"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse flex-shrink-0" />
+              <span
+                className="font-medium truncate text-[11px] sm:text-xs"
+                title={`Active Student: ${activeStudentName}`}
+              >
                 {formatActiveStudentName(activeStudentName)}
               </span>
               <button
+                type="button"
+                id="header-clear-student-btn"
+                data-testid="header-clear-student-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   setClearModalOpen(true);
                 }}
-                className="hover:bg-red-500/20 text-neutral-300 hover:text-white rounded p-0.5 ml-1.5 transition flex-shrink-0 focus:outline-none"
+                className="hover:bg-red-500/20 text-neutral-300 hover:text-white rounded p-0.5 ml-1.5 transition flex-shrink-0 focus:outline-none cursor-pointer"
                 title="Clear Active Student Record"
                 aria-label="Clear Active Student Record"
               >
@@ -229,77 +277,161 @@ export default function HeaderNav({
             </div>
           )}
 
-          {/* Far Right: Faculty Profile Badge & Dropdown */}
+          {/* Far Right: Clean Profile Avatar Icon Button & Floating Popover */}
           <div className="relative flex-shrink-0">
             <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center space-x-2 sm:space-x-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-full pl-1.5 sm:pl-2 pr-2.5 sm:pr-3 py-1 transition focus:outline-none"
+              ref={avatarBtnRef}
+              id="profile-avatar-btn"
+              data-testid="profile-avatar-btn"
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              aria-expanded={dropdownOpen}
+              aria-haspopup="true"
+              aria-label="Advisor Profile Menu"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#857542] hover:bg-[#6E6035] border-2 border-[#B5A36A] flex items-center justify-center text-white transition focus:outline-none focus:ring-2 focus:ring-[#B5A36A]/50 shadow-xs cursor-pointer"
+              title="Advisor Workspace Profile & Settings"
             >
-              {facultyProfile?.photo_url ? (
-                <img
-                  src={facultyProfile.photo_url}
-                  alt={facultyProfile.first_name}
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#B5A36A] object-cover"
-                />
-              ) : (
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#857542] text-white font-bold flex items-center justify-center text-xs border-2 border-[#B5A36A]">
-                  {initials}
-                </div>
-              )}
-
-              <div className="text-left hidden lg:block">
-                <div className="text-xs font-bold text-white leading-tight">
-                  {facultyProfile?.first_name || 'Matthias'} {facultyProfile?.last_name || 'Wood'}
-                </div>
-                <div className="text-[10px] text-[#B5A36A] leading-tight">
-                  {facultyProfile?.position_title?.split(',')[0] || 'Senior Instructor'}
-                </div>
-              </div>
-
-              <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+              <User className="w-4 h-4 text-white" />
             </button>
 
+            {/* Floating Popover Menu Docked Below Avatar */}
             {dropdownOpen && (
               <div
-                className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-neutral-200 py-1 z-50 text-neutral-900"
-                onClick={() => setDropdownOpen(false)}
+                ref={popoverRef}
+                id="profile-popover-menu"
+                data-testid="profile-popover-menu"
+                role="menu"
+                aria-label="Advisor Account"
+                className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-[#B5A36A]/40 overflow-hidden z-50 text-neutral-900 animate-in fade-in zoom-in-95 duration-100"
               >
-                <div className="px-4 py-2.5 border-b border-neutral-100 bg-neutral-50">
-                  <p className="text-xs font-bold text-neutral-900">
-                    {facultyProfile?.first_name} {facultyProfile?.last_name}
+                {/* Header Section */}
+                <div className="px-4 py-3 bg-[#F7F5EE]/70 border-b border-neutral-100">
+                  <p className="text-[10px] font-bold tracking-wider text-neutral-400 uppercase">
+                    Advisor Workspace
                   </p>
-                  <p className="text-[11px] text-neutral-500 font-mono">{facultyProfile?.email}</p>
-                  <p className="text-[10px] text-[#857542] mt-0.5">{facultyProfile?.department}</p>
+                  <p className="text-sm font-bold text-neutral-900 mt-0.5">
+                    {displayAdvisorName}
+                  </p>
+                  <p className="text-xs text-neutral-500 font-mono mt-0.5">
+                    {displayAdvisorEmail}
+                  </p>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    onOpenSharedDb?.();
-                  }}
-                  className="w-full text-left px-4 py-2 text-xs hover:bg-[#F7F5EE] flex items-center space-x-2 text-neutral-700 hover:text-neutral-900"
-                >
-                  <Database className="w-4 h-4 text-[#857542]" />
-                  <span>Inspect Master Curriculum Catalog</span>
-                </button>
+                {/* Action Item 1: Master Curriculum Catalog */}
+                <div className="p-1.5">
+                  <button
+                    type="button"
+                    id="view-catalog-action-btn"
+                    data-testid="view-catalog-action-btn"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      onOpenSharedDb?.();
+                    }}
+                    className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-[#F7F5EE] transition flex items-start gap-2.5 group cursor-pointer"
+                  >
+                    <div className="p-1.5 rounded-md bg-[#857542]/10 text-[#857542] group-hover:bg-[#857542]/20 transition flex-shrink-0 mt-0.5">
+                      <BookOpen className="w-4 h-4 text-[#857542]" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-neutral-900 leading-snug">
+                        View List of all Current Courses
+                      </div>
+                      <div className="text-[10px] text-neutral-500 mt-0.5">
+                        Inspect Master Curriculum Catalog
+                      </div>
+                    </div>
+                  </button>
+                </div>
 
-                <div className="border-t border-neutral-100 my-1"></div>
+                {/* Divider Line */}
+                <div className="border-t border-neutral-100 mx-2" />
 
-                <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    onLogout?.();
-                  }}
-                  className="w-full text-left px-4 py-2 text-xs hover:bg-red-50 text-red-600 flex items-center space-x-2"
-                >
-                  <LogOut className="w-4 h-4 text-red-600" />
-                  <span>Sign Out of Faculty Workspace</span>
-                </button>
+                {/* Action Item 2: Sign Out */}
+                <div className="p-1.5">
+                  <button
+                    type="button"
+                    id="sign-out-action-btn"
+                    data-testid="sign-out-action-btn"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      setSignOutModalOpen(true);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 transition flex items-center gap-2 group cursor-pointer text-xs font-semibold"
+                  >
+                    <LogOut className="w-4 h-4 text-red-500 group-hover:text-red-700 transition" />
+                    <span>Sign Out of Degree Planner</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
       </header>
+
+      {/* 3-Second Sign-Out Confirmation Modal */}
+      {signOutModalOpen && (
+        <div
+          id="signout-modal"
+          data-testid="signout-modal"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="signout-dialog-title"
+          onClick={() => setSignOutModalOpen(false)}
+        >
+          <div
+            className="bg-white border border-[#B5A36A]/60 rounded-xl max-w-md w-full p-6 text-neutral-900 shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start space-x-3">
+              <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 flex-shrink-0">
+                <LogOut className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="space-y-1">
+                <h3 id="signout-dialog-title" className="text-base font-bold text-neutral-900 tracking-tight">
+                  Confirm Sign Out
+                </h3>
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  Are you sure you want to sign out of the Degree Planner? Any unsaved changes in the active student session will be reset.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-3 flex items-center justify-end space-x-3 border-t border-neutral-100">
+              <button
+                type="button"
+                id="cancel-signout-btn"
+                data-testid="cancel-signout-btn"
+                onClick={() => setSignOutModalOpen(false)}
+                className="px-4 py-2 text-xs font-semibold rounded-lg border border-neutral-300 text-neutral-700 hover:bg-neutral-50 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                id="confirm-signout-btn"
+                data-testid="confirm-signout-btn"
+                disabled={signOutCountdown > 0}
+                onClick={() => {
+                  setSignOutModalOpen(false);
+                  onLogout?.();
+                }}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition flex items-center space-x-1.5 ${
+                  signOutCountdown > 0
+                    ? 'bg-neutral-200 text-neutral-400 border border-neutral-300 cursor-not-allowed'
+                    : 'bg-red-600 hover:bg-red-700 text-white shadow-md cursor-pointer'
+                }`}
+              >
+                <span>
+                  {signOutCountdown > 0
+                    ? `Confirm Sign Out (${signOutCountdown}s)`
+                    : 'Confirm Sign Out'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Active Record Clear Confirmation Modal with 5-Second Countdown */}
       {clearModalOpen && (
