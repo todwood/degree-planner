@@ -223,9 +223,21 @@ export default function App() {
   };
 
   // Proceed from Screen 2 Audit to Screen 3 Schedule
-  const handleProceedToSchedule = () => {
+  const handleProceedToSchedule = (handoffPayload) => {
     try {
-      const sched = generateOptimalSchedule(auditResult, parsedTranscript, constraints);
+      let activeAudit = auditResult;
+      if (handoffPayload) {
+        activeAudit = {
+          ...auditResult,
+          activeTrackMode: handoffPayload.activeTrackMode || 'COMMITTED',
+          activeTrackId: handoffPayload.activeTrackId || auditResult?.activeTrackId,
+          primaryRemainingQueue: handoffPayload.primaryRemainingQueue || auditResult?.remainingCourseItems,
+          secondaryRemainingQueue: handoffPayload.secondaryRemainingQueue || null,
+          remainingCourseItems: handoffPayload.primaryRemainingQueue || auditResult?.remainingCourseItems
+        };
+        setAuditResult(activeAudit);
+      }
+      const sched = generateOptimalSchedule(activeAudit, parsedTranscript, constraints);
       setSchedule(sched);
       setCurrentScreen(3);
     } catch (err) {

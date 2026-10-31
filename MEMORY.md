@@ -1490,4 +1490,27 @@
      - Verified execution time of all 100 audits in **~420ms (well under 2000ms threshold)** with zero unhandled exceptions.
      - Vitest suite result: **252 / 252 tests passing across 24 test files (100% green)**.
 
+### 86. Phase B: Screen 2 UI Rebuild, Accordions, Excluded Courses Drawer & Multi-Track Navigation
+- **Objective:** Rebuild `src/components/Screen2Audit.jsx` to integrate Phase A engine outputs: streamlined Race to Graduation card with dynamic credit target and milestone ticks, collapsible Institutional Audit Details & Excluded Courses Drawer (`audit.excludedCoursesLedger`), strict accordion ordering (1. General Education CORE 42, 2. Primary Major with multi-track navigation, 3. Minors & Certificates, 4. Free Electives to Degree Finish Line), and the Screen 2 -> Screen 3 compiled handoff contract.
+- **Architectural Implementation:**
+  1. *Streamlined Race to Graduation Card:*
+     - Header displays `RACE TO GRADUATION` with `Dynamic Target: {targetCr} cr` badge and summary metric `{completedCr} / {targetCr} Total Credits Completed ({percentComplete}%)`.
+     - Visual horizontal bar with milestone ticks (`30 cr [✓]` Sophomore, `60 cr [✓]` Junior, `90 cr [✓]` Senior, `{targetCr} cr` Graduation), stick-figure student avatar at completed coordinate, and sheared graduation flag.
+     - Credit breakdown summary: Completed, Active In-Progress, Active Scheduled, and Remaining to Finish Line. Standalone upper-division bar removed from face to reduce visual clutter.
+  2. *Collapsible Institutional Audit Details & Excluded Courses Drawer:*
+     - Drawer toggle: `[ View Institutional Audit Details & Excluded Courses Ledger ({count} Courses) ]`.
+     - Sub-Panel A: Institutional policy gates (42 Upper-Division Hours with `data-testid="upper-division-meter"`, Missouri CORE 42 status, Composition C-or-higher check, 30cr Lindenwood residency, Human Diversity /HD).
+     - Sub-Panel B: Itemized Excluded Courses Ledger table rendered directly from `auditResult.excludedCoursesLedger` with columns Course, Credits, Term, Grade, and Reason Badges (`[Developmental / Non-College Level]`, `[Repeated Attempt / Subsequent Used]`, `[Below Minimum Grade Threshold]`).
+  3. *Strict Accordion Ordering:*
+     - Accordion 1 (Top Priority): `GENERAL EDUCATION: CORE 42` (42 Credits). If CORE 42 transfer block is active, displays green transfer waiver banner. If native, displays the 8 distribution categories with restrictive-first allocation and itemized GE buckets.
+     - Accordion 2: `PRIMARY MAJOR` (and Secondary Major if declared). Features embedded multi-track navigation (Option A Domain Depth vs. Option B Applied Science) with commitment toggles (`● Commit to Active Track` vs. `○ Keep Uncommitted (Generate Both Schedules)`), elective pools with choice group pre-selection dropdowns (`[ -- Pass as Category Placeholder to Scheduler -- ]`), and Anthology operational status badges (`✓ Completed`, `⏳ In-Progress`, `⏳ Scheduled`, `○ Unfulfilled`).
+     - Accordion 3: `MINORS & CERTIFICATES (STACK WATERFALL)` displaying cross-counting badges (`🔗 Cross-Counted with {Major Name}`).
+     - Accordion 4: `FREE ELECTIVES TO REACH DEGREE FINISH LINE` displaying remaining free elective gap, applied historical free electives, safeguard placeholders, and action buttons for custom and incoming transfer placeholders.
+  4. *Screen 2 -> Screen 3 Handoff Contract (`src/App.jsx` & `Screen2Audit.jsx`):*
+     - Compiles and passes `handoffPayload` (`activeTrackMode`, `activeTrackId`, `primaryRemainingQueue`, `secondaryRemainingQueue`), strictly excluding `IN_PROGRESS` and `SCHEDULED` courses from future scheduling queues.
+  5. *Autonomous Verification (`.tmp/verify_screen2_ui.mjs` & `.tmp/verify_intake_to_audit_transition.mjs`):*
+     - Headless Playwright script verified Brandon Paz transcript ingestion, top context card metadata, streamlined Race to Graduation card, drawer expansion, excluded courses ledger table, strict accordion ordering (GE preceding Primary Major), and clean process teardown.
+     - Vitest suite result: **252 / 252 tests passing across 24 test files (100% green)**.
+
+
 
