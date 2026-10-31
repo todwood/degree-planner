@@ -1566,3 +1566,27 @@
      - Vitest suite (`tests/profilePopoverAndLogout.test.js`): 12 comprehensive unit tests verifying popover management, 3s countdown lockout, storage state separation, and pre-filled persona rendering.
      - Total Vitest suite: **264 / 264 tests passing (100% green)** across all 25 test suites (`npm test`).
      - Headless Playwright suite (`.tmp/verify_profile_popover.mjs`): Verified full lifecycle across cleared state, login, clean header avatar, popover open/content, catalog modal launch, 3-second lockout countdown, and returning authorized login screen with zero console errors.
+
+### 89. Screen 0 Access Gate Polish, FERPA Copy, 30s Rate Limiter & Label Synchronization
+- **Objective:** Update Screen 0 access gate copy and branding, implement a 5-attempt / 30-second brute-force rate limiter, remove the hardcoded demo bypass button, support optional blank personas, and synchronize Screen 1 advisor labels.
+- **Architectural Implementation:**
+  1. *Screen 0 Access Gate Copy & Branding (`src/components/AdvisorAccessModal.jsx`):*
+     - Modal title updated to `Degree Planner Access`.
+     - Subtitle updated to `Automatic & Custom Degree Audit and Planning Tool`.
+     - Removed demo option (`#login-demo-bypass-btn`) completely from the login screen.
+     - Updated FERPA assurance card: heading to `Built to Support FERPA-Compliant Advising`, body copy to `Zero-Cloud Student Data: Student transcripts, grades, and degree audits are parsed and stored strictly inside your browser memory. No student Personal Identifiable Information (PII) leaves this device.`.
+  2. *Cold Load State & Optional Persona Fields (`src/utils/authHelpers.js` & `src/components/AdvisorAccessModal.jsx`):*
+     - Removed hardcoded `"Prof Wood"` and `"mwood"` from `DEFAULT_ADVISOR_PERSONA`. Inputs start as empty strings (`""`) on cold load.
+     - Field labels updated: `Advisor Full Name` -> `Advisor Name` (placeholder `Prof. Name` with `placeholder-neutral-400`); `Lindenwood Username` -> `Advisor Email` (placeholder `username`). Both inputs are optional.
+     - Blank persona submission with valid passphrase (`"lionsplanahead"`) succeeds and unlocks workspace.
+     - Fallback display name in `HeaderNav` popover evaluates to `'Advisor'` if persona name is blank.
+  3. *5-Attempt Client-Side Rate Limiter (`createRateLimiter` & `src/components/AdvisorAccessModal.jsx`):*
+     - Tracks failed attempts in memory and `sessionStorage`. On incorrect passphrase, alerts `Incorrect passphrase. (${5 - failedAttempts} attempts remaining)`.
+     - At 5 failed attempts, triggers a 30-second lockout: disables passphrase input and launch button, shows warning alert `Too many failed attempts. Submissions locked for ${lockoutSecondsRemaining}s.`, and runs a 1000ms ticker until unlocking and resetting `failedAttempts = 0`.
+  4. *Screen 1 Label Synchronization (`src/components/Screen1Intake.jsx`):*
+     - Updated Card 1 advisor label from `Advisor Full Name` to `Advisor Name`. Preserved placeholder `Prof. Name`.
+  5. *Verification & Deployment:*
+     - Vitest suite (`tests/accessGateRateLimiter.test.js`): 12 tests verifying title, FERPA copy, cold-load blank inputs, optional persona submission, 5-attempt rate limiter, and lockout countdown.
+     - Total Vitest suite: **276 / 276 tests passing (100% green)** across all 26 test suites (`npm test`).
+     - Headless Playwright suite (`.tmp/verify_access_gate_refinements.mjs`): All 9 checks verified with clean child preview server process teardown.
+     - Deployed live to GitHub Pages (`todwood/degree-planner`) and verified via `execution/verify_live_pages.js` with 0 console errors.
