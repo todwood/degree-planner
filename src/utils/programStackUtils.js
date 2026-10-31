@@ -37,7 +37,7 @@ export function getProgramCategory(prog) {
  */
 export function formatDeclaredStackHeader(programs = []) {
   if (!programs || programs.length === 0) {
-    return 'DECLARED CREDENTIALS STACK (0 Credentials)';
+    return 'Seeking to Confer Credential Stack (0 Credentials)';
   }
 
   let majorsCount = 0;
@@ -82,10 +82,10 @@ export function formatDeclaredStackHeader(programs = []) {
   }
 
   if (parts.length === 0) {
-    return 'DECLARED CREDENTIALS STACK (0 Credentials)';
+    return 'Seeking to Confer Credential Stack (0 Credentials)';
   }
 
-  return `DECLARED CREDENTIALS STACK (${parts.join(', ')})`;
+  return `Seeking to Confer Credential Stack (${parts.join(', ')})`;
 }
 
 /**

@@ -18,7 +18,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'computer_science_bs_2026',
     declaredProgramIds: ['computer_science_bs_2026', 'data_science_bs_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors — Double Major)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors — Double Major)',
     category: 'Double Major',
     core42TransferBlock: false
   },
@@ -29,7 +29,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'biological_sciences_bs_2026',
     declaredProgramIds: ['biological_sciences_bs_2026', 'psychology_bs_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors — Double Major)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors — Double Major)',
     category: 'Double Major',
     core42TransferBlock: false
   },
@@ -40,7 +40,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'business_administration_bs_2026',
     declaredProgramIds: ['business_administration_bs_2026', 'communications_ba_journalism_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors — Double Major)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors — Double Major)',
     category: 'Double Major',
     core42TransferBlock: true
   },
@@ -51,7 +51,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'cybersecurity_bs_2026',
     declaredProgramIds: ['cybersecurity_bs_2026', 'it_networking_bs_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors — Double Major)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors — Double Major)',
     category: 'Double Major',
     core42TransferBlock: false
   },
@@ -62,7 +62,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'english_ba_2026',
     declaredProgramIds: ['english_ba_2026', 'communications_ba_journalism_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors — Double Major)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors — Double Major)',
     category: 'Double Major',
     core42TransferBlock: false
   },
@@ -75,7 +75,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'computer_science_bs_2026',
     declaredProgramIds: ['computer_science_bs_2026', 'mathematics_minor_2026', 'cybersecurity_minor_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors)',
     category: 'Major + 2 Minors',
     core42TransferBlock: false
   },
@@ -86,7 +86,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'data_science_bs_2026',
     declaredProgramIds: ['data_science_bs_2026', 'mathematics_minor_2026', 'cybersecurity_minor_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors)',
     category: 'Major + 2 Minors',
     core42TransferBlock: false
   },
@@ -97,7 +97,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'business_administration_bs_2026',
     declaredProgramIds: ['business_administration_bs_2026', 'mathematics_minor_2026', 'project_management_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 1 Minor, 1 Certificate)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 1 Minor, 1 Certificate)',
     category: 'Major + Minor + Cert',
     core42TransferBlock: true
   },
@@ -108,7 +108,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'psychology_bs_2026',
     declaredProgramIds: ['psychology_bs_2026', 'cybersecurity_minor_2026', 'mathematics_minor_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors)',
     category: 'Major + 2 Minors',
     core42TransferBlock: false
   },
@@ -119,7 +119,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'communications_ba_journalism_2026',
     declaredProgramIds: ['communications_ba_journalism_2026', 'cybersecurity_minor_2026', 'mathematics_minor_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors)',
     category: 'Major + 2 Minors',
     core42TransferBlock: false
   },
@@ -132,7 +132,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'computer_science_bs_2026',
     declaredProgramIds: ['computer_science_bs_2026', 'mathematics_minor_2026', 'cybersecurity_minor_2026', 'data_analysis_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors, 1 Certificate)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors, 1 Certificate)',
     category: 'Major + 3 Credentials',
     core42TransferBlock: false
   },
@@ -143,7 +143,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'data_science_bs_2026',
     declaredProgramIds: ['data_science_bs_2026', 'mathematics_minor_2026', 'cybersecurity_minor_2026', 'project_management_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors, 1 Certificate)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors, 1 Certificate)',
     category: 'Major + 3 Credentials',
     core42TransferBlock: false
   },
@@ -154,7 +154,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'biological_sciences_bs_2026',
     declaredProgramIds: ['biological_sciences_bs_2026', 'mathematics_minor_2026', 'cybersecurity_minor_2026', 'data_analysis_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors, 1 Certificate)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors, 1 Certificate)',
     category: 'Major + 3 Credentials',
     core42TransferBlock: false
   },
@@ -165,7 +165,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'business_administration_bs_2026',
     declaredProgramIds: ['business_administration_bs_2026', 'cybersecurity_minor_2026', 'mathematics_minor_2026', 'project_management_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 2 Minors, 1 Certificate)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 2 Minors, 1 Certificate)',
     category: 'Major + 3 Credentials',
     core42TransferBlock: false
   },
@@ -176,7 +176,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'cybersecurity_bs_2026',
     declaredProgramIds: ['cybersecurity_bs_2026', 'mathematics_minor_2026', 'data_analysis_certificate_2026', 'project_management_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (1 Major, 1 Minor, 2 Certificates)',
+    expectedHeader: 'Seeking to Confer Credential Stack (1 Major, 1 Minor, 2 Certificates)',
     category: 'Major + 3 Credentials',
     core42TransferBlock: false
   },
@@ -189,7 +189,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'computer_science_bs_2026',
     declaredProgramIds: ['computer_science_bs_2026', 'data_science_bs_2026', 'cybersecurity_minor_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors, 1 Minor)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors, 1 Minor)',
     category: 'Double Major + Minor',
     core42TransferBlock: false
   },
@@ -200,7 +200,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'data_science_bs_2026',
     declaredProgramIds: ['data_science_bs_2026', 'business_administration_bs_2026', 'mathematics_minor_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors, 1 Minor)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors, 1 Minor)',
     category: 'Double Major + Minor',
     core42TransferBlock: false
   },
@@ -211,7 +211,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'nursing_bs_2026',
     declaredProgramIds: ['nursing_bs_2026', 'psychology_bs_2026', 'data_analysis_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors, 1 Certificate)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors, 1 Certificate)',
     category: 'Double Major + Cert',
     core42TransferBlock: false
   },
@@ -222,7 +222,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'it_app_dev_bs_2026',
     declaredProgramIds: ['it_app_dev_bs_2026', 'cybersecurity_bs_2026', 'mathematics_minor_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors, 1 Minor)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors, 1 Minor)',
     category: 'Double Major + Minor',
     core42TransferBlock: false
   },
@@ -233,7 +233,7 @@ export const mockMultiProgramStudents = [
     catalogYear: '2026-2027',
     primaryProgramId: 'english_ba_2026',
     declaredProgramIds: ['english_ba_2026', 'communications_ba_journalism_2026', 'project_management_certificate_2026'],
-    expectedHeader: 'DECLARED CREDENTIALS STACK (2 Majors, 1 Certificate)',
+    expectedHeader: 'Seeking to Confer Credential Stack (2 Majors, 1 Certificate)',
     category: 'Double Major + Cert',
     core42TransferBlock: false
   }

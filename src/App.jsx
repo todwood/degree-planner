@@ -41,7 +41,7 @@ export default function App() {
 
   // Core application state
   const [parsedTranscript, setParsedTranscript] = useState(null);
-  const [selectedProgramId, setSelectedProgramId] = useState('cybersecurity_bs_2026');
+  const [selectedProgramId, setSelectedProgramId] = useState(null);
   const [additionalPrograms, setAdditionalPrograms] = useState([]);
   const [catalogYear, setCatalogYear] = useState('2026-2027');
   const [constraints, setConstraints] = useState(DEFAULT_CONSTRAINTS);
@@ -95,7 +95,7 @@ export default function App() {
     const isCore42 = Boolean(c42 ?? parsed?.studentMetadata?.core42Completed ?? c?.core42Completed);
 
     // Run deterministic Waterfall & Multi-Program Degree Audit
-    const declared = [progId, ...(addProgs || [])];
+    const declared = [progId, ...(addProgs || [])].filter(Boolean);
     const audit = runDegreeAudit({
       studentRecord: parsed,
       declaredPrograms: declared,
@@ -138,7 +138,7 @@ export default function App() {
     // If newer Anthology/Transcript records were uploaded in Option A, run full audit & schedule on them
     if (extractedState.parsedTranscript) {
       setParsedTranscript(extractedState.parsedTranscript);
-      const declared = [targetProgId, ...(additionalPrograms || [])];
+      const declared = [targetProgId, ...(additionalPrograms || [])].filter(Boolean);
       const updatedAudit = runDegreeAudit({
         studentRecord: extractedState.parsedTranscript,
         declaredPrograms: declared,
@@ -205,7 +205,7 @@ export default function App() {
       }
     };
     setAuditOptions(mergedOptions);
-    const declared = [selectedProgramId, ...(additionalPrograms || [])];
+    const declared = [selectedProgramId, ...(additionalPrograms || [])].filter(Boolean);
     const updatedAudit = runDegreeAudit({
       studentRecord: parsedTranscript,
       declaredPrograms: declared,
@@ -273,7 +273,7 @@ export default function App() {
       advisorOverrides: {},
       requirementNotes: {}
     });
-    setSelectedProgramId('cybersecurity_bs_2026');
+    setSelectedProgramId(null);
     setAdditionalPrograms([]);
     setCatalogYear('2026-2027');
     setConstraints({ ...DEFAULT_CONSTRAINTS });

@@ -1514,3 +1514,27 @@
 
 
 
+
+
+### 87. Screen 1 UI Refinements, Catalog Year Unlocking, Category Filters, and Initial State Reset
+- **Objective:** Refine Screen 1 (Student Intake) UI copy, titles, component states, and reset behaviors per advisor feedback:
+  1. *Card 2 Header & Labels (`Screen1Intake.jsx`):* Heading updated to `STUDENT ACADEMIC PLAN & FUTURE CREDENTIALS`, subtext updated to `Catalog year, multi-program stacking, and CORE42 Waiver.`, curriculum database badge updated to `Curriculum from Website` (strictly zero mentions of Lindenwood in visible student-facing copy).
+  2. *Missouri CORE 42 / AA Transfer Block Banner (`Screen1Intake.jsx`):* Reduced width and docked right (`ml-auto`) within the top grid row for compact alignment.
+  3. *Catalog Year Selector (`CatalogYearCombobox.jsx` & `Screen1Intake.jsx`):*
+     - Title cleaned to `Catalog Year` (removed `(Forward-Only)`), and subtext `Forward-only catalog switching...` completely removed.
+     - Options list populated with `2026 - 2027 (Active Catalog)`, `2025 - 2026`, `2024 - 2025`, `2023 - 2024`.
+     - Removed all lock icons, restrictions, and disabled attributes on older catalog years. All 4 years freely selectable.
+  4. *Program Search & Add Component (`ProgramCombobox.jsx` & `Screen1Intake.jsx`):*
+     - Heading updated to `Search & Add Academic Programs`, subtitle updated to `Majors, minors, or certificates`.
+     - Search trigger button shows `Click to search` when no program selected; search input placeholder set to `Click to search`.
+     - Programs sorted alphabetically by title (`a.name.localeCompare(b.name)`).
+     - Added category filter pills `[ All ]` | `[ Major ]` | `[ Minor ]` | `[ Certificate ]` inside popover header for 1-click filtering.
+     - Cleaned `[ Add to Student Stack ]` button: removed duplicate text `+` character.
+  5. *Credential Stack State & Reset Invariants (`src/App.jsx`, `Screen1Intake.jsx`, `programStackUtils.js`):*
+     - Dynamic header updated to `Seeking to Confer Credential Stack ({count} Credentials)` / breakdown.
+     - Cold-load state starts with an empty credential stack (`[]`), with no default pre-loaded program. Displays dashed placeholder: `No degree programs declared. Select a program above and click Add to Student Stack.`.
+     - `Clear Active Student` button handler completely purges all student records, parsed transcript artifacts, enrolled/completed courses, profile fields, active-term manual courses, and resets `declaredProgramIds` back to `[]`.
+  6. *Card 3 Subtext (`Screen1Intake.jsx`):* Updated to `Enrollment Status, pacing restrictions, summer availability`.
+  7. *Verification & Tests:*
+     - Vitest suite: **252 / 252 tests passing (100% green)** across all 24 test suites (`npm test`).
+     - Headless Playwright suite (`.tmp/verify_screen1_refinements.mjs`): All 10 checks verified with clean child preview server process teardown.

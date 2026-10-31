@@ -1,34 +1,34 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Calendar, ChevronDown, Check, Lock } from 'lucide-react';
+import { Calendar, ChevronDown, Check } from 'lucide-react';
 
 const CATALOG_YEAR_CONFIG = [
   {
     id: '2026-2027',
-    label: '2026–2027',
+    label: '2026 - 2027',
     startYear: 2026,
     badgeText: 'Active Catalog',
     badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200'
   },
   {
     id: '2025-2026',
-    label: '2025–2026',
+    label: '2025 - 2026',
     startYear: 2025,
-    badgeText: 'Prior Year',
-    badgeClass: 'bg-neutral-100 text-neutral-700 border-neutral-200'
+    badgeText: null,
+    badgeClass: ''
   },
   {
     id: '2024-2025',
-    label: '2024–2025',
+    label: '2024 - 2025',
     startYear: 2024,
-    badgeText: 'Historical',
-    badgeClass: 'bg-neutral-100 text-neutral-600 border-neutral-200'
+    badgeText: null,
+    badgeClass: ''
   },
   {
     id: '2023-2024',
-    label: '2023–2024',
+    label: '2023 - 2024',
     startYear: 2023,
-    badgeText: 'Historical',
-    badgeClass: 'bg-neutral-100 text-neutral-600 border-neutral-200'
+    badgeText: null,
+    badgeClass: ''
   }
 ];
 
@@ -75,7 +75,7 @@ export default function CatalogYearCombobox({
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const target = CATALOG_YEAR_CONFIG[highlightedIndex];
-      if (target && !(minCatalogYearStart > target.startYear)) {
+      if (target) {
         handleSelect(target.id);
       }
     } else if (e.key === 'Escape') {
@@ -102,16 +102,10 @@ export default function CatalogYearCombobox({
         aria-hidden="true"
         className="sr-only absolute -left-[9999px] opacity-0 pointer-events-none w-0 h-0"
       >
-        <option value="2026-2027">2026–2027 (Active Catalog)</option>
-        <option value="2025-2026" disabled={minCatalogYearStart > 2025}>
-          2025–2026
-        </option>
-        <option value="2024-2025" disabled={minCatalogYearStart > 2024}>
-          2024–2025
-        </option>
-        <option value="2023-2024" disabled={minCatalogYearStart > 2023}>
-          2023–2024
-        </option>
+        <option value="2026-2027">2026 - 2027 (Active Catalog)</option>
+        <option value="2025-2026">2025 - 2026</option>
+        <option value="2024-2025">2024 - 2025</option>
+        <option value="2023-2024">2023 - 2024</option>
       </select>
 
       {/* Accessible Interactive Trigger Button */}
@@ -142,13 +136,15 @@ export default function CatalogYearCombobox({
             <div className="text-xs font-bold text-neutral-900 leading-tight">
               {selectedOption.label}
             </div>
-            <div className="mt-0.5">
-              <span
-                className={`inline-flex items-center text-[10px] font-semibold border px-1.5 py-0.2 rounded leading-tight ${selectedOption.badgeClass}`}
-              >
-                {selectedOption.badgeText}
-              </span>
-            </div>
+            {selectedOption.badgeText && (
+              <div className="mt-0.5">
+                <span
+                  className={`inline-flex items-center text-[10px] font-semibold border px-1.5 py-0.2 rounded leading-tight ${selectedOption.badgeClass}`}
+                >
+                  {selectedOption.badgeText}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -171,7 +167,6 @@ export default function CatalogYearCombobox({
             {CATALOG_YEAR_CONFIG.map((opt, idx) => {
               const isSelected = opt.id === catalogYear;
               const isHighlighted = idx === highlightedIndex;
-              const isOptionDisabled = minCatalogYearStart > opt.startYear;
 
               return (
                 <div
@@ -179,62 +174,43 @@ export default function CatalogYearCombobox({
                   id={`catalog-year-option-${opt.id}`}
                   role="option"
                   aria-selected={isSelected}
-                  aria-disabled={isOptionDisabled}
-                  onClick={() => {
-                    if (!isOptionDisabled) {
-                      handleSelect(opt.id);
-                    }
-                  }}
+                  onClick={() => handleSelect(opt.id)}
                   onMouseEnter={() => setHighlightedIndex(idx)}
-                  className={`p-2.5 transition flex items-center justify-between gap-2.5 ${
-                    isOptionDisabled
-                      ? 'bg-neutral-50/70 text-neutral-400 cursor-not-allowed opacity-60'
-                      : isSelected
-                      ? 'bg-[#F7F5EE] border-l-4 border-l-[#857542] cursor-pointer'
+                  className={`p-2.5 transition flex items-center justify-between gap-2.5 cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#F7F5EE] border-l-4 border-l-[#857542]'
                       : isHighlighted
-                      ? 'bg-neutral-50 cursor-pointer'
-                      : 'bg-white hover:bg-neutral-50 cursor-pointer'
+                      ? 'bg-neutral-50'
+                      : 'bg-white hover:bg-neutral-50'
                   }`}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       <span
                         className={`text-xs font-bold leading-tight ${
-                          isSelected
-                            ? 'text-[#857542]'
-                            : isOptionDisabled
-                            ? 'text-neutral-400'
-                            : 'text-neutral-900'
+                          isSelected ? 'text-[#857542]' : 'text-neutral-900'
                         }`}
                       >
                         {opt.label}
                       </span>
-                      <span
-                        className={`text-[9px] font-semibold border px-1 rounded ${
-                          isOptionDisabled
-                            ? 'bg-neutral-100 text-neutral-400 border-neutral-200'
-                            : opt.badgeClass
-                        }`}
-                      >
-                        {opt.badgeText}
-                      </span>
+                      {opt.badgeText && (
+                        <span
+                          className={`text-[9px] font-semibold border px-1 rounded ${opt.badgeClass}`}
+                        >
+                          {opt.badgeText}
+                        </span>
+                      )}
                     </div>
 
                     <div className="mt-0.5 text-[10px] text-neutral-500">
-                      {isOptionDisabled
-                        ? `Restricted (matriculated ${minCatalogYearStart}+)`
-                        : opt.id === '2026-2027'
+                      {opt.id === '2026-2027'
                         ? 'Current academic catalog year'
-                        : 'Prior approved catalog year'}
+                        : 'Approved catalog year'}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    {isOptionDisabled ? (
-                      <Lock className="w-3.5 h-3.5 text-neutral-400" />
-                    ) : isSelected ? (
-                      <Check className="w-4 h-4 text-[#857542]" />
-                    ) : null}
+                    {isSelected && <Check className="w-4 h-4 text-[#857542]" />}
                   </div>
                 </div>
               );

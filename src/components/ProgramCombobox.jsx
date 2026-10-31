@@ -48,6 +48,7 @@ export default function ProgramCombobox({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
   const containerRef = useRef(null);
@@ -72,7 +73,8 @@ export default function ProgramCombobox({
 
   // Find currently selected program
   const selectedProgram = useMemo(() => {
-    return effectivePrograms.find((p) => p.id === selectedProgramId) || effectivePrograms[0] || null;
+    if (!selectedProgramId) return null;
+    return effectivePrograms.find((p) => p.id === selectedProgramId) || null;
   }, [effectivePrograms, selectedProgramId]);
 
   const { discipline, emphasis, degreeBadge } = useMemo(() => {
@@ -83,17 +85,29 @@ export default function ProgramCombobox({
     return selectedProgram ? getProgramCategory(selectedProgram) : 'Major';
   }, [selectedProgram]);
 
-  // Filter programs by search query (discipline, emphasis, id, degree, or category)
+  // Filter and sort programs alphabetically by title
   const filteredPrograms = useMemo(() => {
+    let list = effectivePrograms;
+    if (selectedCategoryFilter !== 'All') {
+      list = list.filter((p) => {
+        const cat = getProgramCategory(p);
+        if (selectedCategoryFilter === 'Major') {
+          return cat === 'Major' || cat === 'Major - Track';
+        }
+        return cat === selectedCategoryFilter;
+      });
+    }
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return effectivePrograms;
-    return effectivePrograms.filter((p) => {
-      const name = (p.name || p.program_name || '').toLowerCase();
-      const id = (p.id || '').toLowerCase();
-      const cat = getProgramCategory(p).toLowerCase();
-      return name.includes(q) || id.includes(q) || cat.includes(q);
-    });
-  }, [effectivePrograms, searchQuery]);
+    if (q) {
+      list = list.filter((p) => {
+        const name = (p.name || p.program_name || '').toLowerCase();
+        const id = (p.id || '').toLowerCase();
+        const cat = getProgramCategory(p).toLowerCase();
+        return name.includes(q) || id.includes(q) || cat.includes(q);
+      });
+    }
+    return [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }, [effectivePrograms, searchQuery, selectedCategoryFilter]);
 
   // Focus search input on open
   useEffect(() => {
@@ -161,12 +175,13 @@ export default function ProgramCombobox({
       {/* Hidden Native Select for Headless Test / Scraper Backwards Compatibility */}
       <select
         id="optionB-program-select"
-        value={selectedProgramId}
+        value={selectedProgramId || ''}
         onChange={(e) => onSelectProgramId(e.target.value)}
         tabIndex={-1}
         aria-hidden="true"
         className="sr-only absolute -left-[9999px] opacity-0 pointer-events-none w-0 h-0"
       >
+        <option value="">Select a program</option>
         <optgroup label="Official Undergraduate Degree Programs">
           {effectivePrograms.map((p) => (
             <option key={p.id} value={p.id}>
@@ -187,6 +202,8 @@ export default function ProgramCombobox({
           if (!isOpen && (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
             setIsOpen(true);
+          } else if (isOpen) {
+            handleKeyDown(e);
           }
         }}
         aria-expanded={isOpen}
@@ -199,8 +216,12 @@ export default function ProgramCombobox({
         <div className="flex items-start gap-2 min-w-0 flex-1">
           <Search className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold text-neutral-900 leading-snug break-words">
-              {selectedProgram ? discipline : 'Select a verified degree program...'}
+            <div
+              className={`text-xs font-bold leading-snug break-words ${
+                selectedProgram ? 'text-neutral-900' : 'text-neutral-400 font-medium'
+              }`}
+            >
+              {selectedProgram ? discipline : 'Click to search'}
             </div>
             {selectedProgram && (
               <div className="flex items-center gap-1.5 mt-1">
@@ -232,9 +253,11 @@ export default function ProgramCombobox({
         </div>
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
-            {degreeBadge}
-          </span>
+          {selectedProgram && (
+            <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
+              {degreeBadge}
+            </span>
+          )}
           <ChevronDown
             className={`w-4 h-4 text-neutral-500 transition-transform duration-150 ${
               isOpen ? 'rotate-180 text-[#857542]' : ''
@@ -266,7 +289,7 @@ export default function ProgramCombobox({
                   setHighlightedIndex(0);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search degree or track (e.g., Cyber, App, Net)..."
+                placeholder="Click to search"
                 className="w-full text-xs pl-8 pr-7 py-1.5 bg-white border border-neutral-300 focus:border-[#857542] focus:ring-1 focus:ring-[#857542] rounded-md outline-none text-neutral-900 placeholder:text-neutral-400"
               />
               {searchQuery && (
@@ -283,6 +306,28 @@ export default function ProgramCombobox({
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-neutral-100/70 border-b border-neutral-200/70 overflow-x-auto">
+            {['All', 'Major', 'Minor', 'Certificate'].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                data-testid={`category-pill-${cat.toLowerCase()}`}
+                onClick={() => {
+                  setSelectedCategoryFilter(cat);
+                  setHighlightedIndex(0);
+                }}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition cursor-pointer select-none ${
+                  selectedCategoryFilter === cat
+                    ? 'bg-[#857542] text-white shadow-2xs'
+                    : 'bg-white text-neutral-600 hover:bg-neutral-200/70 border border-neutral-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
 
           {/* Options List */}

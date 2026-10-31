@@ -268,10 +268,10 @@ export default function Screen1Intake({
   // 3. Card 2: Degree Curriculum & Credential Roster State
   // ---------------------------------------------------------------------------
   const [catalogYear, setCatalogYearState] = useState(propCatalogYear || '2026-2027');
-  const [minCatalogYearStart, setMinCatalogYearStart] = useState(2024);
-  const [selectedProgramId, setSelectedProgramIdState] = useState(propProgramId || 'cybersecurity_bs_2026');
-  const [primaryProgramId, setPrimaryProgramId] = useState(propProgramId || 'cybersecurity_bs_2026');
-  const [stagedComboboxProgramId, setStagedComboboxProgramId] = useState(propProgramId || 'cybersecurity_bs_2026');
+  const [minCatalogYearStart, setMinCatalogYearStart] = useState(2023);
+  const [selectedProgramId, setSelectedProgramIdState] = useState(propProgramId || '');
+  const [primaryProgramId, setPrimaryProgramId] = useState(propProgramId || '');
+  const [stagedComboboxProgramId, setStagedComboboxProgramId] = useState(propProgramId || '');
   const [core42TransferBlock, setCore42TransferBlock] = useState(false);
   const [declaredProgramIds, setDeclaredProgramIds] = useState(() => {
     if (Array.isArray(propAdditionalPrograms) && propAdditionalPrograms.length > 0) {
@@ -284,7 +284,7 @@ export default function Screen1Intake({
     if (parsedTranscript && propProgramId) {
       return [propProgramId];
     }
-    return propProgramId ? [propProgramId] : ['cybersecurity_bs_2026'];
+    return propProgramId ? [propProgramId] : [];
   });
 
   const setCatalogYear = (cy) => {
@@ -727,6 +727,12 @@ export default function Screen1Intake({
     setDetectedGpa('');
     setCachedParsedTranscript(null);
     setIsDataExtracted(false);
+    setSelectedProgramIdState('');
+    setPrimaryProgramId('');
+    setStagedComboboxProgramId('');
+    setDeclaredProgramIds([]);
+    setCore42TransferBlock(false);
+    setActiveEnrollmentCourses([]);
     setPacingModeState('Full-Time');
     setMin16wkCreditsState(12);
     setMax16wkCreditsState(15);
@@ -1162,7 +1168,14 @@ export default function Screen1Intake({
     proceedWithAudit(parsed, term);
   };
 
-  const hasActiveRecord = Boolean(parsedTranscript || cachedParsedTranscript || currentCourses.length > 0);
+  const hasActiveRecord = Boolean(
+    parsedTranscript ||
+    cachedParsedTranscript ||
+    currentCourses.length > 0 ||
+    studentName.trim() ||
+    studentId.trim() ||
+    declaredProgramIds.length > 0
+  );
 
   // ---------------------------------------------------------------------------
   // 10. Render
@@ -1505,24 +1518,24 @@ export default function Screen1Intake({
             </div>
             <div>
               <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
-                2. DEGREE CURRICULUM &amp; CREDENTIAL ROSTER
+                STUDENT ACADEMIC PLAN &amp; FUTURE CREDENTIALS
               </h2>
               <p className="text-xs text-neutral-500">
-                Catalog year binding, Missouri CORE 42 waiver, and multi-program credential stacking
+                Catalog year, multi-program stacking, and CORE42 Waiver.
               </p>
             </div>
           </div>
           <span className="text-[10px] bg-neutral-100 text-neutral-700 font-extrabold px-3 py-1 rounded-full border border-neutral-200">
-            Verified Curriculum Database
+            Curriculum from Website
           </span>
         </div>
 
         {/* 1. Catalog Year & CORE 42 Header Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           {/* Catalog Year */}
           <div className="md:col-span-5">
             <label className="block text-xs font-bold text-neutral-800 mb-1.5">
-              <span>Catalog Year (Forward-Only)</span>
+              <span>Catalog Year</span>
               <span className="text-red-600 ml-0.5">*</span>
             </label>
             <CatalogYearCombobox
@@ -1530,37 +1543,41 @@ export default function Screen1Intake({
               minCatalogYearStart={minCatalogYearStart}
               onChange={handleCatalogYearChange}
             />
-            <p className="text-[10px] text-neutral-500 mt-1">
-              Forward-only catalog switching from matriculation year
-            </p>
           </div>
 
           {/* Missouri CORE 42 / AA Transfer Block Complete Toggle */}
-          <div className="md:col-span-7 bg-[#F7F5EE]/80 border border-[#B5A36A]/40 rounded-xl p-3 flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="core42-transfer-toggle"
-              data-testid="core42-transfer-toggle"
-              checked={core42TransferBlock}
-              onChange={(e) => setCore42TransferBlock(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-[#857542] focus:ring-[#857542] cursor-pointer"
-            />
-            <label htmlFor="core42-transfer-toggle" className="cursor-pointer select-none">
-              <span className="block text-xs font-bold text-neutral-900 leading-tight">
-                Missouri CORE 42 / AA Transfer Block Complete
-              </span>
-              <span className="block text-[10px] font-medium text-neutral-600 mt-0.5">
-                Waives all 42 lower-division GE requirements
-              </span>
-            </label>
+          <div className="md:col-span-7 flex justify-end">
+            <div className="w-full sm:max-w-md bg-[#F7F5EE]/80 border border-[#B5A36A]/40 rounded-xl p-2.5 flex items-start gap-2.5 ml-auto">
+              <input
+                type="checkbox"
+                id="core42-transfer-toggle"
+                data-testid="core42-transfer-toggle"
+                checked={core42TransferBlock}
+                onChange={(e) => setCore42TransferBlock(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-[#857542] focus:ring-[#857542] cursor-pointer"
+              />
+              <label htmlFor="core42-transfer-toggle" className="cursor-pointer select-none">
+                <span className="block text-xs font-bold text-neutral-900 leading-tight">
+                  Missouri CORE 42 / AA Transfer Block Complete
+                </span>
+                <span className="block text-[10px] font-medium text-neutral-600 mt-0.5">
+                  Waives all 42 lower-division GE requirements
+                </span>
+              </label>
+            </div>
           </div>
         </div>
 
         {/* 2. Credential Combobox & Add Action */}
         <div className="space-y-1.5 pt-2 border-t border-neutral-100">
-          <label className="block text-xs font-bold text-neutral-800">
-            <span>Add Degree, Emphasis, Minor, or Certificate</span>
-          </label>
+          <div>
+            <label className="block text-xs font-bold text-neutral-800">
+              <span>Search & Add Academic Programs</span>
+            </label>
+            <p className="text-[10px] text-neutral-500">
+              Majors, minors, or certificates
+            </p>
+          </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex-1 min-w-0">
               <ProgramCombobox
@@ -1574,12 +1591,12 @@ export default function Screen1Intake({
               id="add-program-to-stack-button"
               data-testid="add-program-to-stack-button"
               type="button"
-              disabled={declaredProgramIds.includes(stagedComboboxProgramId)}
+              disabled={!stagedComboboxProgramId || declaredProgramIds.includes(stagedComboboxProgramId)}
               onClick={() => handleAddProgramToStack(stagedComboboxProgramId)}
               className="px-4 py-2.5 bg-[#1E293B] hover:bg-[#0F172A] disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>+ Add to Student Stack</span>
+              <span>Add to Student Stack</span>
             </button>
           </div>
         </div>
@@ -1590,7 +1607,7 @@ export default function Screen1Intake({
             <span
               id="declared-stack-header"
               data-testid="declared-stack-header"
-              className="text-[11px] font-extrabold tracking-wider text-neutral-800 uppercase"
+              className="text-[11px] font-extrabold tracking-wider text-neutral-800"
             >
               {formatDeclaredStackHeader(declaredPrograms)}
             </span>
@@ -1602,7 +1619,7 @@ export default function Screen1Intake({
           <div className="space-y-2" id="declared-credentials-stack">
             {declaredPrograms.length === 0 ? (
               <div className="p-4 text-center text-xs text-neutral-500 border border-dashed border-neutral-300 rounded-xl bg-neutral-50/50">
-                No degree programs declared. Select a program above and click <span className="font-semibold text-neutral-700">+ Add to Student Stack</span>.
+                No degree programs declared. Select a program above and click <span className="font-semibold text-neutral-700">Add to Student Stack</span>.
               </div>
             ) : (
               declaredPrograms.map((prog) => {
@@ -1742,7 +1759,7 @@ export default function Screen1Intake({
                 3. SCHEDULING CONSTRAINTS
               </h2>
               <p className="text-xs text-neutral-500">
-                Pacing caps, 8-week accelerated session limits, and term availability rules
+                Enrollment Status, pacing restrictions, summer availability
               </p>
             </div>
           </div>
@@ -2359,6 +2376,7 @@ export default function Screen1Intake({
               <button
                 type="button"
                 id="clear-student-intake-confirm-btn"
+                data-testid="confirm-clear-student-button"
                 disabled={countdown > 0}
                 onClick={handleConfirmClear}
                 className={`px-4 py-2 text-xs font-bold rounded-lg transition flex items-center space-x-1.5 ${

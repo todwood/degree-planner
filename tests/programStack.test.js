@@ -36,29 +36,29 @@ describe('Multi-Program Declared Credentials Stack Suite', () => {
     const mathMinor = masterDb.programs.find((p) => p.id === 'mathematics_minor_2026');
     const dataCert = masterDb.programs.find((p) => p.id === 'data_analysis_certificate_2026');
 
-    it('formats single major correctly: "DECLARED CREDENTIALS STACK (1 Major)"', () => {
+    it('formats single major correctly: "Seeking to Confer Credential Stack (1 Major)"', () => {
       const header = formatDeclaredStackHeader([cs]);
-      expect(header).toBe('DECLARED CREDENTIALS STACK (1 Major)');
+      expect(header).toBe('Seeking to Confer Credential Stack (1 Major)');
     });
 
-    it('formats 1 Major + 1 Minor correctly: "DECLARED CREDENTIALS STACK (1 Major, 1 Minor)"', () => {
+    it('formats 1 Major + 1 Minor correctly: "Seeking to Confer Credential Stack (1 Major, 1 Minor)"', () => {
       const header = formatDeclaredStackHeader([cs, mathMinor]);
-      expect(header).toBe('DECLARED CREDENTIALS STACK (1 Major, 1 Minor)');
+      expect(header).toBe('Seeking to Confer Credential Stack (1 Major, 1 Minor)');
     });
 
-    it('formats 2 Majors (Double Major) correctly: "DECLARED CREDENTIALS STACK (2 Majors — Double Major)"', () => {
+    it('formats 2 Majors (Double Major) correctly: "Seeking to Confer Credential Stack (2 Majors — Double Major)"', () => {
       const header = formatDeclaredStackHeader([cs, dsci]);
-      expect(header).toBe('DECLARED CREDENTIALS STACK (2 Majors — Double Major)');
+      expect(header).toBe('Seeking to Confer Credential Stack (2 Majors — Double Major)');
     });
 
-    it('formats 1 Major, 1 Minor, 1 Cert correctly: "DECLARED CREDENTIALS STACK (1 Major, 1 Minor, 1 Certificate)"', () => {
+    it('formats 1 Major, 1 Minor, 1 Cert correctly: "Seeking to Confer Credential Stack (1 Major, 1 Minor, 1 Certificate)"', () => {
       const header = formatDeclaredStackHeader([cs, mathMinor, dataCert]);
-      expect(header).toBe('DECLARED CREDENTIALS STACK (1 Major, 1 Minor, 1 Certificate)');
+      expect(header).toBe('Seeking to Confer Credential Stack (1 Major, 1 Minor, 1 Certificate)');
     });
 
     it('handles empty credentials stack gracefully', () => {
       const header = formatDeclaredStackHeader([]);
-      expect(header).toBe('DECLARED CREDENTIALS STACK (0 Credentials)');
+      expect(header).toBe('Seeking to Confer Credential Stack (0 Credentials)');
     });
   });
 

@@ -154,7 +154,7 @@ describe('Multi-Major, Multi-Minor & 20-Student Intake Test Suite', () => {
 
       const progs = manager.getStack().map((id) => masterDb.programs.find((p) => p.id === id));
       const header = formatDeclaredStackHeader(progs);
-      expect(header).toBe('DECLARED CREDENTIALS STACK (1 Major, 2 Minors, 1 Certificate)');
+      expect(header).toBe('Seeking to Confer Credential Stack (1 Major, 2 Minors, 1 Certificate)');
     });
   });
 
