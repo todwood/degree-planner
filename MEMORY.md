@@ -1709,3 +1709,55 @@
      - Vitest suite (`tests/repeatabilityDeduplication.test.js`): 19 unit tests verifying regex extraction, database enrichment for the 9 sample courses, multi-attempt scenarios for `TA 10011` (2 attempts valid at 6cr, 3rd attempt excluded at 9cr with `REPEATED_ATTEMPT`), cross-file duplicate collapse, uncapped repeatability (`DAN 10010`), and non-repeatable regression (`CSC 14400`).
      - Total Vitest suite: **333 / 333 tests passing (100% green)** across all 30 test files (`npm test`).
      - Production build: `npm run build` succeeded with 0 errors.
+
+### 94. Skill 1 Program Category Headers, Per-Course Repeat Rules, False Track Purge & Category Audit Engine
+- **Objective:** Extract and preserve Acalog requirement categories (`div.acalog-core > h2`), detect subtle category distribution and repeat rules (e.g. `(6 credit hours from each course)`), cleanse the 23 falsely stamped degree programs in `masterProgramsDatabase.json`, and upgrade the waterfall audit engine (`src/engine/waterfallAudit.js`) to evaluate major requirements category-by-category.
+- **Architectural Implementation:**
+  1. *False Track Purge & Scraper Fixes:*
+     - Removed unanchored regex `/Option A.*Option B/i || /Option 1.*Option 2/i` from catalog scraper files (`.tmp/harvest_full_catalog_2026.mjs`, `harvest_full_catalog_2025.mjs`, `harvest_full_catalog_2024.mjs`, `harvest_full_catalog_2023.mjs`).
+     - Scanned all 1,008 programs in `src/data/masterProgramsDatabase.json`, resetting `flexible_elective_configurations = null` for the 23 false-positive programs (Spanish Minor/Certificate, Ecology & Evolutionary Biology BS, Chemistry BA, Cellular & Molecular Biology BS, Biological Sciences BS, Biochemistry BS).
+     - Reserved `flexible_elective_configurations` strictly for verified bifurcated programs (`Data Science, BS`).
+  2. *Program Category Schema (`requirement_categories`):*
+     - Structured `requirement_categories` array across programs with `category_id`, `title`, `credits_required`, `category_type` (`REPEAT_DISTRIBUTION`, `CHOICE`, `CORE`), `rule_narrative`, `per_course_credit_requirement`, and `courses`.
+     - Preserved backward compatibility by maintaining `requirements.major_core_courses` and `requirements.elective_courses` as flattened fallbacks on all program records.
+     - Specifically calibrated `theatre_bfa_acting_emphasis_2026` with 4 distinct categories: `Major Coursework` (12 cr, core), `Major Coursework Continued` (3 cr, choice), `Production Coursework` (24 cr, repeat distribution with `per_course_credit_requirement: 6` for `TA 10011`–`40011`), and `Acting Emphasis Coursework` (21 cr, core).
+  3. *Waterfall Audit Engine Upgrade (`src/engine/waterfallAudit.js`):*
+     - Implemented `auditProgramRequirementCategories(prog, courses, catalogByCompact)`.
+     - In `REPEAT_DISTRIBUTION` categories: allows multiple successful attempts of a repeatable course (e.g. `TA 10011`, `TA 20011`) to accumulate credit up to `per_course_credit_requirement` without retake exclusion or premature cutoff.
+     - Integrated into `runWaterfallAudit` (claiming repeat courses from `unclaimedPool` without premature ejection to free electives) and `buildProgramAuditLedgers` (evaluating category-by-category progress and remaining requirements).
+     - Enriched audit results with `categories` on the program audit and degree audit payloads.
+  4. *Verification & Zero Regression:*
+     - Created `tests/programCategoryAudit.test.js` (5 unit tests) verifying false-track cleansing, category schema integrity on `theatre_bfa_acting_emphasis_2026`, zero retake exclusions on repeated attempts of `TA 10011` and `TA 20011`, accurate credit progress (12/24 cr), and remaining requirements (6 cr each for `TA 30011` and `TA 40011`).
+     - Total Vitest suite: **338 / 338 tests passing (100% green)** across all 31 test files (`npm test`).
+     - Production build: `npm run build` compiled cleanly in 5.92s.
+
+### 95. Screen 1 Intake Validation Audit, "At Least One Major" Progression Gate, and Navigation Guards
+- **Objective:** Prevent invalid or minor-only/certificate-only credential stacks from advancing to Screen 2 (Degree Audit) or Screen 3 (Schedule Planner), gate action buttons with real-time feedback, and guard application-level and header navigation.
+- **Architectural Implementation:**
+  1. *Centralized Intake Validation Predicate (`src/utils/intakeHelpers.js`):*
+     - Implemented `validateIntakeEligibility({ studentProfile, studentRecord, parsedTranscript, validCourses, declaredProgramIds, programsDatabase })`.
+     - Checks:
+       - Active student record exists (`hasStudentRecord`: student ID/name or uploaded transcript or courses > 0).
+       - Program stack is non-empty (`declaredProgramIds.length > 0`).
+       - At least one declared program has `credentialType === 'MAJOR'` or category `'Major'`/`'Major - Track'` via `getProgramCategory(prog)`. Minors and Certificates alone return `hasMajor: false`.
+       - Returns `{ isEligible, hasStudentRecord, hasPrograms, hasMajor, majorCount, nonMajorCount, errors, warnings }`.
+     - *Active Enrollment Flexibility Invariant:* Zero active-term courses is 100% valid (e.g. incoming freshmen or returning students). Selecting an upcoming start term is sufficient; active courses are never mandatory.
+  2. *Action Button Gating & Inline Feedback (`src/components/Screen1Intake.jsx`):*
+     - Disabled `#screen1-top-proceed-btn` and `#optionB-submit-btn` with `disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-300 disabled:text-neutral-600` whenever `!isEligibleToRunAudit`.
+     - Added `#intake-validation-status` feedback banner directly under the action button:
+       - Eligible: `✓ Ready to run degree audit`
+       - Missing records: `⚠️ Cannot run audit: Upload a transcript or enter student information and course history.`
+       - Missing programs: `⚠️ Cannot run audit: Declare at least one primary Major in the credential stack.`
+       - Minor/Cert only: `⚠️ Cannot run audit: At least one Major is required. Minors and Certificates must accompany a primary Major.`
+     - Gated `handleRunDegreeAudit` and form submission to abort cleanly if `!isEligibleToRunAudit`.
+     - Synchronized declared program IDs upstream via `onUpdateDeclaredProgramIds` callback prop.
+  3. *App-Level & Header Navigation Guards (`src/App.jsx` & `src/components/HeaderNav.jsx`):*
+     - Synchronized `declaredProgramIds` in `App.jsx`, running `validateIntakeEligibility` at the application root.
+     - `handleNavigateScreen(targetScreen)` blocks advancing to Step 2 or Step 3 if `!isIntakeEligibleForAudit`, keeping advisor on Screen 1.
+     - `HeaderNav.jsx` disables direct clicks on Step 2 and Step 3 header pills when `!canAdvance` (`!isEligibleForAudit && currentScreen === 1`), displaying a muted lock icon (`<Lock className="w-2.5 h-2.5 text-neutral-400" />`) and tooltip `"Complete intake requirements and declare a major to unlock"`.
+     - Preserved backward navigation: advisor can return to Screen 1 from Screen 2 or Screen 3 at any time.
+  4. *Verification & Zero Regression:*
+     - Created `tests/intakeProgressionGates.test.js` (7 unit tests) verifying all validation rules, edge cases, 0-enrollment incoming student support, and `HeaderNav` lock state.
+     - Created and ran `.tmp/verify_major_progression_gate.mjs` headless Playwright automation, testing 0-program stack, minor-only stack, major stack transition to Screen 2, major removal on back-navigation, and clean server teardown.
+     - Total Vitest suite: **345 / 345 tests passing (100% green)** across all 32 test files (`npm test`).
+     - Production build: `npm run build` compiled cleanly in 6.03s.

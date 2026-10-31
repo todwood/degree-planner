@@ -62,7 +62,8 @@ import {
   normalizeTermAbbreviation,
   normalizeActiveCourseStatus,
   CANONICAL_TERM_TOKENS,
-  CANONICAL_COURSE_STATUSES
+  CANONICAL_COURSE_STATUSES,
+  validateIntakeEligibility
 } from '../utils/intakeHelpers.js';
 
 export const ANTHOLOGY_SOP_GUIDE_URL =
@@ -222,7 +223,8 @@ export default function Screen1Intake({
   onUpdateAdditionalPrograms,
   intakeFiles,
   onUpdateIntakeFiles,
-  onClearActiveRecord
+  onClearActiveRecord,
+  onUpdateDeclaredProgramIds
 }) {
   // ---------------------------------------------------------------------------
   // 1. Files & Ingestion Channels (Card 1)
@@ -383,6 +385,10 @@ export default function Screen1Intake({
     return calculateStackOverlap(declaredPrograms, { ...masterDb, programs: allAvailablePrograms });
   }, [declaredPrograms, masterDb, allAvailablePrograms]);
 
+  useEffect(() => {
+    onUpdateDeclaredProgramIds?.(declaredProgramIds);
+  }, [declaredProgramIds, onUpdateDeclaredProgramIds]);
+
   const handleMakePrimary = (progId) => {
     setPrimaryProgramId(progId);
     setSelectedProgramIdState(progId);
@@ -425,6 +431,10 @@ export default function Screen1Intake({
           setPrimaryProgramId(next[0]);
           setSelectedProgramIdState(next[0]);
           onSelectProgramId?.(next[0]);
+        } else {
+          setPrimaryProgramId('');
+          setSelectedProgramIdState('');
+          onSelectProgramId?.(null);
         }
       }
       return next;
@@ -580,6 +590,21 @@ export default function Screen1Intake({
       pacingMode === 'Part-Time' ? 'PART_TIME' : 'FULL_TIME'
     );
   }, [currentCourses, pacingMode]);
+
+  const intakeEligibility = useMemo(() => {
+    return validateIntakeEligibility({
+      studentProfile: {
+        studentName,
+        studentId
+      },
+      studentRecord: cachedParsedTranscript || parsedTranscript,
+      validCourses: currentCourses,
+      declaredProgramIds,
+      programsDatabase: allAvailablePrograms
+    });
+  }, [studentName, studentId, cachedParsedTranscript, parsedTranscript, currentCourses, declaredProgramIds, allAvailablePrograms]);
+
+  const isEligibleToRunAudit = intakeEligibility.isEligible;
 
   // ---------------------------------------------------------------------------
   // 6. Hydration from parsedTranscript props (e.g. back navigation)
@@ -1132,6 +1157,14 @@ export default function Screen1Intake({
   };
 
   const handleRunDegreeAudit = async () => {
+    if (!isEligibleToRunAudit) {
+      setParsingError(
+        intakeEligibility.errors[0]?.message ||
+          'Cannot run audit: Please complete intake requirements and declare at least one Major.'
+      );
+      return;
+    }
+
     setIsProcessing(true);
     setParsingError('');
 
@@ -1221,8 +1254,17 @@ export default function Screen1Intake({
               id="screen1-top-proceed-btn"
               data-testid="top-run-audit-btn"
               onClick={handleRunDegreeAudit}
-              disabled={isProcessing}
-              className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded-lg shadow-sm transition flex items-center space-x-2 cursor-pointer disabled:bg-neutral-300"
+              disabled={isProcessing || !isEligibleToRunAudit}
+              title={
+                isEligibleToRunAudit
+                  ? 'Run Deterministic Degree Audit'
+                  : intakeEligibility.errors[0]?.message || 'Cannot run audit: Intake requirements incomplete.'
+              }
+              className={`px-5 py-2 text-xs font-bold rounded-lg shadow-sm transition flex items-center space-x-2 ${
+                !isEligibleToRunAudit || isProcessing
+                  ? 'opacity-50 cursor-not-allowed bg-neutral-300 text-neutral-600 shadow-none hover:bg-neutral-300'
+                  : 'bg-[#857542] hover:bg-[#6E6035] text-white cursor-pointer'
+              }`}
             >
               <span>Run Degree Audit</span>
               <ArrowRight className="w-4 h-4 flex-shrink-0" />
@@ -1995,18 +2037,48 @@ export default function Screen1Intake({
       {/* =================================================================== */}
       {/* Bottom Dynamic Action Bar */}
       {/* =================================================================== */}
-      <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-4">
+      <div className="pt-2 flex flex-col items-end gap-2.5">
         <button
           type="button"
           id="optionB-submit-btn"
           data-testid="run-degree-audit-btn"
           onClick={handleRunDegreeAudit}
-          disabled={isProcessing}
-          className="w-full sm:w-auto px-8 py-3.5 bg-[#857542] hover:bg-[#6E6035] disabled:bg-neutral-300 text-white text-sm font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer"
+          disabled={isProcessing || !isEligibleToRunAudit}
+          title={
+            isEligibleToRunAudit
+              ? 'Run Deterministic Degree Audit'
+              : intakeEligibility.errors[0]?.message || 'Cannot run audit: Intake requirements incomplete.'
+          }
+          className={`w-full sm:w-auto px-8 py-3.5 text-sm font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2 ${
+            !isEligibleToRunAudit || isProcessing
+              ? 'opacity-50 cursor-not-allowed bg-neutral-300 text-neutral-600 shadow-none hover:bg-neutral-300'
+              : 'bg-[#857542] hover:bg-[#6E6035] text-white cursor-pointer'
+          }`}
         >
           <span>Run Degree Audit</span>
           <ArrowRight className="w-4 h-4 flex-shrink-0" />
         </button>
+
+        {/* Validation Status Indicator / Callout */}
+        <div
+          id="intake-validation-status"
+          data-testid="intake-validation-status"
+          className="text-xs font-semibold"
+        >
+          {isEligibleToRunAudit ? (
+            <span className="text-emerald-700 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>✓ Ready to run degree audit</span>
+            </span>
+          ) : (
+            <span className="text-amber-800 bg-amber-50 border border-amber-200/80 px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-2xs">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <span>
+                ⚠️ Cannot run audit: {intakeEligibility.errors[0]?.message}
+              </span>
+            </span>
+          )}
+        </div>
       </div>
 
       {/* =================================================================== */}

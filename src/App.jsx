@@ -10,10 +10,12 @@ import AdvisorTestingExceptionCard from './components/AdvisorTestingExceptionCar
 import Footer from './components/Footer.jsx';
 
 import masterDb from './data/masterDatabase.json' with { type: 'json' };
+import masterProgramsDb from './data/masterProgramsDatabase.json' with { type: 'json' };
 import dbAdapter from './data/dbAdapter.js';
 import { runWaterfallAudit, runDegreeAudit } from './engine/waterfallAudit.js';
 import { generateOptimalSchedule } from './engine/scheduler.js';
 import { processRawCourseRecords } from './engine/transcriptParser.js';
+import { validateIntakeEligibility } from './utils/intakeHelpers.js';
 
 export const DEFAULT_CONSTRAINTS = {
   startSemester: 'Fall 2026',
@@ -74,6 +76,47 @@ export default function App() {
   });
   const [schedule, setSchedule] = useState(null);
   const [intakeKey, setIntakeKey] = useState(0);
+  const [declaredProgramIds, setDeclaredProgramIds] = useState([]);
+
+  // Flattened master programs catalog for validation & lookups
+  const allAvailablePrograms = React.useMemo(() => {
+    if (masterProgramsDb?.programs) {
+      return Array.isArray(masterProgramsDb.programs)
+        ? masterProgramsDb.programs
+        : Object.values(masterProgramsDb.programs);
+    }
+    return masterDb?.programs || [];
+  }, []);
+
+  // Centralized intake eligibility validator
+  const intakeEligibility = React.useMemo(() => {
+    const declared = declaredProgramIds.length > 0
+      ? declaredProgramIds
+      : [selectedProgramId, ...(additionalPrograms || [])].filter(Boolean);
+
+    return validateIntakeEligibility({
+      studentProfile: {
+        studentName: parsedTranscript?.studentMetadata?.name || parsedTranscript?.studentMetadata?.student_name || '',
+        studentId: parsedTranscript?.studentMetadata?.studentId || parsedTranscript?.studentMetadata?.student_id || ''
+      },
+      validCourses: parsedTranscript?.validCourses || [],
+      declaredProgramIds: declared,
+      programsDatabase: allAvailablePrograms
+    });
+  }, [declaredProgramIds, selectedProgramId, additionalPrograms, parsedTranscript, allAvailablePrograms]);
+
+  const isIntakeEligibleForAudit = intakeEligibility.isEligible;
+
+  // Step transition navigation guard
+  const handleNavigateScreen = (targetScreen) => {
+    if (targetScreen > 1 && !isIntakeEligibleForAudit) {
+      console.warn('Navigation blocked: Complete intake requirements and declare a major before proceeding.');
+      setCurrentScreen(1);
+      return false;
+    }
+    setCurrentScreen(targetScreen);
+    return true;
+  };
 
   // Initialize offline local database adapter on mount
   useEffect(() => {
@@ -91,6 +134,7 @@ export default function App() {
     parsedTranscript: parsed,
     selectedProgramId: progId,
     additionalPrograms: addProgs,
+    declaredPrograms: declProgs,
     core42Completed: c42,
     constraints: c,
     directToSchedule = false
@@ -98,6 +142,11 @@ export default function App() {
     setParsedTranscript(parsed);
     setSelectedProgramId(progId);
     setConstraints(c);
+    if (declProgs) {
+      setDeclaredProgramIds(declProgs);
+    } else if (progId) {
+      setDeclaredProgramIds([progId, ...(addProgs || [])].filter(Boolean));
+    }
     if (addProgs) setAdditionalPrograms(addProgs);
     if (parsed?.studentMetadata?.catalogYear) {
       setCatalogYear(parsed.studentMetadata.catalogYear);
@@ -286,6 +335,7 @@ export default function App() {
     });
     setSelectedProgramId(null);
     setAdditionalPrograms([]);
+    setDeclaredProgramIds([]);
     setCatalogYear('2026-2027');
     setConstraints({ ...DEFAULT_CONSTRAINTS });
     setIntakeFiles({
@@ -307,7 +357,8 @@ export default function App() {
         <HeaderNav
           facultyProfile={facultyProfile}
           currentScreen={currentScreen}
-          setCurrentScreen={setCurrentScreen}
+          setCurrentScreen={handleNavigateScreen}
+          isEligibleForAudit={isIntakeEligibleForAudit}
           activeStudentName={
             parsedTranscript?.studentMetadata?.name ||
             parsedTranscript?.studentMetadata?.student_name ||
@@ -357,6 +408,7 @@ export default function App() {
             intakeFiles={intakeFiles}
             onUpdateIntakeFiles={setIntakeFiles}
             onClearActiveRecord={handleClearActiveRecord}
+            onUpdateDeclaredProgramIds={setDeclaredProgramIds}
           />
         ) : currentScreen === 2 ? (
           auditResult ? (

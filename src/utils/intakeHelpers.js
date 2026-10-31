@@ -20,6 +20,7 @@ import {
   CANONICAL_TERM_TOKENS,
   CANONICAL_COURSE_STATUSES
 } from '../engine/transcriptParser.js';
+import { getProgramCategory } from './programStackUtils.js';
 
 export {
   normalizeTermAbbreviation,
@@ -29,6 +30,112 @@ export {
 
 export const DEFAULT_REFERENCE_DATE = '2026-10-29';
 export const DEFAULT_ACTIVE_TERM_ID = 'Fall 2026';
+
+/**
+ * Centralized Intake Progression Eligibility Validator.
+ * Enforces:
+ * 1. Student Record / Transcript Check (has coursework or manual student name/id).
+ * 2. At Least One Major Requirement (stack must contain at least one program with credentialType === 'MAJOR' or recognized as a Major).
+ * 3. 0 Active-Term Enrollment flexibility (active courses are not required).
+ *
+ * @param {object} params
+ * @param {object} [params.studentProfile] - Student profile or metadata
+ * @param {object} [params.studentRecord] - Alternative student record object (parsedTranscript)
+ * @param {Array<object>} [params.validCourses] - List of parsed/enrolled courses
+ * @param {Array<string|object>} [params.declaredProgramIds] - List of declared program IDs or objects
+ * @param {Array<object>|object} [params.programsDatabase] - Master programs database (array or object map)
+ * @returns {{ isEligible: boolean, errors: Array<{ code: string, message: string }>, warnings: Array<{ code: string, message: string }> }}
+ */
+export function validateIntakeEligibility({
+  studentProfile,
+  studentRecord,
+  parsedTranscript,
+  validCourses = [],
+  declaredProgramIds = [],
+  programsDatabase = []
+} = {}) {
+  const errors = [];
+  const warnings = [];
+
+  const courses = Array.isArray(validCourses) && validCourses.length > 0
+    ? validCourses
+    : (studentRecord?.validCourses || parsedTranscript?.validCourses || studentRecord?.courses || parsedTranscript?.courses || []);
+
+  const hasCoursework = Array.isArray(courses) && courses.length > 0;
+  const profile = studentProfile || studentRecord?.studentMetadata || parsedTranscript?.studentMetadata || {};
+  const studentName = String(profile.studentName || profile.student_name || profile.name || '').trim();
+  const studentId = String(profile.studentId || profile.student_id || profile.id || '').trim();
+  const hasManualRecord = Boolean(studentName || studentId);
+
+  // 1. Student Record / Transcript Check
+  if (!hasCoursework && !hasManualRecord) {
+    errors.push({
+      code: 'MISSING_RECORDS',
+      message: 'Upload a transcript or enter student information and course history.'
+    });
+  }
+
+  // Normalize programsDatabase (handles array, object map, or database object with .programs)
+  let programList = [];
+  if (Array.isArray(programsDatabase)) {
+    programList = programsDatabase;
+  } else if (programsDatabase && typeof programsDatabase === 'object') {
+    if (Array.isArray(programsDatabase.programs)) {
+      programList = programsDatabase.programs;
+    } else if (programsDatabase.programs && typeof programsDatabase.programs === 'object') {
+      programList = Object.values(programsDatabase.programs);
+    } else {
+      programList = Object.values(programsDatabase);
+    }
+  }
+
+  // 2. Resolve declared programs
+  const declaredPrograms = (declaredProgramIds || [])
+    .map((item) => {
+      if (typeof item === 'object' && item !== null) {
+        const found = programList.find((p) => p && (p.id === item.id || p.programId === item.id));
+        return found || item;
+      }
+      return programList.find((p) => p && (p.id === item || p.programId === item));
+    })
+    .filter(Boolean);
+
+  const hasMajor = declaredPrograms.some((p) => {
+    if (!p) return false;
+    const credType = String(p.credentialType || p.type || p.programType || p.program_type || '').toUpperCase();
+    if (credType === 'MAJOR') return true;
+    if (credType === 'MINOR' || credType === 'CERTIFICATE') return false;
+
+    const name = String(p.name || p.program_name || '').toLowerCase();
+    if (name.includes('minor')) return false;
+    if (name.includes('certificate') && !name.includes('certification preparation')) return false;
+
+    if (/\b(ba|bs|bfa|bba|bsn|bas|bm)\b/i.test(name) || name.includes('emphasis') || name.includes(' - ')) {
+      return true;
+    }
+    return getProgramCategory(p).startsWith('Major');
+  });
+
+  if (!hasMajor) {
+    if (declaredPrograms.length === 0) {
+      errors.push({
+        code: 'NO_PROGRAMS_DECLARED',
+        message: 'Declare at least one primary Major in the credential stack.'
+      });
+    } else {
+      errors.push({
+        code: 'MISSING_PRIMARY_MAJOR',
+        message: 'At least one Major is required. Minors and Certificates must accompany a primary Major.'
+      });
+    }
+  }
+
+  return {
+    isEligible: errors.length === 0,
+    errors,
+    warnings
+  };
+}
 
 /**
  * Normalize course status to one of three canonical tokens:

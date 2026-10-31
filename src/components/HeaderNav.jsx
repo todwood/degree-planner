@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, Database, User, BookOpen, ShieldCheck, Info, X, AlertTriangle } from 'lucide-react';
+import { LogOut, Database, User, BookOpen, ShieldCheck, Info, X, AlertTriangle, Lock } from 'lucide-react';
 
 /**
  * Deterministic Name Parser for Active Record Badge:
@@ -55,8 +55,10 @@ export default function HeaderNav({
   setCurrentScreen,
   onOpenSharedDb,
   activeStudentName,
-  onClearActiveRecord
+  onClearActiveRecord,
+  isEligibleForAudit = true
 }) {
+  const canAdvance = currentScreen > 1 || Boolean(isEligibleForAudit);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [ferpaHovered, setFerpaHovered] = useState(false);
   const [clearModalOpen, setClearModalOpen] = useState(false);
@@ -200,7 +202,9 @@ export default function HeaderNav({
         <nav className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm font-semibold">
           {/* Step 1 */}
           <button
-            onClick={() => setCurrentScreen(1)}
+            id="nav-step-1-btn"
+            data-testid="nav-step-1-btn"
+            onClick={() => setCurrentScreen?.(1)}
             className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 cursor-pointer ${
               currentScreen === 1
                 ? 'bg-[#857542] text-white font-bold shadow'
@@ -216,14 +220,24 @@ export default function HeaderNav({
 
           {/* Step 2 */}
           <button
-            onClick={() => setCurrentScreen(2)}
-            className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 cursor-pointer ${
-              currentScreen === 2
-                ? 'bg-[#857542] text-white font-bold shadow'
-                : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
+            id="nav-step-2-btn"
+            data-testid="nav-step-2-btn"
+            disabled={!canAdvance}
+            onClick={() => {
+              if (canAdvance) setCurrentScreen?.(2);
+            }}
+            title={canAdvance ? 'Navigate to Degree Audit' : 'Complete intake requirements and declare a major to unlock'}
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 ${
+              !canAdvance
+                ? 'opacity-40 cursor-not-allowed text-neutral-500'
+                : currentScreen === 2
+                ? 'bg-[#857542] text-white font-bold shadow cursor-pointer'
+                : 'text-neutral-400 hover:text-white hover:bg-neutral-900 cursor-pointer'
             }`}
           >
-            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">2</span>
+            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">
+              {!canAdvance ? <Lock className="w-2.5 h-2.5 text-neutral-400" /> : '2'}
+            </span>
             <span className="hidden sm:inline">Degree Audit</span>
             <span className="sm:hidden">Audit</span>
           </button>
@@ -232,14 +246,24 @@ export default function HeaderNav({
 
           {/* Step 3 */}
           <button
-            onClick={() => setCurrentScreen(3)}
-            className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 cursor-pointer ${
-              currentScreen === 3
-                ? 'bg-[#857542] text-white font-bold shadow'
-                : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
+            id="nav-step-3-btn"
+            data-testid="nav-step-3-btn"
+            disabled={!canAdvance}
+            onClick={() => {
+              if (canAdvance) setCurrentScreen?.(3);
+            }}
+            title={canAdvance ? 'Navigate to Degree Plan' : 'Complete intake requirements and declare a major to unlock'}
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-md transition flex items-center space-x-1.5 ${
+              !canAdvance
+                ? 'opacity-40 cursor-not-allowed text-neutral-500'
+                : currentScreen === 3
+                ? 'bg-[#857542] text-white font-bold shadow cursor-pointer'
+                : 'text-neutral-400 hover:text-white hover:bg-neutral-900 cursor-pointer'
             }`}
           >
-            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">3</span>
+            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">
+              {!canAdvance ? <Lock className="w-2.5 h-2.5 text-neutral-400" /> : '3'}
+            </span>
             <span className="hidden sm:inline">Degree Plan</span>
             <span className="sm:hidden">Plan</span>
           </button>
