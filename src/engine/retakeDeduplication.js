@@ -191,15 +191,18 @@ export function deduplicateCourseAttempts(group, catalogCourse = null, options =
   const referenceYear = options.referenceYear || 2026;
 
   // Determine repeatability & credit cap
+  const descRepeat = catalogCourse?.description ? parseRepeatability(catalogCourse.description) : null;
   const isRepeatable = Boolean(
     catalogCourse?.repeatable ||
+    descRepeat?.repeatable ||
     group.some((r) => r.repeatable)
   );
 
   const maxRepeatCredits =
     catalogCourse?.max_repeat_credits !== undefined && catalogCourse?.max_repeat_credits !== null
       ? catalogCourse.max_repeat_credits
-      : (group.find((r) => r.max_repeat_credits !== undefined && r.max_repeat_credits !== null)?.max_repeat_credits ?? null);
+      : (descRepeat?.max_repeat_credits ??
+        (group.find((r) => r.max_repeat_credits !== undefined && r.max_repeat_credits !== null)?.max_repeat_credits ?? null));
 
   const validCourses = [];
   const excludedCourses = [];

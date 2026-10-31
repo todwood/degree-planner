@@ -157139,8 +157139,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 3,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },

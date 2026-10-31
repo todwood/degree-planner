@@ -747,15 +747,43 @@ export function runWaterfallAudit(
   const emphasisRequirements = [];
   const advisorOverrides = options.advisorOverrides || {};
 
+  // Build repeat course credit ceiling map from program requirement_categories
+  const repeatCourseCreditMap = {};
+  for (const prog of selectedPrograms) {
+    for (const cat of prog.requirement_categories || prog.requirements?.requirement_categories || []) {
+      if (cat.category_type === 'REPEAT_DISTRIBUTION' && cat.per_course_credit_requirement) {
+        for (const code of cat.courses || []) {
+          const norm = normalizeCourseCode(code);
+          if (norm) {
+            repeatCourseCreditMap[norm.compact] = Number(cat.per_course_credit_requirement);
+          }
+        }
+      }
+    }
+  }
+
   function claimProgramCourseList(codeList, targetArray, categoryTag) {
     for (const reqCode of codeList) {
       const norm = normalizeCourseCode(reqCode);
       const compact = norm.compact;
       const catCourse = catalogByCompact.get(compact);
+      const targetCredits = repeatCourseCreditMap[compact] || (catCourse?.credits || 3);
 
       // 1. Check direct match in unclaimedPool
       let matchedStudentCourse = findAndClaimUnclaimed(compact);
       let matchNote = null;
+      let claimedCredits = matchedStudentCourse ? (Number(matchedStudentCourse.credits) || 3) : 0;
+      const claimedAttempts = matchedStudentCourse ? [matchedStudentCourse] : [];
+
+      // If repeatable, claim additional attempts from unclaimedPool up to targetCredits
+      if (repeatCourseCreditMap[compact]) {
+        while (claimedCredits < targetCredits) {
+          const addlAttempt = findAndClaimUnclaimed(compact);
+          if (!addlAttempt) break;
+          claimedCredits += Number(addlAttempt.credits) || 3;
+          claimedAttempts.push(addlAttempt);
+        }
+      }
 
       // 2. Check Legacy Substitution (e.g., ICS 41100 -> ICS 41500, ICS 41400 -> ICS 41700)
       if (!matchedStudentCourse && legacySubMap[compact]) {
@@ -796,16 +824,24 @@ export function runWaterfallAudit(
         matchNote = 'Cisco Concurrent Lab Exempt (Prior Catalog / Transfer >= C / Certification)';
       }
 
+      const isFulfilled = Boolean(
+        (repeatCourseCreditMap[compact] ? claimedCredits >= targetCredits : matchedStudentCourse) ||
+        waivedByCiscoRule
+      );
+
       targetArray.push({
         code: reqCode,
         compactCode: compact,
         title: catCourse?.title || reqCode,
-        credits: catCourse?.credits || 3,
+        credits: targetCredits,
+        creditsRequired: targetCredits,
+        creditsSatisfied: claimedCredits,
         category: categoryTag,
-        fulfilled: Boolean(matchedStudentCourse || waivedByCiscoRule),
+        fulfilled: isFulfilled,
         waived: waivedByCiscoRule,
         matchedCourse: matchedStudentCourse,
-        state: matchedStudentCourse ? matchedStudentCourse.state : waivedByCiscoRule ? 'Waived' : 'Remaining',
+        matchedAttempts: claimedAttempts,
+        state: isFulfilled ? (matchedStudentCourse?.state || 'Completed') : claimedAttempts.length > 0 ? 'In Progress' : (waivedByCiscoRule ? 'Waived' : 'Remaining'),
         note: matchNote
       });
     }
@@ -1422,10 +1458,13 @@ export function runWaterfallAudit(
     .filter((r) => !r.fulfilled || (r.matchedCourse && r.matchedCourse.state !== 'TR'))
     .reduce((sum, r) => sum + r.credits, 0);
 
+  const primaryCategories = auditProgramRequirementCategories(primaryProgram, allStudentCourses, catalogByCompact);
+
   return {
     studentMetadata: parsedTranscript?.studentMetadata || null,
     selectedPrograms,
     primaryProgram,
+    categories: primaryCategories,
     geBuckets: geBucketsResult,
     majorRequirements,
     emphasisRequirements,
@@ -1987,6 +2026,189 @@ export function computeRetakeNetCredits(plannedCourse, historicalCourses = []) {
 }
 
 /**
+ * Audits program requirement categories preserving catalog section headers,
+ * subtle per-course repeat distribution rules, choice pools, and core courses.
+ *
+ * @param {object} prog - Degree program object containing requirement_categories
+ * @param {Array} courses - Student courses applied to graduation
+ * @param {Map} catalogByCompact - Catalog lookup by compact code
+ * @returns {Array} Evaluated category objects with credit progress and remaining requirements
+ */
+export function auditProgramRequirementCategories(prog, courses = [], catalogByCompact = null) {
+  if (!prog) return [];
+  const rawCategories = prog.requirement_categories || prog.requirements?.requirement_categories || [];
+  if (!Array.isArray(rawCategories) || rawCategories.length === 0) return [];
+
+  const claimedIndices = new Set();
+
+  return rawCategories.map((cat) => {
+    const catType = cat.category_type || 'CORE';
+    const creditsRequired = Number(cat.credits_required) || 0;
+    let creditsSatisfied = 0;
+    const evaluatedCourses = [];
+    const remainingRequirements = [];
+
+    if (catType === 'REPEAT_DISTRIBUTION') {
+      const perCourseReq = Number(cat.per_course_credit_requirement) || 3;
+      for (const reqCode of cat.courses || []) {
+        const compact = toCompact(reqCode);
+        const catCourse = catalogByCompact?.get(compact);
+        const title = catCourse?.title || reqCode;
+
+        let courseSatisfied = 0;
+        const matchingAttempts = [];
+        courses.forEach((c, cIdx) => {
+          if (
+            isAppliedToGraduation(c) &&
+            (c.compactCode || toCompact(c.code)) === compact &&
+            !claimedIndices.has(cIdx) &&
+            c.state !== 'Excluded'
+          ) {
+            const cr = Number(c.credits) || 3;
+            if (courseSatisfied < perCourseReq) {
+              claimedIndices.add(cIdx);
+              courseSatisfied += cr;
+              matchingAttempts.push(c);
+            }
+          }
+        });
+
+        const effectiveCourseSatisfied = Math.min(courseSatisfied, perCourseReq);
+        creditsSatisfied += effectiveCourseSatisfied;
+        const isSatisfied = effectiveCourseSatisfied >= perCourseReq;
+        const remainingCredits = Math.max(0, perCourseReq - effectiveCourseSatisfied);
+
+        evaluatedCourses.push({
+          code: catCourse?.code || reqCode,
+          compactCode: compact,
+          title,
+          credits: perCourseReq,
+          creditsRequired: perCourseReq,
+          creditsSatisfied: effectiveCourseSatisfied,
+          satisfied: isSatisfied,
+          remainingCredits,
+          attempts: matchingAttempts,
+          state: isSatisfied ? 'Completed' : matchingAttempts.length > 0 ? 'In Progress' : 'Remaining'
+        });
+
+        if (!isSatisfied) {
+          remainingRequirements.push({
+            code: catCourse?.code || reqCode,
+            compactCode: compact,
+            title,
+            credits: remainingCredits,
+            remainingCredits
+          });
+        }
+      }
+    } else if (catType === 'CHOICE') {
+      const allowedCompacts = new Set((cat.courses || []).map(toCompact));
+      const matchingAttempts = [];
+      courses.forEach((c, cIdx) => {
+        const compact = c.compactCode || toCompact(c.code);
+        if (
+          isAppliedToGraduation(c) &&
+          allowedCompacts.has(compact) &&
+          !claimedIndices.has(cIdx) &&
+          c.state !== 'Excluded' &&
+          creditsSatisfied < creditsRequired
+        ) {
+          const cr = Number(c.credits) || 3;
+          claimedIndices.add(cIdx);
+          creditsSatisfied += cr;
+          matchingAttempts.push(c);
+          evaluatedCourses.push({
+            code: c.code,
+            compactCode: compact,
+            title: c.title,
+            credits: cr,
+            creditsRequired: cr,
+            creditsSatisfied: cr,
+            satisfied: true,
+            remainingCredits: 0,
+            attempts: [c],
+            state: c.state || 'Completed'
+          });
+        }
+      });
+      const remainingCredits = Math.max(0, creditsRequired - creditsSatisfied);
+      if (remainingCredits > 0) {
+        remainingRequirements.push({
+          title: `${cat.title} Electives`,
+          credits: remainingCredits,
+          remainingCredits,
+          allowedCourses: cat.courses || []
+        });
+      }
+    } else {
+      // Standard CORE
+      for (const reqCode of cat.courses || []) {
+        const compact = toCompact(reqCode);
+        const catCourse = catalogByCompact?.get(compact);
+        const title = catCourse?.title || reqCode;
+        const cr = Number(catCourse?.credits) || 3;
+
+        let matched = null;
+        for (let cIdx = 0; cIdx < courses.length; cIdx++) {
+          const c = courses[cIdx];
+          if (
+            isAppliedToGraduation(c) &&
+            (c.compactCode || toCompact(c.code)) === compact &&
+            !claimedIndices.has(cIdx) &&
+            c.state !== 'Excluded'
+          ) {
+            claimedIndices.add(cIdx);
+            matched = c;
+            break;
+          }
+        }
+
+        const isSatisfied = Boolean(matched);
+        if (isSatisfied) creditsSatisfied += cr;
+        else {
+          remainingRequirements.push({
+            code: catCourse?.code || reqCode,
+            compactCode: compact,
+            title,
+            credits: cr,
+            remainingCredits: cr
+          });
+        }
+
+        evaluatedCourses.push({
+          code: catCourse?.code || reqCode,
+          compactCode: compact,
+          title,
+          credits: cr,
+          creditsRequired: cr,
+          creditsSatisfied: isSatisfied ? cr : 0,
+          satisfied: isSatisfied,
+          remainingCredits: isSatisfied ? 0 : cr,
+          attempts: matched ? [matched] : [],
+          state: isSatisfied ? (matched.state || 'Completed') : 'Remaining',
+          grade: matched?.grade || null
+        });
+      }
+    }
+
+    const remainingCredits = Math.max(0, creditsRequired - creditsSatisfied);
+    return {
+      category_id: cat.category_id,
+      title: cat.title,
+      credits_required: creditsRequired,
+      credits_satisfied: creditsSatisfied,
+      credits_remaining: remainingCredits,
+      fulfilled: creditsSatisfied >= creditsRequired,
+      category_type: catType,
+      rule_narrative: cat.rule_narrative || null,
+      per_course_credit_requirement: cat.per_course_credit_requirement || null,
+      courses: evaluatedCourses,
+      remainingRequirements
+    };
+  });
+}
+
+/**
  * A. Per-credential audit ledgers with a global cross-counting registry.
  * Shared required courses are marked satisfied in every credential that lists them,
  * but contribute to the unique applied-credit pool exactly once.
@@ -2081,6 +2303,11 @@ export function buildProgramAuditLedgers(orderedPrograms = [], courses = [], cat
       };
     });
 
+    const categories = auditProgramRequirementCategories(prog, courses, catalogByCompact);
+    if (categories.length > 0) {
+      satisfiedCredits = categories.reduce((sum, c) => sum + c.credits_satisfied, 0);
+    }
+
     return {
       programId: prog.id,
       name: prog.name,
@@ -2096,6 +2323,7 @@ export function buildProgramAuditLedgers(orderedPrograms = [], courses = [], cat
       satisfiedCredits,
       crossCountedCredits: programCrossCounted,
       requirements,
+      categories,
       electivePools,
       track
     };
@@ -2274,6 +2502,7 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
     totalCompletedCredits,
     declaredProgramsOrdered: resolvedPrograms.map((p) => p.id),
     programAudits,
+    categories: programAudits[0]?.categories || baseline.categories || [],
     crossCountingLedger,
     generalEducationAudit,
     upperDivisionGate,
