@@ -1613,3 +1613,31 @@
      - Total Vitest suite: **283 / 283 tests passing (100% green)** across all 27 test suites (`npm test`).
      - Headless Playwright suite (`.tmp/verify_clear_student_modal.mjs`): Verified full lifecycle across active student population, modal backdrop blur, 3-point numbered copy, 3s countdown ticker, pristine state reset, auth persistence, and reload with 0 errors.
      - Live GitHub Pages deployment verified via `execution/verify_live_pages.js` with 0 console errors.
+
+
+### 91. Screen 1 UI Artifacts, State Reset Leaks, Re-Extraction Fallback & Credential Stack Invariants
+- **Objective:** Eliminate duplicate button glyphs, eliminate state reset leaks when clearing student records after Screen 2 back-navigation, make re-extract handle zero documents cleanly, modularize ActiveTermModal with intake pre-population, enforce credential deduplication, and support dual-category program classification.
+- **Architectural Implementation:**
+  1. *Duplicate Glyphs Purge (`src/components/Screen1Intake.jsx`):*
+     - Removed duplicate `✕` character from `Clear Active Student` button (`<span>✕ Clear Active Student</span>` -> `<span>Clear Active Student</span>`).
+     - Removed duplicate emoji from `Edit Active Term` button (`<span>✏️ Edit Active Term</span>` -> `<span>Edit Active Term</span>`).
+  2. *Back-Navigation State Reset Leak Resolution:*
+     - `Screen1Intake`'s `useEffect([parsedTranscript])` previously had an early return `if (!parsedTranscript) return;` which left `cachedParsedTranscript`, `isDataExtracted`, and student state populated when `parsedTranscript` prop was cleared to `null`.
+     - Updated effect to unconditionally purge `cachedParsedTranscript(null)`, `isDataExtracted(false)`, `studentName('')`, `studentId('')`, and `detectedGpa('')` when `parsedTranscript` is falsy.
+     - Updated `useEffect([propProgramId, parsedTranscript])` to reset `declaredProgramIds([])`, `selectedProgramIdState('')`, and `stagedComboboxProgramId('')` when both are cleared.
+     - Ensured `handleConfirmClear` dispatches hoisted program updates (`onSelectProgramId('')`, `onUpdateAdditionalPrograms([])`) and `onClearActiveRecord()`, resulting in instant unmounting of `#parsed-telemetry-panel` and hiding `#screen1-top-proceed-btn` without requiring a browser reload.
+  3. *Re-Extract Zero-Document Purge:*
+     - In `handleReExtract` and `parseFilesAndPopulateMetadata`, when no files are present (`!anthologyFile && !transcriptFile && !degreePlanFile`), immediately purge all parsed records, student identity, and declared credentials, returning the workspace to pristine blank state.
+  4. *Modular ActiveTermModal (`src/components/ActiveTermModal.jsx`):*
+     - Extracted Modal A into a dedicated, reusable component `ActiveTermModal.jsx` with input selectors (`#active-term-selected-semester`, `#active-term-selected-status`, `#active-term-selected-modality`).
+     - Form state initializes directly from student intake (e.g. `'Fall 2026'` and `'IN_PROGRESS'`) rather than generic hardcoded defaults.
+  5. *Credential Stacking Deduplication & Dual-Category Matching:*
+     - Enforced that a single program ID exists at most once in `declaredProgramIds`.
+     - When a program is already in the stack, "Add to Student Stack" button is disabled and displays `Already in stack`, accompanied by helper text `#program-already-in-stack-helper`.
+     - Deduplicated transcript-matched programs before appending to declared stack.
+     - Implemented `matchesProgramCategory` in `src/utils/programStackUtils.js` and wired into `ProgramCombobox.jsx` so programs like `"Biological Sciences, BA 9-12 Secondary Education Certification Preparation"` match both `[ Major ]` and `[ Certificate ]` filter pills.
+  6. *Verification & Deployment:*
+     - Vitest suite (`tests/screen1StateAndButtonFixes.test.js`): 14 unit tests verifying all 6 issues.
+     - Total Vitest suite: **297 / 297 tests passing (100% green)** across all 28 test suites (`npm test`).
+     - Headless Playwright suite (`.tmp/verify_screen1_state_fixes.mjs`): All 8 checks passed end-to-end with clean child preview server process teardown.
+     - Deployed live to GitHub Pages (`todwood/degree-planner`) and verified via `execution/verify_live_pages.js` with 0 console errors.
