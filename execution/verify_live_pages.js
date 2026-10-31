@@ -203,7 +203,9 @@ async function verifyLive() {
     await new Promise((r) => setTimeout(r, 500));
 
     const modalATitle = await page.evaluate(() => {
-      const h3 = Array.from(document.querySelectorAll('h3')).find((el) => el.textContent.includes('Active Term Course Editor'));
+      const h3 = Array.from(document.querySelectorAll('h3')).find(
+        (el) => el.textContent.includes('Active Term') || el.textContent.includes('Enrolled Coursework')
+      );
       return h3 ? h3.textContent.trim() : null;
     });
     if (!modalATitle) throw new Error('FAILED: Modal A did not open when clicking Edit Active Term button!');
