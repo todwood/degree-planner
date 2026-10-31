@@ -277,3 +277,28 @@ export async function scrapeCommonCourseSchedule(page, termConfigs = DEFAULT_TER
     totalSections
   };
 }
+
+export function parseRepeatability(descText) {
+  if (!descText) return { repeatable: false, max_repeat_credits: null };
+
+  let repeatable = false;
+  let max_repeat_credits = null;
+
+  // 1. Detect credit ceiling from standard catalog variations:
+  const ceilingMatch = descText.match(
+    /(?:may be repeated|repeatable)(?:[^\.\n]*?)(?:for a maximum of|up to|maximum of)\s*(\d+)\s*(?:credit\s*hours?|hours?|credits?)/i
+  );
+
+  if (ceilingMatch) {
+    repeatable = true;
+    max_repeat_credits = parseInt(ceilingMatch[1], 10);
+    return { repeatable, max_repeat_credits };
+  }
+
+  // 2. Detect boolean repeatability without an explicit credit ceiling:
+  if (/(?:repeatable:\s*may be repeated|may be repeated for credit|repeatable for credit|repeatable)/i.test(descText)) {
+    repeatable = true;
+  }
+
+  return { repeatable, max_repeat_credits };
+}

@@ -10,6 +10,8 @@
 
 import * as XLSX from 'xlsx';
 import { PDFDocument } from 'pdf-lib';
+import masterDbDefault from '../data/masterDatabase.json' with { type: 'json' };
+import { processRetakeDeduplication } from './retakeDeduplication.js';
 
 /**
  * Standard 20 Anthology "Student Course Schedules (All Results)" column headers
@@ -961,7 +963,7 @@ export function parseTermInfo(rawTerm) {
   // 1. Check 4-digit year: 2024, 2025, 2026
   // 2. Check 2-digit year in tokens like _24_, _24, 24_, SEM_19, etc.
   let year = 2026;
-  const fourDigitMatch = upper.match(/\b(20\d{2})\b/);
+  const fourDigitMatch = upper.match(/(?:^|\D)(20\d{2})(?:\D|$)/);
   if (fourDigitMatch) {
     year = parseInt(fourDigitMatch[1], 10);
   } else {
@@ -1180,6 +1182,7 @@ export function processRawCourseRecords(rawRecords, options = {}) {
   const referenceYear = options.referenceYear || 2026;
   const referenceTermSortKey = options.referenceTermSortKey || 202633;
   const isTranscriptPdf = Boolean(options.isTranscriptPdf);
+  const masterDb = options.masterDb || options.catalogDb || masterDbDefault;
 
   const totalRawRows = Array.isArray(rawRecords) ? rawRecords.length : 0;
   let droppedNoiseRows = 0;
@@ -1378,127 +1381,17 @@ export function processRawCourseRecords(rawRecords, options = {}) {
   );
 
   // Section 4: Retake & Deduplication Rules
-  // Group all valid course rows by canonical Published Code (compactCode),
-  // exempting transfer placeholders (ELECT & GE) from repeat deduplication
-  const sourceOccurrences = { anth: {}, pdf: {} };
-  const groupedByCompact = new Map();
-  for (let i = 0; i < parsedRows.length; i++) {
-    const r = parsedRows[i];
-    const placeholderMeta = isTransferPlaceholder(r);
-
-    let groupKey = r.compactCode;
-    if (placeholderMeta?.allowMultipleInstances) {
-      // Differentiating key for transfer placeholders:
-      // Rows with distinct grades, credits, terms, or multiple entries within the same source document
-      // remain distinct. Duplicate rows across Anthology and Transcript PDF with identical attributes merge.
-      const src = r.fromTranscriptPdf ? 'pdf' : 'anth';
-      const sig = `${r.compactCode}_${r.term || 'TR'}_${r.grade || ''}_${r.credits || ''}`;
-      const occ = (sourceOccurrences[src][sig] = (sourceOccurrences[src][sig] || 0) + 1);
-      groupKey = `${sig}_${occ}`;
+  // Repeatable courses accumulate credits across distinct attempts up to max_repeat_credits;
+  // Non-repeatable courses preserve the single best attempt, superseding inferior attempts.
+  const { validCourses, excludedCourses, harvestedOfferings } = processRetakeDeduplication(
+    parsedRows,
+    {
+      ...options,
+      masterDb,
+      referenceYear,
+      isTransferPlaceholder
     }
-
-    if (!groupedByCompact.has(groupKey)) {
-      groupedByCompact.set(groupKey, []);
-    }
-    groupedByCompact.get(groupKey).push(r);
-  }
-
-  const getRowPriorityTuple = (item) => {
-    const statePrio =
-      item.state === 'Completed' || item.state === 'TR'
-        ? 400
-        : item.state === 'Current'
-        ? 300
-        : item.state === 'Scheduled'
-        ? 200
-        : 100;
-    const gradePrio =
-      GRADE_RANK[item.grade] ??
-      (item.state === 'Current' ? 0.5 : item.state === 'Scheduled' ? 0.2 : 0);
-    const luTiebreak = item.state === 'Completed' ? 1 : 0;
-    const dateStr = item.startDate || '';
-    return { statePrio, gradePrio, luTiebreak, dateStr };
-  };
-
-  const compareRows = (a, b) => {
-    const ka = getRowPriorityTuple(a);
-    const kb = getRowPriorityTuple(b);
-    if (kb.statePrio !== ka.statePrio) return kb.statePrio - ka.statePrio;
-    if (kb.gradePrio !== ka.gradePrio) return kb.gradePrio - ka.gradePrio;
-    if (kb.luTiebreak !== ka.luTiebreak) return kb.luTiebreak - ka.luTiebreak;
-    return kb.dateStr.localeCompare(ka.dateStr);
-  };
-
-  const validCourses = [];
-  const excludedCourses = [];
-  const harvestedOfferings = [];
-
-  for (const [, group] of groupedByCompact.entries()) {
-    // Section 4.2 Minor Tag Preservation: merge non-empty Area of Study values onto surviving row
-    const mergedAreas = [];
-    for (const g of group) {
-      if (g.areaOfStudy && !mergedAreas.includes(g.areaOfStudy)) {
-        mergedAreas.push(g.areaOfStudy);
-      }
-    }
-    const mergedAreaStr = mergedAreas.join('; ');
-
-    const sortedGroup = [...group].sort(compareRows);
-    const winner = {
-      ...sortedGroup[0],
-      areaOfStudy: mergedAreaStr || sortedGroup[0].areaOfStudy || ''
-    };
-
-    if (winner.state !== 'Excluded') {
-      validCourses.push(winner);
-
-      // Passive 2-Year Institutional Course Harvester check (restricted to Anthology exports per Section 2.3)
-      if (
-        !winner.fromTranscriptPdf &&
-        (winner.state === 'Completed' || winner.state === 'Current') &&
-        !winner.termInfo.isTransfer &&
-        winner.termInfo.year &&
-        winner.termInfo.year >= referenceYear - 2
-      ) {
-        harvestedOfferings.push({
-          code: winner.code,
-          compactCode: winner.compactCode,
-          title: winner.title,
-          session: winner.termInfo.session,
-          modality: winner.modality,
-          grade: winner.grade,
-          gradePoints: GRADE_POINTS[winner.grade] ?? null,
-          year: winner.termInfo.year
-        });
-      }
-
-      // Log remaining rows in group into Excluded Courses Ledger (ignoring unscheduled Future rows)
-      for (let i = 1; i < sortedGroup.length; i++) {
-        const other = sortedGroup[i];
-        if (other.isUnscheduledFuture) continue;
-        // Do not flag cross-file duplicates of transfer placeholders as repeat/retake
-        if (isTransferPlaceholder(other)) {
-          continue;
-        }
-        const reason =
-          other.state !== 'Excluded'
-            ? `Excluded: Repeat / Retake (Superseded by ${winner.grade || winner.state})`
-            : other.excludeReason || 'Excluded: Repeat / Retake';
-        excludedCourses.push({
-          ...other,
-          reason
-        });
-      }
-    } else {
-      for (const item of sortedGroup) {
-        if (item.isUnscheduledFuture) continue;
-        excludedCourses.push({
-          ...item,
-          reason: item.excludeReason || 'Excluded Course'
-        });
-      }
-    }
-  }
+  );
 
   const transferCourses = validCourses.filter((c) => c.state === 'TR');
   const completedCourses = validCourses.filter((c) => c.state === 'Completed');

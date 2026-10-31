@@ -7413,7 +7413,9 @@
       "pe_notes": [
         "Legacy course replaced by ICS 41500"
       ],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "ICS 41400",
@@ -7446,7 +7448,9 @@
       "pe_notes": [
         "Legacy course replaced by ICS 41700"
       ],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "ICS 32600",
@@ -9363,7 +9367,9 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "PS 15500",
@@ -9986,7 +9992,9 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "TA 11700",
@@ -10283,7 +10291,9 @@
       "pe_notes": [
         "Carries Human Diversity (/HD) attribute"
       ],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REL 20000",
@@ -10323,7 +10333,9 @@
       "pe_notes": [
         "Carries Human Diversity (/HD) attribute"
       ],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "PHL 10000",
@@ -10356,7 +10368,9 @@
       "verification_status": "Verified",
       "submitted_by": "system",
       "pe_notes": [],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "ANT 11200",
@@ -10391,7 +10405,9 @@
       "pe_notes": [
         "Carries Human Diversity (/HD) attribute"
       ],
-      "type": "concrete"
+      "type": "concrete",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_COMP1",
@@ -10439,7 +10455,9 @@
         "ENGL 15000",
         "EPP 15000"
       ],
-      "default_course": "ENGL 15000"
+      "default_course": "ENGL 15000",
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_COMP2",
@@ -10482,7 +10500,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_MATH",
@@ -10525,7 +10545,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_US_HIST_GOV",
@@ -10568,7 +10590,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_SOC_SCI",
@@ -10611,7 +10635,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_NAT_SCI_LAB",
@@ -10654,7 +10680,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_SCI_ELEC",
@@ -10697,7 +10725,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_ART",
@@ -10740,7 +10770,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_LIT",
@@ -10783,7 +10815,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_HC_NON_LIT_ART",
@@ -10826,7 +10860,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_HC_ELEC",
@@ -10869,7 +10905,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_ELEC1",
@@ -10912,7 +10950,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_GE_ELEC2",
@@ -10955,7 +10995,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_ELEC_GEN",
@@ -10998,7 +11040,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "REQ_ELEC_UPPER",
@@ -11041,7 +11085,9 @@
       "flexibility_tier": "sky_blue",
       "verification_status": "Verified",
       "submitted_by": "system",
-      "pe_notes": []
+      "pe_notes": [],
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "MTH 05100",
@@ -16569,7 +16615,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
@@ -18671,8 +18717,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 12,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -20113,8 +20159,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -22433,8 +22479,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -23164,8 +23210,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -24370,7 +24416,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -25425,7 +25471,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
@@ -28999,8 +29045,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -33489,8 +33535,8 @@
         "max": 3,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -34934,8 +34980,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 12,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -39993,8 +40039,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -43661,7 +43707,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
@@ -44253,8 +44299,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -47863,8 +47909,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -51939,8 +51985,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -54126,8 +54172,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -55083,8 +55129,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -55245,7 +55291,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
@@ -55864,8 +55910,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -65345,8 +65391,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -71639,8 +71685,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -74453,8 +74499,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -74587,7 +74633,7 @@
         "is_variable": true
       },
       "repeatable": true,
-      "max_repeat_credits": null,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -78054,7 +78100,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
@@ -79674,8 +79720,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -81864,8 +81910,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -82917,8 +82963,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -83432,8 +83478,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -84774,7 +84820,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -85011,7 +85057,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -85834,8 +85880,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 4,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -85961,8 +86007,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 8,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -86231,8 +86277,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -87084,8 +87130,8 @@
         "max": 3,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -89275,7 +89321,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [
@@ -89348,7 +89394,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [
@@ -90540,7 +90586,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -90948,7 +90994,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -92546,8 +92592,8 @@
         "max": 9,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -96130,7 +96176,7 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -96505,7 +96551,7 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -99308,7 +99354,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -103873,7 +103919,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
@@ -106257,8 +106303,8 @@
         "max": 1,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -111514,8 +111560,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 12,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -111695,8 +111741,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 12,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -114117,8 +114163,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -119825,8 +119871,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -132278,8 +132324,8 @@
         "max": 6,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -147245,7 +147291,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -147405,8 +147451,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 12,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -148008,8 +148054,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 3,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -149039,7 +149085,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -149101,7 +149147,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -149163,7 +149209,7 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
+      "repeatable": true,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
@@ -149316,8 +149362,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -149459,8 +149505,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -152440,8 +152486,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -152759,8 +152805,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -153563,8 +153609,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -154759,8 +154805,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 4,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -154979,8 +155025,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 4,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -155088,8 +155134,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 4,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -155279,8 +155325,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 4,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -155501,8 +155547,8 @@
         "max": 1,
         "is_variable": true
       },
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 8,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -156063,8 +156109,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 6,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -156718,8 +156764,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 4,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -156801,8 +156847,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 3,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -157156,8 +157202,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 9,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
       "annual_session_availability": null
@@ -157673,8 +157719,8 @@
       "is_variable_credit": false,
       "min_credits": null,
       "max_credits": null,
-      "repeatable": false,
-      "max_repeat_credits": null,
+      "repeatable": true,
+      "max_repeat_credits": 3,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": []
     },
@@ -158794,7 +158840,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "IIT 34000",
@@ -158888,7 +158936,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 30000",
@@ -158982,7 +159032,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 31000",
@@ -159076,7 +159128,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 32000",
@@ -159170,7 +159224,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 33000",
@@ -159264,7 +159320,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 34000",
@@ -159358,7 +159416,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 35000",
@@ -159452,7 +159512,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 40000",
@@ -159546,7 +159608,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 41000",
@@ -159640,7 +159704,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 42000",
@@ -159734,7 +159800,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 43000",
@@ -159828,7 +159896,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 44000",
@@ -159922,7 +159992,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 48000",
@@ -160016,7 +160088,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "NUR 49000",
@@ -160110,7 +160184,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "BSC 34000",
@@ -160204,7 +160280,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "BSC 40000",
@@ -160298,7 +160376,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 10100",
@@ -160392,7 +160472,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 13000",
@@ -160486,7 +160568,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 15000",
@@ -160580,7 +160664,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 20100",
@@ -160674,7 +160760,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 30100",
@@ -160768,7 +160856,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 23000",
@@ -160862,7 +160952,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 30500",
@@ -160956,7 +161048,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 33000",
@@ -161050,7 +161144,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "COM 44000",
@@ -161144,7 +161240,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "PSY 40400",
@@ -161238,7 +161336,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "PSY 49900",
@@ -161332,7 +161432,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "ENGL 20000",
@@ -161426,7 +161528,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "ENGL 20200",
@@ -161520,7 +161624,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "ENGL 21200",
@@ -161614,7 +161720,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     },
     {
       "code": "ENGL 40000",
@@ -161708,7 +161816,9 @@
             "evening_sections_count": 0
           }
         ]
-      }
+      },
+      "repeatable": false,
+      "max_repeat_credits": null
     }
   ],
   "ge_popularity_stats": [

@@ -1670,3 +1670,42 @@
      - Total Vitest suite: **314 / 314 tests passing (100% green)** across all 29 test suites (`npm test`).
      - Headless Playwright suite (`.tmp/verify_active_term_modal.mjs`): Verified active course badge tokens, modal title, top panel absence, catalog search at top, updating course to `FA-II (8wk)` and `Scheduled`, modal save, and Screen 1 badge rendering `FA-II (8wk)` and `⏳ Scheduled` with clean process teardown.
      - Production bundle: `npm run build` compiled with 0 errors.
+
+### 93. Skill 2 Course Repeatability Regex Patch, max_repeat_credits Enrichment & Retake Deduplication Guard
+- **Objective:** Patch Skill 2 course repeatability regex to capture standard Lindenwood catalog phrasing across all variations, enrich `repeatable` and `max_repeat_credits` across `src/data/masterDatabase.json` and staging files, and guard the retake deduplication engine (`src/engine/retakeDeduplication.js`) so repeatable courses accumulate earned credits across distinct attempts up to `max_repeat_credits` without being prematurely excluded as retakes.
+- **Architectural Implementation:**
+  1. *Inclusive Repeatability Regex (`parseRepeatability`):*
+     - Replaced restrictive pattern with inclusive parser:
+       ```javascript
+       const ceilingMatch = descText.match(
+         /(?:may be repeated|repeatable)(?:[^\.\n]*?)(?:for a maximum of|up to|maximum of)\s*(\d+)\s*(?:credit\s*hours?|hours?|credits?)/i
+       );
+       ```
+     - Captures integer credit ceilings (`max_repeat_credits`) and boolean repeatability across phrases (`Repeatable: May be repeated for a maximum of 6 credit hours.`, `Repeatable for a maximum of 4 credit hours.`, `May be repeated for credit for up to 12 credit hours.`, `Repeatable: May be repeated for credit.`, `Repeatable.`).
+     - Added/patched in `src/engine/retakeDeduplication.js`, `execution/scrape_common_course_schedule.js`, and `.tmp/harvest_all_courses.mjs`.
+  2. *Database Re-Enrichment (`src/data/masterDatabase.json` & `.tmp/courses_staging_all.json`):*
+     - Re-enriched all courses in `src/data/masterDatabase.json` (125 updated), identifying 127 repeatable courses (50 with integer ceilings).
+     - Verified target sample courses:
+       - `TA 10011`, `TA 20011`, `TA 30011`, `TA 40011`: `repeatable: true, max_repeat_credits: 6`
+       - `TA 48001`: `repeatable: true, max_repeat_credits: 3`
+       - `TA 32200`: `repeatable: true, max_repeat_credits: 4`
+       - `MUS 30200`, `CAH 44444`: `repeatable: true, max_repeat_credits: 12`
+       - `DAN 10010`: `repeatable: true, max_repeat_credits: null`
+     - Preserved all 33 degree program objects in `masterDatabase.json` intact.
+     - Synchronized `.tmp/courses_staging_all.json` and `.tmp/courses_staging_all_2026.json`.
+  3. *Deterministic Retake Engine (`src/engine/retakeDeduplication.js` & `src/engine/transcriptParser.js`):*
+     - Extracted deduplication logic into `src/engine/retakeDeduplication.js` with `deduplicateCourseAttempts` and `processRetakeDeduplication`.
+     - Integrated into `src/engine/transcriptParser.js` `processRawCourseRecords`, defaulting to `masterDbDefault` when `options.masterDb` is omitted.
+     - **Repeatable Courses Contract:**
+       - Cross-file duplicates (Anthology + PDF) for the same attempt merge into a single instance without consuming capacity.
+       - Distinct attempts sort chronologically (`compareAttemptsChronological`).
+       - Cumulative earned credits accumulate: attempts $\le \text{max\_repeat\_credits}$ remain valid (`isRetake: false`, `excluded: false`, kept in `validCourses`).
+       - Attempts that exceed `max_repeat_credits` are routed to `excludedCourses` with `isRetake: true`, `excludeReason: 'REPEATED_ATTEMPT'`, and `reason: 'Excluded: Repeat / Retake - REPEATED_ATTEMPT'`.
+       - Repeatable courses without ceiling (`max_repeat_credits: null`) allow repeated enrollments to earn credit without ceiling exclusion.
+     - **Non-Repeatable Courses Contract:**
+       - Preserves standard single-winner rule (highest grade/state), marking inferior attempts with `Excluded: Repeat / Retake (Superseded by ...)`.
+     - Enhanced `parseTermInfo` 4-digit year regex `/(?:^|\D)(20\d{2})(?:\D|$)/` to accurately capture attached season formats (e.g. `2024FA`, `2025SP`).
+  4. *Verification & Zero Regression:*
+     - Vitest suite (`tests/repeatabilityDeduplication.test.js`): 19 unit tests verifying regex extraction, database enrichment for the 9 sample courses, multi-attempt scenarios for `TA 10011` (2 attempts valid at 6cr, 3rd attempt excluded at 9cr with `REPEATED_ATTEMPT`), cross-file duplicate collapse, uncapped repeatability (`DAN 10010`), and non-repeatable regression (`CSC 14400`).
+     - Total Vitest suite: **333 / 333 tests passing (100% green)** across all 30 test files (`npm test`).
+     - Production build: `npm run build` succeeded with 0 errors.
