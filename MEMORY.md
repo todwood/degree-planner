@@ -1590,3 +1590,26 @@
      - Total Vitest suite: **276 / 276 tests passing (100% green)** across all 26 test suites (`npm test`).
      - Headless Playwright suite (`.tmp/verify_access_gate_refinements.mjs`): All 9 checks verified with clean child preview server process teardown.
      - Deployed live to GitHub Pages (`todwood/degree-planner`) and verified via `execution/verify_live_pages.js` with 0 console errors.
+
+### 90. Clear Active Student Record Modal Unification, 3s Timer & Auth Preservation
+- **Objective:** Unify the visual layout, backdrop styling, and copy of the "Clear Active Student Record" modal across Screen 1 and HeaderNav, reduce lockout from 5s to 3s, restore pristine intake defaults on clear, and strictly preserve advisor authentication state.
+- **Architectural Implementation:**
+  1. *Modal Copy & Typography:*
+     - Title: `Clear Active Student Record?`
+     - Numbered 3-point body text: `This will clear all 1. Student Intake information, 2. Degree Audit insights, and 3. Degree Planner Schedule. You will be returned to an empty student intake workspace.`
+  2. *Visual & Interaction Parity (`Screen1Intake.jsx` & `HeaderNav.jsx`):*
+     - Replaced solid dark backgrounds with `fixed inset-0 z-[100] flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-150`.
+     - Card container: `bg-white border border-neutral-200 rounded-xl max-w-md w-full p-6 text-neutral-900 shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-150`.
+     - 3-Second lockout countdown: Button initially disabled with `opacity-50 cursor-not-allowed bg-red-400 text-white` displaying `Confirm Clear (${countdown}s)`.
+     - Once ticker reaches 0s: Enabled as `Confirm Clear` (`bg-red-600 hover:bg-red-700 text-white shadow-md cursor-pointer`).
+  3. *Pristine State Restoration & Auth Preservation Invariant:*
+     - `handleConfirmClear` clears student name, student ID, transcript files, cache, active term courses, and declared programs (`[]`, 0 credentials).
+     - Catalog year restores to `"2026-2027"` (Active Catalog).
+     - Pacing constraints restore to full-time defaults (12 min / 15 cap, 9 session cap, No Preference, No Summer).
+     - Under no circumstances does clearing student records alter `localStorage.getItem('lu_device_authorized')`, `lu_last_advisor_persona`, or `lu_advisor_session`.
+     - Preserves active advisor name and email on Screen 1 from `facultyProfile`.
+  4. *Verification & Tests:*
+     - Vitest suite (`tests/clearStudentModal.test.js`): 7 unit tests verifying modal markup, 3s lockout timer, pristine state restoration, and auth preservation.
+     - Total Vitest suite: **283 / 283 tests passing (100% green)** across all 27 test suites (`npm test`).
+     - Headless Playwright suite (`.tmp/verify_clear_student_modal.mjs`): Verified full lifecycle across active student population, modal backdrop blur, 3-point numbered copy, 3s countdown ticker, pristine state reset, auth persistence, and reload with 0 errors.
+     - Live GitHub Pages deployment verified via `execution/verify_live_pages.js` with 0 console errors.
