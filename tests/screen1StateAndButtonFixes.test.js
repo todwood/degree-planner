@@ -178,12 +178,11 @@ describe('Screen 1 State, Button Artifacts & Credential Invariants Suite', () =>
       );
 
       // Verify modal headers and testids
-      expect(html).toContain('Active Term Course Editor (Fall 2026)');
-      expect(html).toContain('active-term-selected-semester');
-      expect(html).toContain('active-term-selected-status');
-      expect(html).toContain('active-term-selected-modality');
-      expect(html).toContain('value="Fall 2026"');
-      expect(html).toContain('IN_PROGRESS');
+      expect(html).toContain('Edit Active Term &amp; Enrolled Coursework');
+      expect(html).not.toContain('active-term-selected-semester');
+      expect(html).not.toContain('active-term-selected-status');
+      expect(html).not.toContain('active-term-selected-modality');
+      expect(html).toContain('active-term-search-input');
       expect(html).toContain('save-active-term-btn');
       expect(html).toContain('ICS 42300');
       expect(html).toContain('MTH 27100');

@@ -1,25 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Trash2, Edit3, X, Calendar, Activity, Laptop } from 'lucide-react';
+import { Search, Trash2, Edit3, X } from 'lucide-react';
+import {
+  CANONICAL_TERM_TOKENS,
+  CANONICAL_COURSE_STATUSES,
+  normalizeTermAbbreviation,
+  normalizeActiveCourseStatus
+} from '../utils/intakeHelpers.js';
 
 /**
  * Determine display session band label for an active semester course.
+ * Kept for backwards compatibility; returns standardized canonical token.
  */
 export function getCourseSessionBandLabel(course) {
-  if (!course) return 'Full 16-Week';
-  if (course.sessionBand) return course.sessionBand;
-  const rawTerm = String(course.session || course.term || course.semester || course.termId || '').toUpperCase();
-  if (/_II\b|SESSION\s*II|8-?WK\s*II|FA-II|SP-II/i.test(rawTerm)) {
-    return 'Session II 8-Week';
-  }
-  if (/_I\b|SESSION\s*I\b|8-?WK\s*I\b|FA-I|SP-I/i.test(rawTerm)) {
-    return 'Session I 8-Week';
-  }
-  return 'Full 16-Week';
+  return normalizeTermAbbreviation(course);
 }
 
 /**
  * Modal A: Active Term Course Editor
- * Allows advisors to modify active term coursework, term band, status, and modality.
+ * Allows advisors to modify active term coursework, term band, status, or search catalog.
  */
 export default function ActiveTermModal({
   isOpen = false,
@@ -31,40 +29,46 @@ export default function ActiveTermModal({
   masterDb = null,
   onSave = () => {}
 }) {
-  const [selectedTerm, setSelectedTerm] = useState(initialTerm || 'Fall 2026');
-  const [selectedStatus, setSelectedStatus] = useState(initialStatus || 'IN_PROGRESS');
-  const [selectedModality, setSelectedModality] = useState(initialModality || 'Traditional (On-Campus)');
   const [workingList, setWorkingList] = useState(() =>
     (activeCourses || []).map((c) => ({
       ...c,
-      sessionBand: getCourseSessionBandLabel ? getCourseSessionBandLabel(c) : (c.sessionBand || 'Full 16-Week'),
-      status:
-        c.status ||
-        (c.state === 'Completed' ? 'Completed' : c.state === 'Scheduled' ? 'Scheduled' : 'In-Progress')
+      sessionBand: normalizeTermAbbreviation(c),
+      term: normalizeTermAbbreviation(c),
+      status: normalizeActiveCourseStatus(c),
+      state:
+        normalizeActiveCourseStatus(c) === 'Completed'
+          ? 'Completed'
+          : normalizeActiveCourseStatus(c) === 'Scheduled'
+          ? 'Scheduled'
+          : 'Current'
     }))
   );
   const [searchQuery, setSearchQuery] = useState('');
-  const [newCourseSessionBand, setNewCourseSessionBand] = useState('Full 16-Week');
+  const [newCourseSessionBand, setNewCourseSessionBand] = useState('FA (16wk)');
   const [newCourseStatus, setNewCourseStatus] = useState('In-Progress');
 
   // Sync state whenever modal opens or intake defaults change
   useEffect(() => {
     if (isOpen) {
-      setSelectedTerm(initialTerm || 'Fall 2026');
-      setSelectedStatus(initialStatus || 'IN_PROGRESS');
-      setSelectedModality(initialModality || 'Traditional (On-Campus)');
       setWorkingList(
         (activeCourses || []).map((c) => ({
           ...c,
-          sessionBand: getCourseSessionBandLabel ? getCourseSessionBandLabel(c) : (c.sessionBand || 'Full 16-Week'),
-          status:
-            c.status ||
-            (c.state === 'Completed' ? 'Completed' : c.state === 'Scheduled' ? 'Scheduled' : 'In-Progress')
+          sessionBand: normalizeTermAbbreviation(c),
+          term: normalizeTermAbbreviation(c),
+          status: normalizeActiveCourseStatus(c),
+          state:
+            normalizeActiveCourseStatus(c) === 'Completed'
+              ? 'Completed'
+              : normalizeActiveCourseStatus(c) === 'Scheduled'
+              ? 'Scheduled'
+              : 'Current'
         }))
       );
       setSearchQuery('');
+      setNewCourseSessionBand('FA (16wk)');
+      setNewCourseStatus('In-Progress');
     }
-  }, [isOpen, initialTerm, initialStatus, initialModality, activeCourses]);
+  }, [isOpen, activeCourses]);
 
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -86,7 +90,11 @@ export default function ActiveTermModal({
 
   const handleAddCourse = (course) => {
     const compact = (course.compactCode || course.code || '').replace(/\s+/g, '').toUpperCase();
-    if (workingList.some((c) => (c.compactCode || c.code.replace(/\s+/g, '').toUpperCase()) === compact)) {
+    if (
+      workingList.some(
+        (c) => (c.compactCode || c.code.replace(/\s+/g, '').toUpperCase()) === compact
+      )
+    ) {
       return;
     }
     const newCourseObj = {
@@ -94,9 +102,14 @@ export default function ActiveTermModal({
       compactCode: compact,
       sessionBand: newCourseSessionBand,
       status: newCourseStatus,
-      state: newCourseStatus === 'Completed' ? 'Completed' : newCourseStatus === 'Scheduled' ? 'Scheduled' : 'Current',
-      term: selectedTerm,
-      semester: selectedTerm,
+      state:
+        newCourseStatus === 'Completed'
+          ? 'Completed'
+          : newCourseStatus === 'Scheduled'
+          ? 'Scheduled'
+          : 'Current',
+      term: newCourseSessionBand,
+      semester: initialTerm || 'Fall 2026',
       isActiveTerm: true
     };
     setWorkingList((prev) => [newCourseObj, ...prev]);
@@ -108,10 +121,7 @@ export default function ActiveTermModal({
 
   const handleSave = () => {
     onSave({
-      courses: workingList,
-      selectedTerm,
-      status: selectedStatus,
-      modality: selectedModality
+      courses: workingList
     });
     onClose();
   };
@@ -137,10 +147,10 @@ export default function ActiveTermModal({
             </div>
             <div>
               <h3 id="active-term-modal-title" className="text-base font-extrabold text-neutral-900">
-                Active Term Course Editor ({selectedTerm})
+                Edit Active Term &amp; Enrolled Coursework
               </h3>
               <p className="text-xs text-neutral-500">
-                Configure active term semester, status, delivery modality, and enrolled coursework.
+                Review and adjust session terms and course statuses, or search the catalog to add current and upcoming enrollments.
               </p>
             </div>
           </div>
@@ -148,6 +158,7 @@ export default function ActiveTermModal({
             type="button"
             onClick={onClose}
             className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition cursor-pointer"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -155,143 +166,8 @@ export default function ActiveTermModal({
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto space-y-5 pr-1">
-          {/* Intake Context Parameters */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-neutral-50 rounded-xl border border-neutral-200 shadow-2xs">
-            <div>
-              <label htmlFor="active-term-selected-semester" className="block text-[11px] font-bold text-neutral-700 mb-1 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-[#857542]" />
-                Active Term Semester
-              </label>
-              <input
-                id="active-term-selected-semester"
-                data-testid="active-term-selected-semester"
-                type="text"
-                value={selectedTerm}
-                onChange={(e) => setSelectedTerm(e.target.value)}
-                className="w-full text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-900 focus:outline-none focus:border-[#857542]"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="active-term-selected-status" className="block text-[11px] font-bold text-neutral-700 mb-1 flex items-center gap-1">
-                <Activity className="w-3.5 h-3.5 text-[#857542]" />
-                Intake Status
-              </label>
-              <select
-                id="active-term-selected-status"
-                data-testid="active-term-selected-status"
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-900 cursor-pointer focus:outline-none focus:border-[#857542]"
-              >
-                <option value="IN_PROGRESS">In-Progress</option>
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="active-term-selected-modality" className="block text-[11px] font-bold text-neutral-700 mb-1 flex items-center gap-1">
-                <Laptop className="w-3.5 h-3.5 text-[#857542]" />
-                Delivery Modality
-              </label>
-              <select
-                id="active-term-selected-modality"
-                data-testid="active-term-selected-modality"
-                value={selectedModality}
-                onChange={(e) => setSelectedModality(e.target.value)}
-                className="w-full text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-900 cursor-pointer focus:outline-none focus:border-[#857542]"
-              >
-                <option value="Traditional (On-Campus)">Traditional (On-Campus)</option>
-                <option value="Online">Online</option>
-                <option value="Hybrid">Hybrid</option>
-                <option value="No Preference (Flexible)">No Preference (Flexible)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Section 1: Active Term Courses List */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-neutral-800 uppercase tracking-wide">
-                Enrolled Active Courses ({workingList.length})
-              </span>
-              <span className="font-mono text-neutral-600 font-semibold text-[11px]">
-                Total: {workingList.reduce((sum, c) => sum + (Number(c.credits) || 0), 0)} cr
-              </span>
-            </div>
-
-            {workingList.length === 0 ? (
-              <div className="p-4 border-2 border-dashed border-neutral-200 rounded-xl text-center text-xs text-neutral-400">
-                No active term courses currently enrolled. Search the catalog below to add courses.
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {workingList.map((c, idx) => (
-                  <div
-                    key={`${c.code}-${idx}`}
-                    className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-xs text-neutral-900">{c.code}</span>
-                        <span className="text-[10px] font-mono text-neutral-500 bg-white px-1.5 py-0.5 rounded border border-neutral-200">
-                          {Math.round(c.credits || 3)} cr
-                        </span>
-                      </div>
-                      <p className="text-xs text-neutral-700 truncate mt-0.5">{c.title}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
-                      {/* Term Band Selector */}
-                      <select
-                        value={c.sessionBand || 'Full 16-Week'}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setWorkingList((prev) =>
-                            prev.map((item, i) => (i === idx ? { ...item, sessionBand: val } : item))
-                          );
-                        }}
-                        className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs"
-                      >
-                        <option value="Full 16-Week">Full 16-Week</option>
-                        <option value="Session I 8-Week">Session I 8-Week</option>
-                        <option value="Session II 8-Week">Session II 8-Week</option>
-                      </select>
-
-                      {/* Status Selector */}
-                      <select
-                        value={c.status || 'In-Progress'}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setWorkingList((prev) =>
-                            prev.map((item, i) => (i === idx ? { ...item, status: val } : item))
-                          );
-                        }}
-                        className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs"
-                      >
-                        <option value="In-Progress">In-Progress</option>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Completed">Completed</option>
-                      </select>
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCourse(idx)}
-                        className="p-1.5 text-neutral-400 hover:text-red-600 rounded-lg hover:bg-neutral-100 transition cursor-pointer"
-                        title="Remove course"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Section 2: Catalog Course Search */}
-          <div className="pt-3 border-t border-neutral-200 space-y-3">
+          {/* Section 1: Catalog Course Search (Positioned at Top) */}
+          <div className="space-y-3 p-4 bg-neutral-50 rounded-xl border border-neutral-200 shadow-2xs">
             <span className="text-xs font-bold text-neutral-800 uppercase tracking-wide block">
               Search All Catalog Courses to Add
             </span>
@@ -300,35 +176,45 @@ export default function ActiveTermModal({
               <div className="sm:col-span-6 relative">
                 <input
                   type="text"
+                  id="active-term-search-input"
+                  data-testid="active-term-search-input"
                   placeholder="Search code or title (e.g. MTH 14100, CSC, Ethics)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-xs bg-neutral-50 border border-neutral-300 rounded-lg focus:outline-none focus:border-[#857542] text-neutral-900"
+                  className="w-full pl-8 pr-3 py-2 text-xs bg-white border border-neutral-300 rounded-lg focus:outline-none focus:border-[#857542] text-neutral-900 font-medium"
                 />
                 <Search className="w-4 h-4 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
               <div className="sm:col-span-3">
                 <select
+                  id="active-term-search-session"
+                  data-testid="active-term-search-session"
                   value={newCourseSessionBand}
                   onChange={(e) => setNewCourseSessionBand(e.target.value)}
-                  className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer"
+                  className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer focus:outline-none focus:border-[#857542]"
                 >
-                  <option value="Full 16-Week">Full 16-Week</option>
-                  <option value="Session I 8-Week">Session I 8-Week</option>
-                  <option value="Session II 8-Week">Session II 8-Week</option>
+                  {CANONICAL_TERM_TOKENS.map((token) => (
+                    <option key={token} value={token}>
+                      {token}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div className="sm:col-span-3">
                 <select
+                  id="active-term-search-status"
+                  data-testid="active-term-search-status"
                   value={newCourseStatus}
                   onChange={(e) => setNewCourseStatus(e.target.value)}
-                  className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer"
+                  className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer focus:outline-none focus:border-[#857542]"
                 >
-                  <option value="In-Progress">In-Progress</option>
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="Completed">Completed</option>
+                  {CANONICAL_COURSE_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -376,6 +262,113 @@ export default function ActiveTermModal({
               </div>
             )}
           </div>
+
+          {/* Section 2: Active Enrolled Courses List */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-neutral-800 uppercase tracking-wide">
+                Enrolled Active Courses ({workingList.length})
+              </span>
+              <span className="font-mono text-neutral-600 font-semibold text-[11px]">
+                Total: {workingList.reduce((sum, c) => sum + (Number(c.credits) || 0), 0)} cr
+              </span>
+            </div>
+
+            {workingList.length === 0 ? (
+              <div className="p-4 border-2 border-dashed border-neutral-200 rounded-xl text-center text-xs text-neutral-400">
+                No active term courses currently enrolled. Search the catalog above to add courses.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {workingList.map((c, idx) => {
+                  const currentBand = c.sessionBand || normalizeTermAbbreviation(c);
+                  const currentStatus = c.status || normalizeActiveCourseStatus(c);
+
+                  return (
+                    <div
+                      key={`${c.code}-${idx}`}
+                      className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs text-neutral-900">{c.code}</span>
+                          <span className="text-[10px] font-mono text-neutral-500 bg-white px-1.5 py-0.5 rounded border border-neutral-200">
+                            {Math.round(c.credits || 3)} cr
+                          </span>
+                        </div>
+                        <p className="text-xs text-neutral-700 truncate mt-0.5">{c.title}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
+                        {/* Term Band Selector */}
+                        <select
+                          data-testid={`active-term-select-${idx}`}
+                          value={currentBand}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setWorkingList((prev) =>
+                              prev.map((item, i) =>
+                                i === idx ? { ...item, sessionBand: val, term: val } : item
+                              )
+                            );
+                          }}
+                          className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs focus:outline-none focus:border-[#857542]"
+                        >
+                          {CANONICAL_TERM_TOKENS.map((token) => (
+                            <option key={token} value={token}>
+                              {token}
+                            </option>
+                          ))}
+                        </select>
+
+                        {/* Status Selector */}
+                        <select
+                          data-testid={`active-status-select-${idx}`}
+                          value={currentStatus}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setWorkingList((prev) =>
+                              prev.map((item, i) =>
+                                i === idx
+                                  ? {
+                                      ...item,
+                                      status: val,
+                                      state:
+                                        val === 'Completed'
+                                          ? 'Completed'
+                                          : val === 'Scheduled'
+                                          ? 'Scheduled'
+                                          : 'Current'
+                                    }
+                                  : item
+                              )
+                            );
+                          }}
+                          className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs focus:outline-none focus:border-[#857542]"
+                        >
+                          {CANONICAL_COURSE_STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
+
+                        <button
+                          type="button"
+                          data-testid={`remove-active-course-${idx}`}
+                          onClick={() => handleRemoveCourse(idx)}
+                          className="p-1.5 text-red-500 hover:text-red-700 rounded-lg hover:bg-red-50 transition cursor-pointer font-bold text-xs"
+                          title="Remove course"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Modal Footer */}
@@ -394,7 +387,7 @@ export default function ActiveTermModal({
             onClick={handleSave}
             className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded-lg shadow-sm transition cursor-pointer"
           >
-            Done / Save Changes
+            Save &amp; Apply Active Changes
           </button>
         </div>
       </div>

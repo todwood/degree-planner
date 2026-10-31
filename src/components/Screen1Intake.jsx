@@ -58,7 +58,11 @@ import {
   DEFAULT_REFERENCE_DATE,
   MODALITY_PREFERENCE_OPTIONS,
   SUMMER_AVAILABILITY_OPTIONS,
-  doesCourseMatchSemester
+  doesCourseMatchSemester,
+  normalizeTermAbbreviation,
+  normalizeActiveCourseStatus,
+  CANONICAL_TERM_TOKENS,
+  CANONICAL_COURSE_STATUSES
 } from '../utils/intakeHelpers.js';
 
 export const ANTHOLOGY_SOP_GUIDE_URL =
@@ -198,15 +202,7 @@ function StudentRecordDropzone({
  * Determine display session band label for an active semester course.
  */
 function getCourseSessionBandLabel(course) {
-  if (course.sessionBand) return course.sessionBand;
-  const rawTerm = String(course.session || course.term || course.semester || course.termId || '').toUpperCase();
-  if (/_II\b|SESSION\s*II|8-?WK\s*II|FA-II|SP-II/i.test(rawTerm)) {
-    return 'Session II 8-Week';
-  }
-  if (/_I\b|SESSION\s*I\b|8-?WK\s*I\b|FA-I|SP-I/i.test(rawTerm)) {
-    return 'Session I 8-Week';
-  }
-  return 'Full 16-Week';
+  return normalizeTermAbbreviation(course);
 }
 
 export default function Screen1Intake({
@@ -624,22 +620,22 @@ export default function Screen1Intake({
 
     const formattedActive = (courses || []).map((c) => {
       const compact = (c.compactCode || c.code || '').replace(/\s+/g, '').toUpperCase();
-      const isCompleted = c.status === 'Completed' || c.state === 'Completed' || status === 'COMPLETED';
+      const canonicalTerm = normalizeTermAbbreviation(c);
+      const canonicalStatus = normalizeActiveCourseStatus(c);
+      const isCompleted = canonicalStatus === 'Completed';
+      const isScheduled = canonicalStatus === 'Scheduled';
+
       return {
         ...c,
         code: c.code,
         compactCode: compact,
         title: c.title,
         credits: Number(c.credits) || 3.0,
-        term: c.sessionBand === 'Session II 8-Week'
-          ? `${effectiveTerm} II 8wk`
-          : c.sessionBand === 'Session I 8-Week'
-          ? `${effectiveTerm} I 8wk`
-          : effectiveTerm,
+        term: canonicalTerm,
         semester: effectiveTerm,
-        sessionBand: c.sessionBand || 'Full 16-Week',
-        state: isCompleted ? 'Completed' : (c.status === 'Scheduled' || status === 'SCHEDULED') ? 'Scheduled' : 'Current',
-        status: c.status || (isCompleted ? 'Completed' : (status === 'SCHEDULED' ? 'Scheduled' : 'In-Progress')),
+        sessionBand: canonicalTerm,
+        state: isCompleted ? 'Completed' : isScheduled ? 'Scheduled' : 'Current',
+        status: canonicalStatus,
         modality: modality || c.modality || modalityPreference,
         isActiveTerm: true
       };
@@ -1437,7 +1433,7 @@ export default function Screen1Intake({
             </div>
 
             {/* Active Term Breakdown */}
-            <div className="space-y-2">
+            <div id="active-term-enrolled-section" data-testid="active-term-enrolled-section" className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-neutral-800">
                   Active Term Enrollment Breakdown ({DEFAULT_ACTIVE_TERM_ID}):
@@ -1454,7 +1450,7 @@ export default function Screen1Intake({
               ) : (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {activeTermEnrollment.activeCourses.map((c, idx) => {
-                    const band = getCourseSessionBandLabel(c);
+                    const band = normalizeTermAbbreviation(c);
                     const isCompleted = c.state === 'Completed' || c.status === 'Completed';
                     const isScheduled = c.state === 'Scheduled' || c.status === 'Scheduled';
                     return (
@@ -1479,7 +1475,7 @@ export default function Screen1Intake({
                               : 'bg-amber-50 text-amber-900 border border-amber-200'
                           }`}
                         >
-                          {isCompleted ? (c.grade ? `Completed (${c.grade})` : 'Completed') : isScheduled ? 'Scheduled' : 'In-Progress'}
+                          {isCompleted ? (c.grade ? `Completed (${c.grade})` : 'Completed') : isScheduled ? '⏳ Scheduled' : 'In-Progress'}
                         </span>
                       </div>
                     );

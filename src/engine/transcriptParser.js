@@ -843,6 +843,88 @@ export function isTransferPlaceholder(course) {
   };
 }
 
+export const CANONICAL_TERM_TOKENS = [
+  'FA-I (8wk)',
+  'FA-II (8wk)',
+  'FA (16wk)',
+  'SP-I (8wk)',
+  'SP-II (8wk)',
+  'SP (16wk)',
+  'Summer'
+];
+
+export const CANONICAL_COURSE_STATUSES = [
+  'Completed',
+  'In-Progress',
+  'Scheduled'
+];
+
+/**
+ * Standardize active term strings into 7 canonical tokens:
+ * 'FA-I (8wk)', 'FA-II (8wk)', 'FA (16wk)', 'SP-I (8wk)', 'SP-II (8wk)', 'SP (16wk)', 'Summer'
+ */
+export function normalizeTermAbbreviation(termInput) {
+  if (!termInput) return 'FA (16wk)';
+
+  let rawStr = '';
+  if (typeof termInput === 'object') {
+    rawStr = String(
+      termInput.sessionBand ||
+      termInput.session ||
+      termInput.term ||
+      termInput.semester ||
+      termInput.termId ||
+      termInput.displayTerm ||
+      ''
+    ).trim();
+  } else {
+    rawStr = String(termInput).trim();
+  }
+
+  if (!rawStr) return 'FA (16wk)';
+  if (CANONICAL_TERM_TOKENS.includes(rawStr)) return rawStr;
+
+  const upper = rawStr.toUpperCase();
+
+  // Summer check
+  if (
+    upper.includes('SUMMER') ||
+    upper.startsWith('SU') ||
+    upper.includes('_SU') ||
+    upper.includes('SU-') ||
+    upper.endsWith('SU')
+  ) {
+    return 'Summer';
+  }
+
+  // Spring check
+  if (
+    upper.includes('SPRING') ||
+    upper.includes('SP-') ||
+    upper.includes('SP_') ||
+    upper.startsWith('SP') ||
+    upper.includes(' SP')
+  ) {
+    if (/_II(?:_|$)|-II\b|\bII\b|\bSESSION\s*(II|2)\b|\b8-?(?:WK|WEEK)\s*(II|2)\b|\b8WK2\b|_8WII\b/i.test(upper)) {
+      return 'SP-II (8wk)';
+    }
+    if (/_I(?:_|$)|-I\b|\bI\b|\bSESSION\s*(I|1)\b|\b8-?(?:WK|WEEK)\s*(I|1)\b|\b8WK1\b|_8WI\b/i.test(upper)) {
+      return 'SP-I (8wk)';
+    }
+    return 'SP (16wk)';
+  }
+
+  // Fall or generic session labels (e.g. "Session I 8-Week", "Full 16-Week", "FA-II")
+  if (/_II(?:_|$)|-II\b|\bII\b|\bSESSION\s*(II|2)\b|\b8-?(?:WK|WEEK)\s*(II|2)\b|\b8WK2\b|_8WII\b/i.test(upper)) {
+    return 'FA-II (8wk)';
+  }
+  if (/_I(?:_|$)|-I\b|\bI\b|\bSESSION\s*(I|1)\b|\b8-?(?:WK|WEEK)\s*(I|1)\b|\b8WK1\b|_8WI\b/i.test(upper)) {
+    return 'FA-I (8wk)';
+  }
+
+  return 'FA (16wk)';
+}
+
 /**
  * Parse term string into structured metadata:
  * Handles modern Anthology formats (FALL_II_26_8W, SPRING_I_25_8W, SUMMER_26_8W, FALL_24_16W),
@@ -1258,6 +1340,7 @@ export function processRawCourseRecords(rawRecords, options = {}) {
       qualityPoints,
       status,
       term: termInfo.raw,
+      sessionBand: normalizeTermAbbreviation(termInfo?.session || term),
       termInfo,
       startDate,
       modality,

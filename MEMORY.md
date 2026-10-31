@@ -1641,3 +1641,32 @@
      - Total Vitest suite: **297 / 297 tests passing (100% green)** across all 28 test suites (`npm test`).
      - Headless Playwright suite (`.tmp/verify_screen1_state_fixes.mjs`): All 8 checks passed end-to-end with clean child preview server process teardown.
      - Deployed live to GitHub Pages (`todwood/degree-planner`) and verified via `execution/verify_live_pages.js` with 0 console errors.
+
+### 92. Active Term Abbreviation Standardization, Course Status Synchronization & ActiveTermModal Overhaul
+- **Objective:** Standardize all internal and display active term abbreviations across the client application and parser engine to 7 canonical tokens (`FA-I (8wk)`, `FA-II (8wk)`, `FA (16wk)`, `SP-I (8wk)`, `SP-II (8wk)`, `SP (16wk)`, `Summer`), synchronize course row status values (`Completed`, `In-Progress`, `Scheduled`), and overhaul `ActiveTermModal.jsx` by removing global top inputs and repositioning catalog course search directly to the top of the modal body.
+- **Architectural Implementation:**
+  1. *Canonical Term Abbreviations (`src/engine/transcriptParser.js` & `src/utils/intakeHelpers.js`):*
+     - Exported `CANONICAL_TERM_TOKENS = ['FA-I (8wk)', 'FA-II (8wk)', 'FA (16wk)', 'SP-I (8wk)', 'SP-II (8wk)', 'SP (16wk)', 'Summer']`.
+     - Exported `CANONICAL_COURSE_STATUSES = ['Completed', 'In-Progress', 'Scheduled']`.
+     - Implemented `normalizeTermAbbreviation(termInput)` handling strings and course objects across variations (`Full 16 Week`, `Fall Session I`, `FALL_II_26_8W`, `Spring 8-Week 2`, `Summer 2026`, etc.).
+     - In `processRawCourseRecords`, set `sessionBand: normalizeTermAbbreviation(termInfo?.session || term)`.
+     - Implemented `normalizeActiveCourseStatus(courseOrStatus, fallbackState)` mapping raw statuses to canonical tokens (`Completed`, `In-Progress`, `Scheduled`).
+  2. *ActiveTermModal Overhaul (`src/components/ActiveTermModal.jsx`):*
+     - Modal title: `Edit Active Term & Enrolled Coursework` with subtext: `Review and adjust session terms and course statuses, or search the catalog to add current and upcoming enrollments.`.
+     - Completely removed the 3 global top inputs (`active-term-selected-semester`, `active-term-selected-status`, `active-term-selected-modality`) to avoid conflict with row-level attributes.
+     - Repositioned `"Search All Catalog Courses to Add"` to the top of the modal body, directly below the header, with `#active-term-search-input`, search term token select, and status select.
+     - Rendered active enrolled courses directly below the search bar. Each row features:
+       - Canonical term select (`data-testid="active-term-select-${idx}"`) defaulting to `normalizeTermAbbreviation(c)`.
+       - Canonical status select (`data-testid="active-status-select-${idx}"`) defaulting to `normalizeActiveCourseStatus(c)`.
+       - Red remove button (`data-testid="remove-active-course-${idx}"`).
+     - Save button: `Save & Apply Active Changes` (`#save-active-term-btn`).
+  3. *Screen 1 Active Roster & Status Badges Synchronization (`src/components/Screen1Intake.jsx`):*
+     - Active course badges in Card 1 render canonical term tokens (`normalizeTermAbbreviation(c)`).
+     - Status badges render `'Completed'` (or `'Completed (Grade)'` in emerald), `'⏳ Scheduled'` (in blue), or `'In-Progress'` (in amber).
+     - `handleSaveActiveTermModal` cleanly updates active course records with canonical tokens and recalculates active credits and pacing totals.
+  4. *Verification & Tests:*
+     - Vitest suite (`tests/activeTermModalFixes.test.js`): 17 unit tests verifying canonical term and status normalization, modal markup, top panel removal, catalog search position, and row selectors.
+     - Updated `tests/screen1StateAndButtonFixes.test.js` to assert absence of the removed top panel inputs.
+     - Total Vitest suite: **314 / 314 tests passing (100% green)** across all 29 test suites (`npm test`).
+     - Headless Playwright suite (`.tmp/verify_active_term_modal.mjs`): Verified active course badge tokens, modal title, top panel absence, catalog search at top, updating course to `FA-II (8wk)` and `Scheduled`, modal save, and Screen 1 badge rendering `FA-II (8wk)` and `⏳ Scheduled` with clean process teardown.
+     - Production bundle: `npm run build` compiled with 0 errors.

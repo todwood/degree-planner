@@ -14,10 +14,66 @@
  * - Accepts optional referenceDate (defaulting to '2026-10-29') for deterministic testing.
  */
 
-import { parseTermInfo } from '../engine/transcriptParser.js';
+import {
+  parseTermInfo,
+  normalizeTermAbbreviation,
+  CANONICAL_TERM_TOKENS,
+  CANONICAL_COURSE_STATUSES
+} from '../engine/transcriptParser.js';
+
+export {
+  normalizeTermAbbreviation,
+  CANONICAL_TERM_TOKENS,
+  CANONICAL_COURSE_STATUSES
+};
 
 export const DEFAULT_REFERENCE_DATE = '2026-10-29';
 export const DEFAULT_ACTIVE_TERM_ID = 'Fall 2026';
+
+/**
+ * Normalize course status to one of three canonical tokens:
+ * 'Completed', 'In-Progress', 'Scheduled'
+ */
+export function normalizeActiveCourseStatus(courseOrStatus, fallbackState = 'In-Progress') {
+  if (!courseOrStatus) return fallbackState;
+
+  let val = '';
+  if (typeof courseOrStatus === 'object') {
+    val = String(
+      courseOrStatus.status ||
+      courseOrStatus.state ||
+      fallbackState
+    ).trim();
+  } else {
+    val = String(courseOrStatus).trim();
+  }
+
+  const upper = val.toUpperCase();
+
+  if (upper === 'COMPLETED' || upper === 'COMPLETE' || upper.startsWith('COMPLET')) {
+    return 'Completed';
+  }
+  if (upper === 'SCHEDULED' || upper.startsWith('SCHEDUL')) {
+    return 'Scheduled';
+  }
+  if (
+    upper === 'IN-PROGRESS' ||
+    upper === 'IN_PROGRESS' ||
+    upper === 'IN PROGRESS' ||
+    upper === 'CURRENT' ||
+    upper.startsWith('IN-PROG') ||
+    upper.startsWith('IN PROG') ||
+    upper.startsWith('IN_PROG')
+  ) {
+    return 'In-Progress';
+  }
+
+  if (CANONICAL_COURSE_STATUSES.includes(val)) {
+    return val;
+  }
+
+  return fallbackState || 'In-Progress';
+}
 
 export const REGISTRATION_TERM_WINDOWS = [
   {
