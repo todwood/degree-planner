@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, ChevronDown, Check } from 'lucide-react';
-import { getProgramCategory } from '../utils/programStackUtils.js';
+import { getProgramCategory, matchesProgramCategory } from '../utils/programStackUtils.js';
 import masterProgramsDb from '../data/masterProgramsDatabase.json' with { type: 'json' };
 
 /**
@@ -89,13 +89,7 @@ export default function ProgramCombobox({
   const filteredPrograms = useMemo(() => {
     let list = effectivePrograms;
     if (selectedCategoryFilter !== 'All') {
-      list = list.filter((p) => {
-        const cat = getProgramCategory(p);
-        if (selectedCategoryFilter === 'Major') {
-          return cat === 'Major' || cat === 'Major - Track';
-        }
-        return cat === selectedCategoryFilter;
-      });
+      list = list.filter((p) => matchesProgramCategory(p, selectedCategoryFilter));
     }
     const q = searchQuery.trim().toLowerCase();
     if (q) {

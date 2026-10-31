@@ -36,6 +36,7 @@ import { calculateStartingSemester } from '../engine/scheduler.js';
 import dbAdapter from '../data/dbAdapter.js';
 import ProgramCombobox, { parseProgramDetails } from './ProgramCombobox.jsx';
 import CatalogYearCombobox from './CatalogYearCombobox.jsx';
+import ActiveTermModal from './ActiveTermModal.jsx';
 import masterProgramsDb from '../data/masterProgramsDatabase.json' with { type: 'json' };
 import {
   getProgramCategory,
@@ -258,10 +259,18 @@ export default function Screen1Intake({
   // ---------------------------------------------------------------------------
   // 2. Identity Row (4 Inputs — All start empty with zero hardcoded sample names)
   // ---------------------------------------------------------------------------
-  const [studentName, setStudentName] = useState('');
-  const [studentId, setStudentId] = useState('');
-  const [advisorName, setAdvisorName] = useState(facultyProfile?.advisorName || '');
-  const [advisorUsername, setAdvisorUsername] = useState(facultyProfile?.advisorUsername || '');
+  const [studentName, setStudentName] = useState(
+    () => parsedTranscript?.studentMetadata?.name || parsedTranscript?.studentMetadata?.student_name || ''
+  );
+  const [studentId, setStudentId] = useState(
+    () => parsedTranscript?.studentMetadata?.studentId || parsedTranscript?.studentMetadata?.student_id || ''
+  );
+  const [advisorName, setAdvisorName] = useState(
+    () => facultyProfile?.advisorName || parsedTranscript?.studentMetadata?.advisor || parsedTranscript?.studentMetadata?.advisor_name || ''
+  );
+  const [advisorUsername, setAdvisorUsername] = useState(
+    () => facultyProfile?.advisorUsername || (parsedTranscript?.studentMetadata?.email ? parseAdvisorEmailUsername(parsedTranscript.studentMetadata.email) : '')
+  );
 
   // Keep advisorName and advisorUsername synced with facultyProfile if present
   useEffect(() => {
@@ -272,7 +281,9 @@ export default function Screen1Intake({
       setAdvisorUsername(facultyProfile.advisorUsername);
     }
   }, [facultyProfile]);
-  const [detectedGpa, setDetectedGpa] = useState('');
+  const [detectedGpa, setDetectedGpa] = useState(
+    () => (parsedTranscript?.studentMetadata?.gpa !== undefined && parsedTranscript?.studentMetadata?.gpa !== null) ? String(parsedTranscript.studentMetadata.gpa) : ''
+  );
 
   // ---------------------------------------------------------------------------
   // 3. Card 2: Degree Curriculum & Credential Roster State
@@ -321,6 +332,11 @@ export default function Screen1Intake({
         if (!prev.includes(propProgramId)) return [propProgramId, ...prev];
         return prev;
       });
+    } else if (!propProgramId && !parsedTranscript) {
+      setSelectedProgramIdState('');
+      setPrimaryProgramId('');
+      setStagedComboboxProgramId('');
+      setDeclaredProgramIds([]);
     }
   }, [propProgramId, parsedTranscript]);
 
@@ -573,7 +589,14 @@ export default function Screen1Intake({
   // 6. Hydration from parsedTranscript props (e.g. back navigation)
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    if (!parsedTranscript) return;
+    if (!parsedTranscript) {
+      setCachedParsedTranscript(null);
+      setIsDataExtracted(false);
+      setStudentName('');
+      setStudentId('');
+      setDetectedGpa('');
+      return;
+    }
     const meta = parsedTranscript.studentMetadata || {};
     if (meta.name || meta.student_name) setStudentName(meta.name || meta.student_name);
     if (meta.studentId || meta.student_id) setStudentId(meta.studentId || meta.student_id);
@@ -593,76 +616,15 @@ export default function Screen1Intake({
   // ---------------------------------------------------------------------------
   // Modal A: Active Term Course Editor
   const [editActiveTermModalOpen, setEditActiveTermModalOpen] = useState(false);
-  const [activeTermWorkingList, setActiveTermWorkingList] = useState([]);
-  const [activeTermSearchQuery, setActiveTermSearchQuery] = useState('');
-  const [newCourseSessionBand, setNewCourseSessionBand] = useState('Full 16-Week');
-  const [newCourseStatus, setNewCourseStatus] = useState('In-Progress');
 
-  useEffect(() => {
-    if (editActiveTermModalOpen) {
-      setActiveTermWorkingList(
-        activeTermEnrollment.activeCourses.map((c) => ({
-          ...c,
-          sessionBand: getCourseSessionBandLabel(c),
-          status: c.status || (c.state === 'Completed' ? 'Completed' : c.state === 'Scheduled' ? 'Scheduled' : 'In-Progress')
-        }))
-      );
-      setActiveTermSearchQuery('');
-    }
-  }, [editActiveTermModalOpen, activeTermEnrollment.activeCourses]);
-
-  const activeTermSearchResults = useMemo(() => {
-    const q = activeTermSearchQuery.trim().toLowerCase();
-    if (!q || q.length < 2) return [];
-    const all = masterDb?.courses || [];
-    const matched = [];
-    for (const c of all) {
-      if (
-        c.code.toLowerCase().includes(q) ||
-        (c.title && c.title.toLowerCase().includes(q))
-      ) {
-        matched.push(c);
-        if (matched.length >= 25) break;
-      }
-    }
-    return matched;
-  }, [activeTermSearchQuery, masterDb]);
-
-  const handleAddCourseToActiveWorking = (catalogCourse) => {
-    const compact = catalogCourse.code.replace(/\s+/g, '').toUpperCase();
-    if (activeTermWorkingList.some((c) => (c.compactCode || c.code.replace(/\s+/g, '').toUpperCase()) === compact)) {
-      return;
-    }
-    const newCourseObj = {
-      code: catalogCourse.code,
-      compactCode: compact,
-      title: catalogCourse.title || catalogCourse.code,
-      credits: Number(catalogCourse.credits) || 3.0,
-      term: newCourseSessionBand === 'Session II 8-Week'
-        ? 'Fall 2026 II 8wk'
-        : newCourseSessionBand === 'Session I 8-Week'
-        ? 'Fall 2026 I 8wk'
-        : 'Fall 2026',
-      semester: 'Fall 2026',
-      sessionBand: newCourseSessionBand,
-      status: newCourseStatus,
-      state: newCourseStatus === 'Completed' ? 'Completed' : newCourseStatus === 'Scheduled' ? 'Scheduled' : 'Current',
-      isActiveTerm: true
-    };
-    setActiveTermWorkingList((prev) => [newCourseObj, ...prev]);
-  };
-
-  const handleRemoveCourseFromActiveWorking = (idx) => {
-    setActiveTermWorkingList((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleSaveActiveTermModal = () => {
+  const handleSaveActiveTermModal = ({ courses, selectedTerm, status, modality }) => {
     const existingCourses = currentCourses;
+    const effectiveTerm = selectedTerm || DEFAULT_ACTIVE_TERM_ID;
     const nonActiveCourses = existingCourses.filter((c) => !doesCourseMatchSemester(c, DEFAULT_ACTIVE_TERM_ID));
 
-    const formattedActive = activeTermWorkingList.map((c) => {
+    const formattedActive = (courses || []).map((c) => {
       const compact = (c.compactCode || c.code || '').replace(/\s+/g, '').toUpperCase();
-      const isCompleted = c.status === 'Completed' || c.state === 'Completed';
+      const isCompleted = c.status === 'Completed' || c.state === 'Completed' || status === 'COMPLETED';
       return {
         ...c,
         code: c.code,
@@ -670,14 +632,15 @@ export default function Screen1Intake({
         title: c.title,
         credits: Number(c.credits) || 3.0,
         term: c.sessionBand === 'Session II 8-Week'
-          ? 'Fall 2026 II 8wk'
+          ? `${effectiveTerm} II 8wk`
           : c.sessionBand === 'Session I 8-Week'
-          ? 'Fall 2026 I 8wk'
-          : 'Fall 2026',
-        semester: 'Fall 2026',
+          ? `${effectiveTerm} I 8wk`
+          : effectiveTerm,
+        semester: effectiveTerm,
         sessionBand: c.sessionBand || 'Full 16-Week',
-        state: isCompleted ? 'Completed' : c.status === 'Scheduled' ? 'Scheduled' : 'Current',
-        status: c.status || (isCompleted ? 'Completed' : 'Current'),
+        state: isCompleted ? 'Completed' : (c.status === 'Scheduled' || status === 'SCHEDULED') ? 'Scheduled' : 'Current',
+        status: c.status || (isCompleted ? 'Completed' : (status === 'SCHEDULED' ? 'Scheduled' : 'In-Progress')),
+        modality: modality || c.modality || modalityPreference,
         isActiveTerm: true
       };
     });
@@ -692,6 +655,9 @@ export default function Screen1Intake({
 
     setCachedParsedTranscript(newRecord);
     setIsDataExtracted(true);
+    if (modality) {
+      setModalityPreferenceState(modality);
+    }
     setEditActiveTermModalOpen(false);
   };
 
@@ -745,7 +711,6 @@ export default function Screen1Intake({
     setStagedComboboxProgramId('');
     setDeclaredProgramIds([]);
     setCore42TransferBlock(false);
-    setActiveEnrollmentCourses([]);
     setPacingModeState('Full-Time');
     setMin16wkCreditsState(12);
     setMax16wkCreditsState(15);
@@ -753,6 +718,8 @@ export default function Screen1Intake({
     setModalityPreferenceState('No Preference (Default)');
     setSummerAvailabilityState('No Summer (Default)');
     setMaxSummerCreditsState(6);
+    onSelectProgramId?.('');
+    onUpdateAdditionalPrograms?.([]);
     onClearActiveRecord?.();
   };
 
@@ -785,6 +752,23 @@ export default function Screen1Intake({
   const parseFilesAndPopulateMetadata = async (nextAnthologyFile, nextTranscriptFile, nextDegreePlanFile) => {
     setIsProcessing(true);
     setParsingError('');
+
+    if (!nextAnthologyFile && !nextTranscriptFile && !nextDegreePlanFile) {
+      setCachedParsedTranscript(null);
+      setIsDataExtracted(false);
+      setStudentName('');
+      setStudentId('');
+      setDetectedGpa('');
+      setSelectedProgramIdState('');
+      setPrimaryProgramId('');
+      setStagedComboboxProgramId('');
+      setDeclaredProgramIds([]);
+      onSelectProgramId?.('');
+      onUpdateAdditionalPrograms?.([]);
+      onClearActiveRecord?.();
+      setIsProcessing(false);
+      return null;
+    }
 
     try {
       let parsed = null;
@@ -959,7 +943,6 @@ export default function Screen1Intake({
   const handleAnthologyFileChange = async (file) => {
     if (!file) {
       setAnthologyFile(null);
-      await parseFilesAndPopulateMetadata(null, transcriptFile, degreePlanFile);
       return;
     }
     try {
@@ -1014,7 +997,6 @@ export default function Screen1Intake({
   const handleTranscriptFileChange = async (file) => {
     if (!file) {
       setTranscriptFile(null);
-      await parseFilesAndPopulateMetadata(anthologyFile, null, degreePlanFile);
       return;
     }
     try {
@@ -1069,7 +1051,6 @@ export default function Screen1Intake({
   const handleDegreePlanFileChange = async (file) => {
     if (!file) {
       setDegreePlanFile(null);
-      await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile, null);
       return;
     }
     setDegreePlanFile(file);
@@ -1077,6 +1058,21 @@ export default function Screen1Intake({
   };
 
   const handleReExtract = async () => {
+    if (!anthologyFile && !transcriptFile && !degreePlanFile) {
+      setCachedParsedTranscript(null);
+      setIsDataExtracted(false);
+      setStudentName('');
+      setStudentId('');
+      setDetectedGpa('');
+      setSelectedProgramIdState('');
+      setPrimaryProgramId('');
+      setStagedComboboxProgramId('');
+      setDeclaredProgramIds([]);
+      onSelectProgramId?.('');
+      onUpdateAdditionalPrograms?.([]);
+      onClearActiveRecord?.();
+      return;
+    }
     await parseFilesAndPopulateMetadata(anthologyFile, transcriptFile, degreePlanFile);
   };
 
@@ -1221,7 +1217,7 @@ export default function Screen1Intake({
               title="Clear Active Student Record"
             >
               <X className="w-3.5 h-3.5 text-neutral-500 hover:text-red-600 flex-shrink-0" />
-              <span>✕ Clear Active Student</span>
+              <span>Clear Active Student</span>
             </button>
 
             <button
@@ -1502,7 +1498,7 @@ export default function Screen1Intake({
                 className="px-3 py-1.5 text-xs font-bold bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-300 rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5 text-[#857542]" />
-                <span>✏️ Edit Active Term</span>
+                <span>Edit Active Term</span>
               </button>
 
               {activeTermEnrollment.showLowCreditWarning && (
@@ -1609,9 +1605,18 @@ export default function Screen1Intake({
               className="px-4 py-2.5 bg-[#1E293B] hover:bg-[#0F172A] disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add to Student Stack</span>
+              <span>{stagedComboboxProgramId && declaredProgramIds.includes(stagedComboboxProgramId) ? 'Already in stack' : 'Add to Student Stack'}</span>
             </button>
           </div>
+          {stagedComboboxProgramId && declaredProgramIds.includes(stagedComboboxProgramId) && (
+            <p
+              id="program-already-in-stack-helper"
+              data-testid="program-already-in-stack-helper"
+              className="text-[11px] font-semibold text-amber-700 mt-1"
+            >
+              Already in stack
+            </p>
+          )}
         </div>
 
         {/* 3. The Declared Credentials Stack Display */}
@@ -2011,234 +2016,31 @@ export default function Screen1Intake({
       {/* =================================================================== */}
       {/* MODAL A: Active Term Course Editor */}
       {/* =================================================================== */}
-      {editActiveTermModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="active-term-modal-title"
-        >
-          <div
-            className="bg-white rounded-2xl border-2 border-[#B5A36A] max-w-3xl w-full p-6 text-neutral-900 shadow-2xl relative space-y-5 animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between pb-3 border-b border-neutral-200 flex-shrink-0">
-              <div className="flex items-center space-x-3">
-                <div className="p-2.5 rounded-xl bg-[#F7F5EE] border border-[#B5A36A]/50 text-[#857542]">
-                  <Edit3 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 id="active-term-modal-title" className="text-base font-extrabold text-neutral-900">
-                    Active Term Course Editor ({DEFAULT_ACTIVE_TERM_ID})
-                  </h3>
-                  <p className="text-xs text-neutral-500">
-                    Add, remove, or modify session bands and completion statuses for active term enrollments.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditActiveTermModalOpen(false)}
-                className="p-1 text-neutral-400 hover:text-neutral-700 rounded-md hover:bg-neutral-100 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto space-y-5 pr-1">
-              {/* Section 1: Active Term Courses List */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-neutral-800 uppercase tracking-wide">
-                    Enrolled Active Courses ({activeTermWorkingList.length})
-                  </span>
-                  <span className="font-mono text-neutral-600 font-semibold text-[11px]">
-                    Total:{' '}
-                    {activeTermWorkingList.reduce((sum, c) => sum + (Number(c.credits) || 0), 0)} cr
-                  </span>
-                </div>
-
-                {activeTermWorkingList.length === 0 ? (
-                  <div className="p-4 border-2 border-dashed border-neutral-200 rounded-xl text-center text-xs text-neutral-400">
-                    No active term courses currently enrolled. Search the catalog below to add courses.
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {activeTermWorkingList.map((c, idx) => (
-                      <div
-                        key={`${c.code}-${idx}`}
-                        className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-xs text-neutral-900">{c.code}</span>
-                            <span className="text-[10px] font-mono text-neutral-500 bg-white px-1.5 py-0.5 rounded border border-neutral-200">
-                              {Math.round(c.credits || 3)} cr
-                            </span>
-                          </div>
-                          <p className="text-xs text-neutral-700 truncate mt-0.5">{c.title}</p>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
-                          {/* Term Band Selector */}
-                          <select
-                            value={c.sessionBand || 'Full 16-Week'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setActiveTermWorkingList((prev) =>
-                                prev.map((item, i) => (i === idx ? { ...item, sessionBand: val } : item))
-                              );
-                            }}
-                            className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs"
-                          >
-                            <option value="Full 16-Week">Full 16-Week</option>
-                            <option value="Session I 8-Week">Session I 8-Week</option>
-                            <option value="Session II 8-Week">Session II 8-Week</option>
-                          </select>
-
-                          {/* Status Selector */}
-                          <select
-                            value={c.status || 'In-Progress'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setActiveTermWorkingList((prev) =>
-                                prev.map((item, i) => (i === idx ? { ...item, status: val } : item))
-                              );
-                            }}
-                            className="text-xs font-semibold bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-800 cursor-pointer shadow-2xs"
-                          >
-                            <option value="In-Progress">In-Progress</option>
-                            <option value="Scheduled">Scheduled</option>
-                            <option value="Completed">Completed</option>
-                          </select>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveCourseFromActiveWorking(idx)}
-                            className="p-1.5 text-neutral-400 hover:text-red-600 rounded-lg hover:bg-neutral-100 transition cursor-pointer"
-                            title="Remove course"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Section 2: Catalog Course Search */}
-              <div className="pt-3 border-t border-neutral-200 space-y-3">
-                <span className="text-xs font-bold text-neutral-800 uppercase tracking-wide block">
-                  Search All 1,936 Catalog Courses to Add
-                </span>
-
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                  <div className="sm:col-span-6 relative">
-                    <input
-                      type="text"
-                      placeholder="Search code or title (e.g. MTH 14100, CSC, Ethics)..."
-                      value={activeTermSearchQuery}
-                      onChange={(e) => setActiveTermSearchQuery(e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 text-xs bg-neutral-50 border border-neutral-300 rounded-lg focus:outline-none focus:border-[#857542] text-neutral-900"
-                    />
-                    <Search className="w-4 h-4 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <select
-                      value={newCourseSessionBand}
-                      onChange={(e) => setNewCourseSessionBand(e.target.value)}
-                      className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer"
-                    >
-                      <option value="Full 16-Week">Full 16-Week</option>
-                      <option value="Session I 8-Week">Session I 8-Week</option>
-                      <option value="Session II 8-Week">Session II 8-Week</option>
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <select
-                      value={newCourseStatus}
-                      onChange={(e) => setNewCourseStatus(e.target.value)}
-                      className="w-full py-2 px-2.5 text-xs bg-white border border-neutral-300 rounded-lg font-semibold text-neutral-800 cursor-pointer"
-                    >
-                      <option value="In-Progress">In-Progress</option>
-                      <option value="Scheduled">Scheduled</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Search Results List */}
-                {activeTermSearchQuery.trim().length >= 2 && (
-                  <div className="border border-neutral-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-neutral-100 bg-white shadow-2xs">
-                    {activeTermSearchResults.length === 0 ? (
-                      <p className="p-3 text-xs text-neutral-400 text-center">
-                        No courses found matching &ldquo;{activeTermSearchQuery}&rdquo;
-                      </p>
-                    ) : (
-                      activeTermSearchResults.map((course) => {
-                        const compact = course.code.replace(/\s+/g, '').toUpperCase();
-                        const isAlreadyAdded = activeTermWorkingList.some(
-                          (c) => (c.compactCode || c.code.replace(/\s+/g, '').toUpperCase()) === compact
-                        );
-                        return (
-                          <div
-                            key={course.code}
-                            className="p-2.5 flex items-center justify-between gap-2 hover:bg-[#F7F5EE]/60 transition"
-                          >
-                            <div className="min-w-0 flex-1 truncate">
-                              <span className="font-mono font-bold text-xs text-neutral-900 mr-2">
-                                {course.code}
-                              </span>
-                              <span className="text-xs text-neutral-700 truncate">{course.title}</span>
-                              <span className="text-[10px] font-mono text-neutral-500 ml-2">
-                                ({Math.round(course.credits || 3)}cr)
-                              </span>
-                            </div>
-
-                            <button
-                              type="button"
-                              disabled={isAlreadyAdded}
-                              onClick={() => handleAddCourseToActiveWorking(course)}
-                              className="px-2.5 py-1 text-[11px] font-bold rounded-lg transition disabled:bg-neutral-100 disabled:text-neutral-400 bg-[#857542] hover:bg-[#6E6035] text-white flex-shrink-0 cursor-pointer"
-                            >
-                              {isAlreadyAdded ? 'Added' : '+ Add'}
-                            </button>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="pt-3 border-t border-neutral-200 flex items-center justify-end space-x-3 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setEditActiveTermModalOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-300 rounded-lg transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                id="save-active-term-btn"
-                data-testid="save-active-term-btn"
-                onClick={handleSaveActiveTermModal}
-                className="px-5 py-2 text-xs font-bold bg-[#857542] hover:bg-[#6E6035] text-white rounded-lg shadow-sm transition cursor-pointer"
-              >
-                Done / Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ActiveTermModal
+        isOpen={editActiveTermModalOpen}
+        onClose={() => setEditActiveTermModalOpen(false)}
+        activeCourses={activeTermEnrollment.activeCourses}
+        initialTerm={
+          activeTermEnrollment.activeCourses[0]?.termInfo?.displayTerm ||
+          activeTermEnrollment.activeCourses[0]?.term ||
+          parsedTranscript?.studentMetadata?.activeTerm ||
+          DEFAULT_ACTIVE_TERM_ID
+        }
+        initialStatus={
+          activeTermEnrollment.activeCourses[0]?.status?.toUpperCase() === 'SCHEDULED'
+            ? 'SCHEDULED'
+            : activeTermEnrollment.activeCourses[0]?.status?.toUpperCase() === 'COMPLETED'
+            ? 'COMPLETED'
+            : 'IN_PROGRESS'
+        }
+        initialModality={
+          activeTermEnrollment.activeCourses.find((c) => c.modality)?.modality ||
+          modalityPreference ||
+          'Traditional (On-Campus)'
+        }
+        masterDb={masterDb}
+        onSave={handleSaveActiveTermModal}
+      />
 
       {/* =================================================================== */}
       {/* MODAL B: Registration Start Term Confirmation Modal */}

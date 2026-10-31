@@ -25,6 +25,49 @@ export function getProgramCategory(prog) {
 }
 
 /**
+ * Checks if a program matches a category filter pill ('All', 'Major', 'Minor', 'Certificate').
+ * Supports dual-category programs that function as both a Major and Certificate preparation
+ * (e.g., "Biological Sciences, BA 9-12 Secondary Education Certification Preparation").
+ * 
+ * @param {object} prog - Program object
+ * @param {string} categoryFilter - 'All' | 'Major' | 'Minor' | 'Certificate'
+ * @returns {boolean}
+ */
+export function matchesProgramCategory(prog, categoryFilter) {
+  if (!categoryFilter || categoryFilter === 'All') return true;
+  if (!prog) return false;
+
+  const name = (prog.name || prog.program_name || '').toLowerCase();
+  const progType = (prog.program_type || '').toLowerCase();
+
+  const isMinor = progType.includes('minor') || name.includes('minor');
+  const isCert =
+    progType.includes('cert') ||
+    name.includes('certificate') ||
+    name.includes('certification') ||
+    name.includes('cert prep');
+
+  const isMajor =
+    !isMinor &&
+    (/\b(ba|bs|bfa|bba|bsn|bas|bm)\b/i.test(name) ||
+      progType.includes('major') ||
+      name.includes('emphasis') ||
+      name.includes(' - ') ||
+      (!isCert && !isMinor));
+
+  if (categoryFilter === 'Major') {
+    return isMajor;
+  }
+  if (categoryFilter === 'Minor') {
+    return isMinor;
+  }
+  if (categoryFilter === 'Certificate') {
+    return isCert;
+  }
+  return true;
+}
+
+/**
  * Generates dynamic stack header text with strict pluralization.
  * Examples:
  * - 1 Major -> "DECLARED CREDENTIALS STACK (1 Major)"
