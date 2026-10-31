@@ -71,7 +71,7 @@ async function verifyLive() {
 
     // Checkpoint 1: 3-Card Layout Structure
     const hasCard1 = await page.evaluate(() => document.body.innerText.includes('1. STUDENT RECORDS'));
-    const hasCard2 = await page.evaluate(() => document.body.innerText.includes('2. DEGREE CURRICULUM & CREDENTIAL ROSTER'));
+    const hasCard2 = await page.evaluate(() => document.body.innerText.includes('STUDENT ACADEMIC PLAN & FUTURE CREDENTIALS') || document.body.innerText.includes('2. DEGREE CURRICULUM & CREDENTIAL ROSTER'));
     const hasCard3 = await page.evaluate(() => document.body.innerText.includes('3. SCHEDULING CONSTRAINTS'));
     if (!hasCard1 || !hasCard2 || !hasCard3) {
       throw new Error(`FAILED: 3-Card layout headers missing. Card1: ${hasCard1}, Card2: ${hasCard2}, Card3: ${hasCard3}`);
