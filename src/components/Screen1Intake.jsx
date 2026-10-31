@@ -1304,7 +1304,7 @@ export default function Screen1Intake({
 
           <div>
             <label className="block text-xs font-bold text-neutral-800 mb-1.5">
-              <span>Advisor Full Name</span>
+              <span>Advisor Name</span>
             </label>
             <input
               id="optionB-advisor-name"

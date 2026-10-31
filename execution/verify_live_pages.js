@@ -47,22 +47,28 @@ async function verifyLive() {
     const header = await page.$eval('header', (el) => el.innerText);
     console.log('[PASS] Live Header Text:', header.replace(/\n/g, ' '));
 
-    // Demo login if on Screen 0
-    const demoBtn = await page.$('button[type="button"]');
-    const isLogin = await page.evaluate(() => document.body.innerText.includes('Faculty Access Required') || document.body.innerText.includes('Sign In'));
+    // Login if on Screen 0
+    const isLogin = await page.evaluate(() => 
+      document.body.innerText.includes('Faculty Access Required') || 
+      document.body.innerText.includes('Sign In') ||
+      document.body.innerText.includes('Degree Planner Access') ||
+      document.body.innerText.includes('Advisor Workspace Access')
+    );
     if (isLogin) {
-      const bypass = await page.evaluate(() => {
-        const btn = Array.from(document.querySelectorAll('button')).find((b) => b.textContent.includes('Instant Demo / Local Dev Bypass'));
-        if (btn) {
-          btn.click();
-          return true;
+      // Enter passphrase and submit
+      const passInput = await page.$('#login-passphrase');
+      if (passInput) {
+        const isDisabled = await page.evaluate((el) => el.disabled, passInput);
+        if (!isDisabled) {
+          await passInput.type('lionsplanahead');
         }
-        return false;
-      });
-      if (bypass) {
-        await new Promise((r) => setTimeout(r, 600));
-        console.log('[PASS] Demo bypass executed on live site.');
       }
+      const launchBtn = await page.$('#login-launch-btn, button[type="submit"]');
+      if (launchBtn) {
+        await launchBtn.click();
+      }
+      await new Promise((r) => setTimeout(r, 800));
+      console.log('[PASS] Logged in to Degree Planner on live site.');
     }
 
     // Verify Screen 1 Intake Heading

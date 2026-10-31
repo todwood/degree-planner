@@ -140,15 +140,16 @@ export default function HeaderNav({
   }, [signOutModalOpen, clearModalOpen, dropdownOpen]);
 
   const displayAdvisorName =
-    facultyProfile?.advisorName ||
+    facultyProfile?.advisorName?.trim() ||
     (facultyProfile?.first_name && facultyProfile?.last_name
-      ? `${facultyProfile.first_name} ${facultyProfile.last_name}`
-      : 'Prof Wood');
+      ? `${facultyProfile.first_name} ${facultyProfile.last_name}`.trim()
+      : '') ||
+    'Advisor';
 
   const displayAdvisorEmail =
     facultyProfile?.advisorEmail ||
     facultyProfile?.email ||
-    'mwood@lindenwood.edu';
+    '';
 
   return (
     <>
@@ -311,9 +312,11 @@ export default function HeaderNav({
                   <p className="text-sm font-bold text-neutral-900 mt-0.5">
                     {displayAdvisorName}
                   </p>
-                  <p className="text-xs text-neutral-500 font-mono mt-0.5">
-                    {displayAdvisorEmail}
-                  </p>
+                  {displayAdvisorEmail && (
+                    <p className="text-xs text-neutral-500 font-mono mt-0.5">
+                      {displayAdvisorEmail}
+                    </p>
+                  )}
                 </div>
 
                 {/* Action Item 1: Master Curriculum Catalog */}

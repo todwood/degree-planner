@@ -11,9 +11,9 @@ export const AUTHORIZED_PASSPHRASE = 'lionsplanahead';
 export const MASKED_PASSPHRASE = '••••••••••••';
 
 export const DEFAULT_ADVISOR_PERSONA = {
-  advisorName: 'Prof Wood',
-  advisorUsername: 'mwood',
-  advisorEmail: 'mwood@lindenwood.edu'
+  advisorName: '',
+  advisorUsername: '',
+  advisorEmail: ''
 };
 
 /**
@@ -57,9 +57,9 @@ export function getSavedAdvisorPersona(storage = (typeof localStorage !== 'undef
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
-        advisorName: parsed.advisorName || DEFAULT_ADVISOR_PERSONA.advisorName,
-        advisorUsername: parsed.advisorUsername || DEFAULT_ADVISOR_PERSONA.advisorUsername,
-        advisorEmail: parsed.advisorEmail || `${parsed.advisorUsername || DEFAULT_ADVISOR_PERSONA.advisorUsername}@lindenwood.edu`
+        advisorName: parsed.advisorName || '',
+        advisorUsername: parsed.advisorUsername || '',
+        advisorEmail: parsed.advisorEmail || (parsed.advisorUsername ? `${parsed.advisorUsername}@lindenwood.edu` : '')
       };
     }
   } catch (e) {
@@ -70,17 +70,18 @@ export function getSavedAdvisorPersona(storage = (typeof localStorage !== 'undef
 
 /**
  * Resolves full faculty profile from advisor persona fields.
+ * Optional persona fields: if blank, maintains clean empty strings.
  * @param {object} persona
  * @returns {object} Full faculty profile compatible with HeaderNav and audits
  */
 export function buildFacultyProfile(persona = {}) {
-  const cleanName = (persona.advisorName || DEFAULT_ADVISOR_PERSONA.advisorName).trim();
-  const cleanUsername = (persona.advisorUsername || DEFAULT_ADVISOR_PERSONA.advisorUsername).trim().toLowerCase();
-  const email = `${cleanUsername}@lindenwood.edu`;
+  const cleanName = (persona.advisorName || '').trim();
+  const cleanUsername = (persona.advisorUsername || '').trim().toLowerCase();
+  const email = cleanUsername ? `${cleanUsername}@lindenwood.edu` : (persona.advisorEmail || '');
 
-  const nameParts = cleanName.split(' ');
-  const firstName = nameParts[0] || 'Prof';
-  const lastName = nameParts.slice(1).join(' ') || 'Wood';
+  const nameParts = cleanName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
 
   return {
     advisorName: cleanName,
@@ -90,7 +91,7 @@ export function buildFacultyProfile(persona = {}) {
     last_name: lastName,
     email,
     username_prefix: cleanUsername,
-    position_title: 'Senior Instructor, Mathematics',
+    position_title: 'Faculty Advisor',
     department: 'College of Science, Technology, and Health',
     photo_url: ''
   };
@@ -181,6 +182,96 @@ export function createPopoverManager({ onOpen, onClose } = {}) {
       if (isOpen) onOpen?.();
       else onClose?.();
       return isOpen;
+    }
+  };
+}
+
+/**
+ * 5-Attempt Client-Side Rate Limiter.
+ * Tracks failed attempts; triggers a 30s lockout after 5 consecutive failures.
+ * Storage defaults to sessionStorage if present, or custom Storage instance.
+ */
+export function createRateLimiter({
+  maxAttempts = 5,
+  lockoutDuration = 30,
+  storage = (typeof sessionStorage !== 'undefined' ? sessionStorage : null)
+} = {}) {
+  let failedAttempts = 0;
+  let lockoutSecondsRemaining = 0;
+
+  if (storage) {
+    try {
+      const storedAttempts = parseInt(storage.getItem('lu_failed_attempts') || '0', 10);
+      const storedLockoutUntil = parseInt(storage.getItem('lu_lockout_until') || '0', 10);
+      const now = Math.floor(Date.now() / 1000);
+
+      if (storedLockoutUntil > now) {
+        failedAttempts = maxAttempts;
+        lockoutSecondsRemaining = storedLockoutUntil - now;
+      } else if (!isNaN(storedAttempts)) {
+        failedAttempts = storedAttempts;
+      }
+    } catch (e) {
+      // Ignore storage read errors
+    }
+  }
+
+  return {
+    get failedAttempts() {
+      return failedAttempts;
+    },
+    get lockoutSecondsRemaining() {
+      return lockoutSecondsRemaining;
+    },
+    get isLocked() {
+      return lockoutSecondsRemaining > 0;
+    },
+    recordFailedAttempt() {
+      if (lockoutSecondsRemaining > 0) {
+        return { isLocked: true, lockoutSecondsRemaining, attemptsRemaining: 0 };
+      }
+      failedAttempts += 1;
+      if (failedAttempts >= maxAttempts) {
+        lockoutSecondsRemaining = lockoutDuration;
+        if (storage) {
+          try {
+            storage.setItem('lu_failed_attempts', String(failedAttempts));
+            storage.setItem('lu_lockout_until', String(Math.floor(Date.now() / 1000) + lockoutDuration));
+          } catch (e) {}
+        }
+        return { isLocked: true, lockoutSecondsRemaining, attemptsRemaining: 0 };
+      }
+      if (storage) {
+        try {
+          storage.setItem('lu_failed_attempts', String(failedAttempts));
+        } catch (e) {}
+      }
+      return { isLocked: false, lockoutSecondsRemaining: 0, attemptsRemaining: maxAttempts - failedAttempts };
+    },
+    tick() {
+      if (lockoutSecondsRemaining > 0) {
+        lockoutSecondsRemaining -= 1;
+        if (lockoutSecondsRemaining === 0) {
+          failedAttempts = 0;
+          if (storage) {
+            try {
+              storage.removeItem('lu_failed_attempts');
+              storage.removeItem('lu_lockout_until');
+            } catch (e) {}
+          }
+        }
+      }
+      return lockoutSecondsRemaining;
+    },
+    reset() {
+      failedAttempts = 0;
+      lockoutSecondsRemaining = 0;
+      if (storage) {
+        try {
+          storage.removeItem('lu_failed_attempts');
+          storage.removeItem('lu_lockout_until');
+        } catch (e) {}
+      }
     }
   };
 }

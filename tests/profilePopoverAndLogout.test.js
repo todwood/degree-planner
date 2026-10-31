@@ -225,14 +225,14 @@ describe('Profile Popover, Master Catalog Launcher & 3-Second Sign-Out Suite', (
       expect(isDeviceAuthorized(mockStorage)).toBe(true);
     });
 
-    it('falls back to default persona if stored persona is missing or corrupted', () => {
+    it('falls back to empty default persona if stored persona is missing or corrupted', () => {
       authorizeDevice(mockStorage);
       mockStorage.setItem('lu_last_advisor_persona', 'invalid-json');
 
       const persona = getSavedAdvisorPersona(mockStorage);
-      expect(persona.advisorName).toBe('Prof Wood');
-      expect(persona.advisorUsername).toBe('mwood');
-      expect(persona.advisorEmail).toBe('mwood@lindenwood.edu');
+      expect(persona.advisorName).toBe('');
+      expect(persona.advisorUsername).toBe('');
+      expect(persona.advisorEmail).toBe('');
     });
   });
 });

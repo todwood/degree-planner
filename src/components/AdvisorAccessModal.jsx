@@ -14,46 +14,69 @@ export default function AdvisorAccessModal({ onLoginSuccess }) {
   const [advisorName, setAdvisorName] = useState('');
   const [advisorUsername, setAdvisorUsername] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutSecondsRemaining, setLockoutSecondsRemaining] = useState(0);
 
   // Initialize from localStorage
   useEffect(() => {
     const isAuth = isDeviceAuthorized();
     setDeviceAuthorized(isAuth);
     const persona = getSavedAdvisorPersona();
-    setAdvisorName(persona.advisorName || 'Prof Wood');
-    setAdvisorUsername(persona.advisorUsername || 'mwood');
+    setAdvisorName(persona.advisorName || '');
+    setAdvisorUsername(persona.advisorUsername || '');
   }, []);
+
+  // 30-Second Lockout Countdown Ticker
+  useEffect(() => {
+    let intervalId;
+    if (lockoutSecondsRemaining > 0) {
+      intervalId = setInterval(() => {
+        setLockoutSecondsRemaining((prev) => {
+          if (prev <= 1) {
+            setFailedAttempts(0);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [lockoutSecondsRemaining]);
 
   const handleSubmit = (e) => {
     e?.preventDefault();
+    if (lockoutSecondsRemaining > 0) return;
+
     setErrorMsg('');
 
     // If device is not yet authorized, require valid passphrase
     if (!deviceAuthorized) {
       if (!validatePassphrase(passphrase)) {
-        setErrorMsg('Invalid department passphrase. Please enter the authorized department passphrase.');
+        const nextFailed = failedAttempts + 1;
+        setFailedAttempts(nextFailed);
+        if (nextFailed >= 5) {
+          setLockoutSecondsRemaining(30);
+          setErrorMsg('');
+        } else {
+          setErrorMsg(`Incorrect passphrase. (${5 - nextFailed} attempts remaining)`);
+        }
         return;
       }
     }
 
-    const cleanName = advisorName.trim() || 'Prof Wood';
-    const cleanUsername = advisorUsername.trim().toLowerCase() || 'mwood';
+    const cleanName = advisorName.trim();
+    const cleanUsername = advisorUsername.trim().toLowerCase();
 
     const profile = saveAdvisorSession({
       advisorName: cleanName,
       advisorUsername: cleanUsername,
-      advisorEmail: `${cleanUsername}@lindenwood.edu`
+      advisorEmail: cleanUsername ? `${cleanUsername}@lindenwood.edu` : ''
     });
 
-    onLoginSuccess?.(profile);
-  };
-
-  const handleDemoBypass = () => {
-    const profile = saveAdvisorSession({
-      advisorName: 'Prof Wood',
-      advisorUsername: 'mwood',
-      advisorEmail: 'mwood@lindenwood.edu'
-    });
+    setFailedAttempts(0);
+    setLockoutSecondsRemaining(0);
     onLoginSuccess?.(profile);
   };
 
@@ -70,14 +93,24 @@ export default function AdvisorAccessModal({ onLoginSuccess }) {
               <Lock className="w-6 h-6 text-[#857542]" />
             </div>
             <h2 className="text-2xl font-display font-extrabold text-neutral-950 tracking-tight">
-              Advisor Workspace Access
+              Degree Planner Access
             </h2>
             <p className="text-xs text-neutral-500 mt-1">
-              Deterministic Academic Auditing &amp; 8-Week Session Scheduling
+              Automatic &amp; Custom Degree Audit and Planning Tool
             </p>
           </div>
 
-          {errorMsg && (
+          {/* Rate Limiter Lockout Alert */}
+          {lockoutSecondsRemaining > 0 ? (
+            <div
+              id="login-lockout-alert"
+              data-testid="login-lockout-alert"
+              className="mb-4 p-3 rounded bg-amber-50 border border-amber-300 text-xs text-amber-800 flex items-start space-x-2"
+            >
+              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <span>Too many failed attempts. Submissions locked for {lockoutSecondsRemaining}s.</span>
+            </div>
+          ) : errorMsg ? (
             <div
               id="login-error-alert"
               data-testid="login-error-alert"
@@ -86,7 +119,7 @@ export default function AdvisorAccessModal({ onLoginSuccess }) {
               <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
-          )}
+          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* 1. Passphrase Input */}
@@ -130,19 +163,24 @@ export default function AdvisorAccessModal({ onLoginSuccess }) {
                   value={passphrase}
                   onChange={(e) => setPassphrase(e.target.value)}
                   placeholder="Enter Passphrase"
-                  className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md font-mono focus:outline-none focus:border-[#857542] focus:ring-1 focus:ring-[#857542]"
-                  required
+                  disabled={lockoutSecondsRemaining > 0}
+                  className={`w-full px-3 py-2 text-sm border rounded-md font-mono focus:outline-none focus:border-[#857542] focus:ring-1 focus:ring-[#857542] ${
+                    lockoutSecondsRemaining > 0
+                      ? 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed'
+                      : 'border-neutral-300'
+                  }`}
+                  required={!deviceAuthorized}
                 />
               )}
             </div>
 
-            {/* 2. Advisor Name Input */}
+            {/* 2. Advisor Name Input (Optional) */}
             <div>
               <label
                 htmlFor="login-advisor-name"
                 className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1.5"
               >
-                Advisor Full Name
+                Advisor Name
               </label>
               <input
                 id="login-advisor-name"
@@ -150,19 +188,19 @@ export default function AdvisorAccessModal({ onLoginSuccess }) {
                 type="text"
                 value={advisorName}
                 onChange={(e) => setAdvisorName(e.target.value)}
-                placeholder="Prof Wood"
-                className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:border-[#857542] focus:ring-1 focus:ring-[#857542]"
-                required
+                placeholder="Prof. Name"
+                disabled={lockoutSecondsRemaining > 0}
+                className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md placeholder-neutral-400 focus:outline-none focus:border-[#857542] focus:ring-1 focus:ring-[#857542]"
               />
             </div>
 
-            {/* 3. Lindenwood Username Input */}
+            {/* 3. Advisor Email Input (Optional) */}
             <div>
               <label
                 htmlFor="login-advisor-username"
                 className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1.5"
               >
-                Lindenwood Username
+                Advisor Email
               </label>
               <div className="flex rounded-md shadow-2xs border border-neutral-300 focus-within:border-[#857542] focus-within:ring-1 focus-within:ring-[#857542] overflow-hidden">
                 <input
@@ -171,9 +209,9 @@ export default function AdvisorAccessModal({ onLoginSuccess }) {
                   type="text"
                   value={advisorUsername}
                   onChange={(e) => setAdvisorUsername(e.target.value)}
-                  placeholder="mwood"
-                  className="w-full px-3 py-2 text-sm font-mono text-neutral-900 focus:outline-none"
-                  required
+                  placeholder="username"
+                  disabled={lockoutSecondsRemaining > 0}
+                  className="w-full px-3 py-2 text-sm font-mono text-neutral-900 placeholder-neutral-400 focus:outline-none"
                 />
                 <span className="inline-flex items-center px-3.5 bg-[#F3F4F6] text-neutral-800 font-bold text-xs border-l border-neutral-300 select-none">
                   @lindenwood.edu
@@ -186,37 +224,26 @@ export default function AdvisorAccessModal({ onLoginSuccess }) {
               id="login-launch-btn"
               data-testid="login-launch-btn"
               type="submit"
-              className="w-full py-2.5 px-4 bg-[#857542] hover:bg-[#6E6035] text-white font-bold text-sm rounded-md transition shadow flex items-center justify-center space-x-2 cursor-pointer mt-2"
+              disabled={lockoutSecondsRemaining > 0}
+              className={`w-full py-2.5 px-4 font-bold text-sm rounded-md transition shadow flex items-center justify-center space-x-2 mt-2 ${
+                lockoutSecondsRemaining > 0
+                  ? 'bg-neutral-300 text-neutral-500 cursor-not-allowed border border-neutral-300'
+                  : 'bg-[#857542] hover:bg-[#6E6035] text-white cursor-pointer'
+              }`}
             >
               <span>Launch Degree Planner →</span>
               <ArrowRight className="w-4 h-4 ml-1" />
             </button>
           </form>
 
-          {/* Quick Demo Bypass Button for Local Dev / Test Compatibility */}
-          <div className="mt-4 pt-4 border-t border-neutral-100 text-center">
-            <button
-              id="login-demo-bypass-btn"
-              data-testid="login-demo-bypass-btn"
-              type="button"
-              onClick={handleDemoBypass}
-              className="w-full py-2 px-3 rounded text-xs font-semibold text-[#857542] bg-[#F7F5EE] hover:bg-[#EFEBD9] border border-[#B5A36A] transition flex items-center justify-center space-x-2 cursor-pointer"
-            >
-              <CheckCircle2 className="w-4 h-4 text-[#857542]" />
-              <span>Instant Demo / Local Dev Bypass (Prof Wood)</span>
-            </button>
-          </div>
-
           {/* FERPA Reassurance Box */}
           <div className="mt-6 p-4 rounded-lg bg-[#F7F5EE] border-l-4 border-[#857542] text-neutral-700">
             <div className="flex items-center space-x-2 text-xs font-bold text-neutral-900 mb-1">
               <ShieldCheck className="w-4 h-4 text-[#857542]" />
-              <span>100% FERPA &amp; Client-Side Privacy Guarantee</span>
+              <span>Built to Support FERPA-Compliant Advising</span>
             </div>
             <p className="text-[11px] leading-relaxed text-neutral-600">
-              Student transcripts, Anthology course records, and exported degree plans are processed
-              <strong> strictly in local browser memory</strong>. No student names, student IDs,
-              grades, or PII are ever stored on, uploaded to, or transmitted to any external server.
+              Zero-Cloud Student Data: Student transcripts, grades, and degree audits are parsed and stored strictly inside your browser memory. No student Personal Identifiable Information (PII) leaves this device.
             </p>
           </div>
         </div>
