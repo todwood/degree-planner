@@ -1820,3 +1820,37 @@
      - Headless Playwright script `.tmp/verify_audit_overrides.mjs` verifying Brandon Paz transcript flow, GE locked card pill and tooltip, unmatching `ENGL 15000` (credits drop 74 -> 71 and paw updates), "Set to Complete" exemption assignment (`✓ Exempted`), and "Suggest Recommended Course" modal.
      - Total Vitest suite: **370 / 370 tests passing (100% green)** across all 35 test files (`npm test`).
      - Production bundle: `npm run build` compiled cleanly in 5.94s.
+
+
+### 98. Credential Stack Synchronization, Ghost Minors Elimination, Dynamic Target Math & Progress Bar Overhaul
+- **Objective:** Fix multi-program stack desynchronization across Screen 1 <-> Screen 2 back-navigation, eliminate synthetic "Ghost Minors" created from emphasis tracks in the Anthology parser, dynamically scale graduation target credits beyond 120 cr for multi-program stacks, and overhaul Card 2's academic standing progress bar into 4 discrete tiers with proportional fills.
+- **Architectural Implementation:**
+  1. *Parser Ghost Minor Elimination (`src/engine/transcriptParser.js`):*
+     - Ceased setting `declaredMinors: resolvedConcentrations`.
+     - `declaredMinors` is now strictly populated ONLY if the detected candidate program explicitly matches an official catalog minor (`credentialType === 'MINOR'`).
+     - Sub-plans and areas of study are stored strictly in `concentrations` and `emphasisTracks`.
+  2. *Credential State Synchronization & Back-Navigation Data Flow (`src/components/Screen1Intake.jsx` & `src/App.jsx`):*
+     - `Screen1Intake.jsx` dispatches `additionalPrograms` as an array of program IDs (`declaredProgramIds.filter(id => id !== selectedProgramId)`), NOT string names.
+     - Added `declaredProgramIds` state and prop passed cleanly to `<Screen1Intake declaredProgramIds={declaredProgramIds} />` and `<Screen2Audit declaredProgramIds={declaredProgramIds} />`.
+     - In `Screen1Intake.jsx` remount initialization, prioritized `propDeclaredProgramIds` and resolved programs by ID, guaranteeing 0 programs are lost when returning from Screen 2 to Screen 1.
+  3. *Screen 2 Summary Card Credential Labeling (`src/components/Screen2Audit.jsx`):*
+     - Resolved credentials against both `masterProgramsDatabase.json` (1,008 programs, keyed object) and `masterDatabase.json` (33 programs).
+     - Labeling accurately reflects verified `credentialType`: `Major:`, `Minor:`, `Certificate:`, and `Emphasis:`.
+     - Raw string IDs and ghost minors no longer render in the student info card.
+  4. *Dynamic Target Ceiling Math (`src/engine/waterfallAudit.js` & `src/components/Screen2Audit.jsx`):*
+     - Dynamically computes graduation target:
+       $$\text{Dynamic Target} = \max\Big(120,\, \text{Earned} + \text{Active} + \text{Net Unfulfilled Stack Credits}\Big)$$
+     - Properly deduplicates shared overlap requirements, dynamically scaling the target (e.g. 153 cr for Connor Brown's IT Networking + IT App Dev double major and AI Certificate).
+  5. *Academic Standing Progress Bar Overhaul (`src/components/Screen2Audit.jsx`):*
+     - Restructured Card 2 with 4 discrete academic standing tiers:
+       - Freshman (0–29 cr)
+       - Sophomore (30–59 cr)
+       - Junior (60–89 cr)
+       - Senior (90–119+ cr)
+     - Proportional multi-segment fill: solid `#857542` (completed), striped `#B5A36A` (active enrollment), `#F5F5F4` (remaining track).
+     - Maintained 100% backward compatibility for all test IDs (`path-to-graduation-card`, `path-to-graduation-title`, `dynamic-target-badge`, `audit-summary-metric`, `lion-paw-marker`, `diploma-finish-icon`, `path-segment-completed`, `path-segment-active`, `path-segment-remaining`, `credit-metrics-line`).
+  6. *Verification & Zero Regression:*
+     - Authored Vitest suite `tests/screen2StackAndTargetFixes.test.js` (5 unit tests) covering ghost minor elimination, stack ID persistence, Screen 2 info card secondary major labeling, dynamic target scaling, and 4-tier progress bar rendering.
+     - Full Vitest suite: **375 / 375 tests passing (100% green)** across all 36 test files (`npm test`).
+     - Headless Playwright verification `.tmp/verify_screen2_fixes.mjs` verifying Connor Brown transcript ingestion, adding secondary IT App Dev major, advancing to Screen 2, checking Info Card labels (`Major: Information Technology, BS Networking Emphasis` and `Major: Information Technology, BS Applications Development Emphasis`, zero ghost minors), verifying dynamic target scaled to 153 cr, verifying progress bar and paw marker, navigating back to Screen 1, and confirming both majors persist in the stack.
+     - Production build: `npm run build` compiled cleanly in 5.75s.

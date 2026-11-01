@@ -1469,6 +1469,41 @@ export function processRawCourseRecords(rawRecords, options = {}) {
       : detectedAreasOfStudy;
   const resolvedCatalogYear = inMeta.catalog_year || inMeta.catalogYear || inferredCatalogYear;
 
+  // Verify declared minors against catalog programs database (credentialType === 'MINOR' or program_type === 'Minor')
+  const allCatalogPrograms = Array.isArray(masterDb?.programs) ? masterDb.programs : [];
+  const catalogMinorPrograms = allCatalogPrograms.filter((p) => {
+    const pt = String(p.program_type || p.degree_type || p.credentialType || '').toLowerCase();
+    const nm = String(p.name || p.program_name || '').toLowerCase();
+    return pt === 'minor' || nm.includes('minor');
+  });
+
+  const verifiedDeclaredMinors = [];
+  const candidateMinors = Array.isArray(inMeta.declaredMinors)
+    ? inMeta.declaredMinors
+    : [];
+
+  for (const candidate of candidateMinors) {
+    if (!candidate) continue;
+    const candStr = typeof candidate === 'string' ? candidate.trim() : (candidate.name || candidate.id || '').trim();
+    if (!candStr) continue;
+    const isOfficial = catalogMinorPrograms.some(
+      (m) => m.id === candStr || m.name?.toLowerCase() === candStr.toLowerCase()
+    );
+    if (isOfficial && !verifiedDeclaredMinors.includes(candStr)) {
+      verifiedDeclaredMinors.push(candStr);
+    }
+  }
+
+  for (const area of detectedAreasOfStudy) {
+    if (!area) continue;
+    const isOfficial = catalogMinorPrograms.some(
+      (m) => m.id === area || m.name?.toLowerCase() === area.toLowerCase()
+    );
+    if (isOfficial && !verifiedDeclaredMinors.includes(area)) {
+      verifiedDeclaredMinors.push(area);
+    }
+  }
+
   return {
     studentMetadata: {
       name: resolvedName,
@@ -1489,9 +1524,10 @@ export function processRawCourseRecords(rawRecords, options = {}) {
       enrollment_number: inMeta.enrollment_number || '',
       status: inMeta.status || '',
       concentrations: resolvedConcentrations,
-      declaredMinors: resolvedConcentrations,
+      emphasisTracks: resolvedConcentrations,
       templateSuffixes,
-      ...inMeta
+      ...inMeta,
+      declaredMinors: verifiedDeclaredMinors
     },
     validCourses,
     transferCourses,

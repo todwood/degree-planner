@@ -110,3 +110,13 @@
 - **Symptom:** `getPrescribedGeForCategory` returned `null` for `cybersecurity_bs_2026` inside the rendered GE section in browser tests, despite being present in `masterProgramsDatabase.json`.
 - **Root Cause:** `auditGeneralEducationCategories` in `waterfallAudit.js` outputs `cat.id = 'mathematics'` and `'additional_ge_electives'`, whereas `CATEGORY_BUCKET_MAP` in `auditOverrideHelpers.js` initially only keyed on `'mathematical_sciences'` and `'general_education_elective'`.
 - **Resolution:** Added `'mathematics'` and `'additional_ge_electives'` directly into `CATEGORY_BUCKET_MAP`, ensuring robust alias resolution whether the category ID originates from MOTR bucket strings or engine output objects.
+
+
+### Issue 24: Combobox DOM Locator Timeout & Dual Database Lookup in Screen 2
+- **Symptom:** Playwright verification timed out locating `[id^="program-option-it_networking_bs"]` and Screen 2 displayed raw ID strings (`EMPHASIS:information_technology_bs_...`) in the student summary card.
+- **Root Cause:**
+  1. The program catalog database `masterProgramsDatabase.json` keys programs by `information_technology_bs_networking_emphasis_2026` rather than `it_networking_bs_2026`, and the programs field is an Object, not an Array.
+  2. In `Screen2Audit.jsx`, line 1074 resolved credentials using `masterDb?.programs || masterProgramsDb?.programs || []`. Because `masterDb?.programs` existed with only 33 programs, `masterProgramsDb` was never consulted, causing secondary majors from `masterProgramsDb` to fall through to raw string display.
+- **Resolution:**
+  1. Updated test locators to match option and card IDs by substring (`[id^="program-option-"][id*="networking"]` / `[id*="applications_development"]`).
+  2. In `Screen2Audit.jsx`, combined `masterProgramsDb` (1008 programs, supporting both Array and Object formats) and `masterDb` (33 programs) into a single lookup array, cleanly resolving all credentials into official `Major:`, `Minor:`, `Certificate:`, and `Emphasis:` labels with 0 raw IDs or ghost minors.

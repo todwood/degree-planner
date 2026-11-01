@@ -2309,6 +2309,7 @@ export function buildProgramAuditLedgers(orderedPrograms = [], courses = [], cat
     }
 
     return {
+      id: prog.id,
       programId: prog.id,
       name: prog.name,
       category,
@@ -2449,20 +2450,44 @@ export function runDegreeAudit({ studentRecord = null, declaredPrograms = [], ca
   const netRequiredStackCredits = geRequiredCredits + uniqueProgramCredits;
 
   // 3. Dynamic Target Resolution:
-  // targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits)
-  const targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits);
+  // Collect unfulfilled requirements across all program audits without double-counting shared unfulfilled courses
+  const unfulfilledCodesSeen = new Set();
+  let remainingProgramRequirementsOnly = 0;
+  for (const pa of programAudits || []) {
+    for (const r of pa.requirements || []) {
+      if (!r.satisfied && !r.waived) {
+        const cCode = r.code ? r.code.toUpperCase().replace(/\s+/g, '') : null;
+        if (cCode) {
+          if (!unfulfilledCodesSeen.has(cCode)) {
+            unfulfilledCodesSeen.add(cCode);
+            remainingProgramRequirementsOnly += Number(r.credits) || 3;
+          }
+        } else {
+          remainingProgramRequirementsOnly += Number(r.credits) || 3;
+        }
+      }
+    }
+    for (const pool of pa.electivePools || []) {
+      remainingProgramRequirementsOnly += Number(pool.remainingCredits) || 0;
+    }
+  }
+
+  const remainingGeCredits = Number(generalEducationAudit?.remainingCredits) || 0;
+  const netUnfulfilledStackCredits = remainingProgramRequirementsOnly + remainingGeCredits;
 
   const resolvedPrograms = ordered.length > 0 ? ordered : baseline.selectedPrograms;
 
   const totalAppliedCredits = baseline.policyChecklist?.totalCredits?.EarnedPlusEnrolled ?? 0;
   const totalCompletedCredits = baseline.policyChecklist?.totalCredits?.completed ?? 0;
 
-  // Remaining program requirements across all credential ledgers + remaining GE
-  const remainingProgramRequirements = programAudits.reduce((sum, pa) => {
-    const reqRemaining = pa.requirements.filter((r) => !r.satisfied).reduce((s, r) => s + r.credits, 0);
-    const poolRemaining = (pa.electivePools || []).reduce((s, p) => s + (p.remainingCredits || 0), 0);
-    return sum + reqRemaining + poolRemaining;
-  }, 0) + (generalEducationAudit?.remainingCredits || 0);
+  // targetGraduationCredits = Math.max(baseInstitutionalFloor, netRequiredStackCredits, options.targetGraduationCredits || 0)
+  const targetGraduationCredits = Math.max(
+    baseInstitutionalFloor,
+    netRequiredStackCredits,
+    options.targetGraduationCredits || 0
+  );
+
+  const remainingProgramRequirements = netUnfulfilledStackCredits;
 
   // Adjust Free Elective remaining calculation:
   // remainingFreeElectives = Math.max(0, targetGraduationCredits - (totalAppliedCredits + remainingProgramRequirements))

@@ -224,7 +224,8 @@ export default function Screen1Intake({
   intakeFiles,
   onUpdateIntakeFiles,
   onClearActiveRecord,
-  onUpdateDeclaredProgramIds
+  onUpdateDeclaredProgramIds,
+  declaredProgramIds: propDeclaredProgramIds
 }) {
   // ---------------------------------------------------------------------------
   // 1. Files & Ingestion Channels (Card 1)
@@ -293,10 +294,16 @@ export default function Screen1Intake({
   const [stagedComboboxProgramId, setStagedComboboxProgramId] = useState(propProgramId || '');
   const [core42TransferBlock, setCore42TransferBlock] = useState(false);
   const [declaredProgramIds, setDeclaredProgramIds] = useState(() => {
+    if (Array.isArray(propDeclaredProgramIds) && propDeclaredProgramIds.length > 0) {
+      return [...propDeclaredProgramIds];
+    }
     if (Array.isArray(propAdditionalPrograms) && propAdditionalPrograms.length > 0) {
       const initial = propProgramId ? [propProgramId] : [];
       for (const p of propAdditionalPrograms) {
-        if (p && !initial.includes(p)) initial.push(p);
+        if (!p) continue;
+        const matched = (masterDb?.programs || []).find((prog) => prog.id === p || prog.name === p);
+        const resolvedId = matched ? matched.id : p;
+        if (resolvedId && !initial.includes(resolvedId)) initial.push(resolvedId);
       }
       return initial;
     }
@@ -305,6 +312,20 @@ export default function Screen1Intake({
     }
     return propProgramId ? [propProgramId] : [];
   });
+
+  useEffect(() => {
+    if (Array.isArray(propDeclaredProgramIds) && propDeclaredProgramIds.length > 0) {
+      setDeclaredProgramIds((prev) => {
+        if (
+          prev.length === propDeclaredProgramIds.length &&
+          prev.every((id, idx) => id === propDeclaredProgramIds[idx])
+        ) {
+          return prev;
+        }
+        return [...propDeclaredProgramIds];
+      });
+    }
+  }, [propDeclaredProgramIds]);
 
   const setCatalogYear = (cy) => {
     setCatalogYearState(cy);
@@ -367,7 +388,10 @@ export default function Screen1Intake({
 
   const declaredPrograms = useMemo(() => {
     return declaredProgramIds
-      .map((id) => allAvailablePrograms.find((p) => p.id === id) || (masterDb?.programs || []).find((p) => p.id === id))
+      .map((id) =>
+        allAvailablePrograms.find((p) => p.id === id || p.name === id) ||
+        (masterDb?.programs || []).find((p) => p.id === id || p.name === id)
+      )
       .filter(Boolean);
   }, [declaredProgramIds, allAvailablePrograms, masterDb]);
 
@@ -1139,7 +1163,7 @@ export default function Screen1Intake({
     onIntakeComplete({
       parsedTranscript: finalParsed,
       selectedProgramId,
-      additionalPrograms: declaredPrograms.filter((p) => p.id !== selectedProgramId).map((p) => p.name),
+      additionalPrograms: declaredPrograms.filter((p) => p.id !== selectedProgramId).map((p) => p.id),
       declaredPrograms: declaredProgramIds,
       core42Completed: core42TransferBlock,
       constraints: {

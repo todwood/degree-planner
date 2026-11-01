@@ -23,6 +23,7 @@ import {
   Lock
 } from 'lucide-react';
 import masterProgramsDb from '../data/masterProgramsDatabase.json' with { type: 'json' };
+import { getProgramCategory } from '../utils/programStackUtils.js';
 import ManualAssignmentModal from './audit/ManualAssignmentModal.jsx';
 import CourseRecommenderModal from './audit/CourseRecommenderModal.jsx';
 import {
@@ -56,6 +57,7 @@ export default function Screen2Audit({
   constraints,
   selectedProgramId: propSelectedProgramId,
   additionalPrograms: propAdditionalPrograms,
+  declaredProgramIds: propDeclaredProgramIds,
   catalogYear: propCatalogYear,
   parsedTranscript,
   initialDrawerOpen = false
@@ -547,14 +549,57 @@ export default function Screen2Audit({
 
   const totalEarnedAndActive = completedCr + inProgressCr + scheduledCr;
 
+  const unfulfilledGeCredits = useMemo(() => {
+    const buckets = auditResult?.geBuckets || [];
+    return buckets
+      .filter((b) => {
+        const reqKey = `GE:${b.bucket_id}`;
+        if (auditOverrides?.unmatched?.[reqKey]) return true;
+        if (auditOverrides?.manualMatches?.[reqKey]) return false;
+        return !b.fulfilled;
+      })
+      .reduce((sum, b) => sum + (Number(b.credits) || 3), 0);
+  }, [auditResult?.geBuckets, auditOverrides]);
+
+  const remainingProgramCredits = useMemo(() => {
+    const seenReqCodes = new Set();
+    let sum = 0;
+    for (const ledger of programLedgers || []) {
+      for (const req of ledger.requirements || []) {
+        const reqKey = `MAJOR:${req.compactCode}`;
+        const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+        const isManuallyMatched = Boolean(auditOverrides?.manualMatches?.[reqKey]);
+        const isUnfulfilled = isUnmatched || (!isManuallyMatched && !req.satisfied && !req.matchedCourse && !req.waived);
+        if (isUnfulfilled) {
+          const codeKey = req.compactCode || req.code || null;
+          if (codeKey) {
+            if (!seenReqCodes.has(codeKey)) {
+              seenReqCodes.add(codeKey);
+              sum += Number(req.credits) || 3;
+            }
+          } else {
+            sum += Number(req.credits) || 3;
+          }
+        }
+      }
+    }
+    return sum;
+  }, [programLedgers, auditOverrides]);
+
+  const netUnfulfilledStackCredits = useMemo(() => {
+    return remainingProgramCredits + unfulfilledGeCredits;
+  }, [remainingProgramCredits, unfulfilledGeCredits]);
+
   const targetCr = useMemo(() => {
-    return (
+    const baseFloor = 120;
+    const stackTarget =
       auditResult?.targetGraduationCredits ||
       auditResult?.dynamicGraduationTarget ||
       auditResult?.policyChecklist?.totalCredits?.target ||
-      120
-    );
-  }, [auditResult]);
+      baseFloor;
+    const requiredTotal = totalEarnedAndActive + netUnfulfilledStackCredits;
+    return Math.max(baseFloor, stackTarget, requiredTotal);
+  }, [auditResult, totalEarnedAndActive, netUnfulfilledStackCredits]);
 
   const remainingCr = Math.max(0, targetCr - totalEarnedAndActive);
   const percentComplete = Math.min(100, Math.round((completedCr / targetCr) * 100));
@@ -582,9 +627,9 @@ export default function Screen2Audit({
     return calculateFreeElectivesNeeded({
       targetGraduationCredits: targetCr,
       totalEarnedAndActiveCredits: totalEarnedAndActive,
-      remainingMajorCredits
+      remainingMajorCredits: remainingProgramCredits
     });
-  }, [targetCr, totalEarnedAndActive, remainingMajorCredits]);
+  }, [targetCr, totalEarnedAndActive, remainingProgramCredits]);
 
   const itemizedFreeElectives = useMemo(() => {
     return itemizeFreeElectives(freeElectivesNeeded);
@@ -1021,26 +1066,90 @@ export default function Screen2Audit({
           emphasis = parts.slice(1).join(' — ').trim();
         }
 
+        const resolveCredentialInfo = (candidate) => {
+          if (!candidate) return null;
+          const candStr = typeof candidate === 'string' ? candidate.trim() : (candidate.name || candidate.id || '').trim();
+          if (!candStr) return null;
+
+          const rawDb1 = masterProgramsDb?.programs
+            ? (Array.isArray(masterProgramsDb.programs) ? masterProgramsDb.programs : Object.values(masterProgramsDb.programs))
+            : [];
+          const rawDb2 = masterDb?.programs
+            ? (Array.isArray(masterDb.programs) ? masterDb.programs : Object.values(masterDb.programs))
+            : [];
+          const catalogPrograms = [...rawDb1, ...rawDb2];
+          const matched = catalogPrograms.find(
+            (p) => p.id === candStr || p.name?.toLowerCase() === candStr.toLowerCase()
+          );
+
+          if (matched) {
+            const category = getProgramCategory(matched);
+            const isMajor = category === 'Major' || category === 'Major - Track' || matched.credentialType === 'MAJOR' || matched.program_type === 'Major';
+            const isMinor = category === 'Minor' || matched.credentialType === 'MINOR' || matched.program_type === 'Minor';
+            const isCert = category === 'Certificate' || matched.credentialType === 'CERTIFICATE' || matched.program_type === 'Certificate';
+
+            let label = 'Major';
+            if (isMinor) label = 'Minor';
+            else if (isCert) label = 'Certificate';
+            else if (isMajor) label = 'Major';
+
+            return {
+              key: matched.id,
+              label,
+              name: matched.name || candStr
+            };
+          }
+
+          const lower = candStr.toLowerCase();
+          let label = 'Emphasis';
+          if (lower.includes('minor')) {
+            label = 'Minor';
+          } else if (lower.includes('cert')) {
+            label = 'Certificate';
+          } else if (lower.includes('major') || /,\s*(bs|ba)\b/i.test(candStr)) {
+            label = 'Major';
+          } else if (lower.includes('concentration')) {
+            label = 'Concentration';
+          }
+
+          return {
+            key: candStr,
+            label,
+            name: candStr
+          };
+        };
+
+        const primaryProgId = auditResult?.primaryProgram?.id || primaryLedger?.program?.id || propSelectedProgramId;
+
         const rawAdditionalList = [
-          ...(propAdditionalPrograms || []),
+          ...(propDeclaredProgramIds || []).filter((id) => id !== primaryProgId),
+          ...(secondaryLedgers || []).map((l) => l.program || l.name || l.programId || l.id),
+          ...(minorAndCertLedgers || []).map((l) => l.program || l.name || l.programId || l.id),
+          ...(propAdditionalPrograms || []).filter((p) => p !== primaryProgId),
           ...(student.declaredMinors || []),
           ...(student.concentrations || []),
           ...(student.additionalPrograms || []),
           ...(auditResult?.additionalPrograms || [])
         ];
 
-        const allAdditionalPrograms = Array.from(
-          new Set(
-            rawAdditionalList
-              .map((p) => (typeof p === 'string' ? p.trim() : p?.name?.trim() || ''))
-              .filter(Boolean)
-          )
-        ).filter((prog) => {
-          const lower = prog.toLowerCase();
-          if (degreeTitle.toLowerCase().includes(lower)) return false;
-          if (emphasis && emphasis.toLowerCase().includes(lower)) return false;
-          return true;
-        });
+        const seenKeys = new Set();
+        const allAdditionalPrograms = [];
+
+        for (const item of rawAdditionalList) {
+          const info = resolveCredentialInfo(item);
+          if (!info) continue;
+
+          const lowerName = info.name.toLowerCase();
+          if (degreeTitle.toLowerCase().includes(lowerName)) continue;
+          if (emphasis && emphasis.toLowerCase().includes(lowerName)) continue;
+          if (primaryLedger?.program?.name && primaryLedger.program.name.toLowerCase() === lowerName) continue;
+
+          const dedupeKey = `${info.label}:${info.name.toLowerCase()}`;
+          if (!seenKeys.has(dedupeKey)) {
+            seenKeys.add(dedupeKey);
+            allAdditionalPrograms.push(info);
+          }
+        }
 
         return (
           <div className="bg-white rounded-xl border border-neutral-200/80 p-4 shadow-xs">
@@ -1086,18 +1195,14 @@ export default function Screen2Audit({
                     {degreeTitle}
                     {emphasis ? ` • ${emphasis}` : ''}
                   </p>
-                  {allAdditionalPrograms.map((prog, idx) => {
-                    const isCert = /cert/i.test(prog);
-                    const label = isCert ? 'Certificate' : 'Minor';
-                    return (
-                      <p key={idx} className="text-xs font-semibold text-neutral-800">
-                        <span className="text-neutral-500 uppercase text-[10px] tracking-wider font-bold mr-1.5">
-                          {label}:
-                        </span>
-                        {prog}
-                      </p>
-                    );
-                  })}
+                  {allAdditionalPrograms.map((item, idx) => (
+                    <p key={idx} className="text-xs font-semibold text-neutral-800">
+                      <span className="text-neutral-500 uppercase text-[10px] tracking-wider font-bold mr-1.5">
+                        {item.label}:
+                      </span>
+                      {item.name}
+                    </p>
+                  ))}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-neutral-500 pt-1">
@@ -1173,42 +1278,49 @@ export default function Screen2Audit({
       ========================================================================= */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm space-y-6" data-testid="path-to-graduation-card">
         {/* Header & Target Badge */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center space-x-2">
-            <h2 className="text-lg font-bold text-neutral-900 tracking-tight" data-testid="path-to-graduation-title">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-1.5 h-4 bg-[#857542] rounded-full" />
+            <h2
+              className="text-base font-bold text-neutral-900 tracking-tight uppercase"
+              data-testid="path-to-graduation-title"
+            >
               PATH TO GRADUATION
             </h2>
+            <span className="hidden sm:inline-block text-xs text-neutral-400 font-medium">
+              Academic Standing & Degree Audit Progress
+            </span>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <span
               data-testid="dynamic-target-badge"
-              className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#857542]/10 text-[#857542] border border-[#857542]/30"
+              className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#FDFBF7] text-[#857542] border border-[#B5A36A] shadow-2xs font-mono"
             >
               Dynamic Target: {targetCr} cr
             </span>
             <span
               data-testid="audit-summary-metric"
-              className="text-xs font-bold text-neutral-900 font-mono bg-neutral-100 px-3 py-1 rounded border border-neutral-200"
+              className="text-xs font-bold text-neutral-900 font-mono bg-neutral-100 px-3 py-1 rounded-md border border-neutral-200"
             >
               {completedCr} / {targetCr} Total Credits Completed ({percentComplete}%)
             </span>
           </div>
         </div>
 
-        {/* Minimalist Linear Path Infographic */}
-        <div className="relative pt-10 pb-4" data-testid="path-infographic-container">
-          {/* Lion Paw Progress Marker at Completed Coordinate */}
+        {/* Academic Standing Segmented Bar Infographic */}
+        <div className="relative pt-9 pb-2" data-testid="path-infographic-container">
+          {/* Floating Lion Paw Marker */}
           <div
             data-testid="lion-paw-marker-container"
             className="absolute top-0 transform -translate-x-1/2 flex flex-col items-center pointer-events-none transition-all duration-300 z-10"
-            style={{ left: `${Math.max(3, Math.min(97, completedPct))}%` }}
+            style={{ left: `${Math.max(2, Math.min(98, completedPct))}%` }}
           >
-            <div className="bg-[#857542] text-white text-[10px] font-bold font-mono px-1.5 py-0.5 rounded shadow whitespace-nowrap">
-              {completedCr} cr
+            <div className="bg-[#857542] text-white text-[10px] font-bold font-mono px-2 py-0.5 rounded shadow-xs whitespace-nowrap">
+              {completedCr} cr Completed
             </div>
             <svg
               viewBox="0 0 24 24"
-              className="w-5 h-5 text-[#857542] fill-current mt-0.5 drop-shadow-xs"
+              className="w-4 h-4 text-[#857542] fill-current mt-0.5 drop-shadow-2xs"
               data-testid="lion-paw-marker"
               aria-label="Lion Paw Progress Marker"
             >
@@ -1220,12 +1332,12 @@ export default function Screen2Audit({
             </svg>
           </div>
 
-          {/* Diploma / Degree Scroll Finish Milestone at Target Mark (100%) */}
+          {/* Graduation Diploma Finish Badge */}
           <div
             data-testid="diploma-finish-container"
-            className="absolute right-0 top-1 flex flex-col items-center z-10"
+            className="absolute right-0 top-0.5 flex flex-col items-center z-10"
           >
-            <div className="bg-neutral-900 text-[#B5A36A] font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center space-x-1.5 border border-[#B5A36A]">
+            <div className="bg-neutral-900 text-[#B5A36A] font-bold text-[10px] px-2 py-0.5 rounded-md shadow-xs flex items-center space-x-1.5 border border-[#B5A36A]">
               <svg
                 viewBox="0 0 24 24"
                 className="w-3.5 h-3.5 text-[#B5A36A] fill-none stroke-current"
@@ -1241,56 +1353,70 @@ export default function Screen2Audit({
                 <path d="M9 14h5" stroke="#B5A36A" />
                 <path d="M17 14l2 6-2.5-1.5L14 20l1-5" fill="#B5A36A" stroke="#B5A36A" />
               </svg>
-              <span>DIPLOMA ({targetCr} CR)</span>
+              <span className="font-mono">DIPLOMA ({targetCr} CR)</span>
             </div>
           </div>
 
-          {/* Horizontal Track Bar with 3 Segments */}
-          <div className="w-full h-6 bg-neutral-100 rounded-full overflow-hidden flex border border-neutral-300 relative">
-            {/* Path Segment 1: Completed (Solid Gold) */}
+          {/* Multi-Segment Track with 4 Academic Standing Tiers */}
+          <div className="w-full h-5 bg-neutral-100 rounded-md overflow-hidden flex border border-neutral-300 relative">
+            {/* 4 Standing Tier Dividing Lines (25%, 50%, 75%) */}
+            <div className="absolute inset-0 flex pointer-events-none z-10">
+              <div className="w-1/4 border-r border-neutral-300/60" />
+              <div className="w-1/4 border-r border-neutral-300/60" />
+              <div className="w-1/4 border-r border-neutral-300/60" />
+              <div className="w-1/4" />
+            </div>
+
+            {/* Path Segment 1: Completed Fill (Solid Gold) */}
             <div
               data-testid="path-segment-completed"
-              className="bg-[#857542] h-full transition-all duration-500"
+              className="bg-[#857542] h-full transition-all duration-500 z-0"
               style={{ width: `${completedPct}%` }}
               title={`Completed: ${completedCr} credits`}
             />
-            {/* Path Segment 2: In-Progress & Scheduled (Textured / Striped Gold) */}
+            {/* Path Segment 2: Active Fill (In-Progress & Scheduled Striped Gold) */}
             <div
               data-testid="path-segment-active"
-              className="bg-[#B5A36A] h-full transition-all duration-500 relative"
+              className="bg-[#B5A36A] h-full transition-all duration-500 relative z-0"
               style={{
                 width: `${activePct}%`,
                 backgroundImage:
-                  'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.35) 5px, rgba(255,255,255,0.35) 10px)'
+                  'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 8px)'
               }}
               title={`Active (In-Progress & Scheduled): ${inProgressCr + scheduledCr} credits`}
             />
-            {/* Path Segment 3: Remaining (Light Neutral with dashed border and dotted pattern) */}
+            {/* Path Segment 3: Remaining Track */}
             <div
               data-testid="path-segment-remaining"
-              className="flex-1 h-full bg-neutral-100 border-l border-dashed border-neutral-300"
-              style={{
-                backgroundImage:
-                  'radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px)',
-                backgroundSize: '8px 8px'
-              }}
+              className="flex-1 h-full bg-neutral-100 z-0"
               title={`Remaining: ${remainingCr} credits`}
             />
           </div>
 
-          {/* Milestone Ticks */}
-          <div className="flex justify-between text-[11px] font-mono text-neutral-500 mt-2 px-1">
-            <span>0 cr</span>
-            <span className={completedCr >= 30 ? 'font-bold text-emerald-700' : ''}>
-              30 cr {completedCr >= 30 ? '[✓]' : ''} (Sophomore)
-            </span>
-            <span className={completedCr >= 60 ? 'font-bold text-emerald-700' : ''}>
-              60 cr {completedCr >= 60 ? '[✓]' : ''} (Junior)
-            </span>
-            <span className={completedCr >= 90 ? 'font-bold text-emerald-700' : ''}>
-              90 cr {completedCr >= 90 ? '[✓]' : ''} (Senior)
-            </span>
-            <span className="font-bold text-neutral-900">{targetCr} cr (Graduation)</span>
+          {/* Academic Standing Milestone Labels */}
+          <div className="grid grid-cols-4 text-[10px] font-mono text-neutral-500 mt-2 text-center">
+            <div className="text-left pl-0.5">
+              <span className="font-bold text-neutral-700">Freshman</span>
+              <span className="block text-[9px] text-neutral-400">0–29 cr</span>
+            </div>
+            <div>
+              <span className={`font-bold ${completedCr >= 30 ? 'text-[#857542]' : 'text-neutral-700'}`}>
+                Sophomore {completedCr >= 30 ? '✓' : ''}
+              </span>
+              <span className="block text-[9px] text-neutral-400">30–59 cr</span>
+            </div>
+            <div>
+              <span className={`font-bold ${completedCr >= 60 ? 'text-[#857542]' : 'text-neutral-700'}`}>
+                Junior {completedCr >= 60 ? '✓' : ''}
+              </span>
+              <span className="block text-[9px] text-neutral-400">60–89 cr</span>
+            </div>
+            <div className="text-right pr-0.5">
+              <span className={`font-bold ${completedCr >= 90 ? 'text-[#857542]' : 'text-neutral-700'}`}>
+                Senior {completedCr >= 90 ? '✓' : ''}
+              </span>
+              <span className="block text-[9px] text-neutral-400">90–119+ cr</span>
+            </div>
           </div>
         </div>
 
@@ -1309,11 +1435,11 @@ export default function Screen2Audit({
             </span>
             <span className="text-neutral-300">•</span>
             <span>
-              <strong className="text-purple-800 font-bold font-mono">{scheduledCr}</strong> Scheduled
+              <strong className="text-purple-800 font-bold font-mono" data-testid="audit-scheduled-cr">{scheduledCr}</strong> Scheduled
             </span>
             <span className="text-neutral-300">•</span>
             <span>
-              <strong className="text-neutral-900 font-bold font-mono">{remainingCr}</strong> Remaining to Graduation
+              <strong className="text-neutral-900 font-bold font-mono" data-testid="audit-remaining-cr">{remainingCr}</strong> Remaining to Graduation
             </span>
           </div>
           <div className="text-[11px] text-neutral-500 font-mono">

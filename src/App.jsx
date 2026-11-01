@@ -142,11 +142,11 @@ export default function App() {
     setParsedTranscript(parsed);
     setSelectedProgramId(progId);
     setConstraints(c);
-    if (declProgs) {
-      setDeclaredProgramIds(declProgs);
-    } else if (progId) {
-      setDeclaredProgramIds([progId, ...(addProgs || [])].filter(Boolean));
-    }
+    const resolvedDeclaredIds = (Array.isArray(declProgs) && declProgs.length > 0)
+      ? declProgs
+      : [progId, ...(addProgs || [])].filter(Boolean);
+
+    setDeclaredProgramIds(resolvedDeclaredIds);
     if (addProgs) setAdditionalPrograms(addProgs);
     if (parsed?.studentMetadata?.catalogYear) {
       setCatalogYear(parsed.studentMetadata.catalogYear);
@@ -155,10 +155,9 @@ export default function App() {
     const isCore42 = Boolean(c42 ?? parsed?.studentMetadata?.core42Completed ?? c?.core42Completed);
 
     // Run deterministic Waterfall & Multi-Program Degree Audit
-    const declared = [progId, ...(addProgs || [])].filter(Boolean);
     const audit = runDegreeAudit({
       studentRecord: parsed,
-      declaredPrograms: declared,
+      declaredPrograms: resolvedDeclaredIds,
       catalogDb: masterDb,
       auditOptions: {
         mathPlacementMet: true,
@@ -408,6 +407,7 @@ export default function App() {
             intakeFiles={intakeFiles}
             onUpdateIntakeFiles={setIntakeFiles}
             onClearActiveRecord={handleClearActiveRecord}
+            declaredProgramIds={declaredProgramIds}
             onUpdateDeclaredProgramIds={setDeclaredProgramIds}
           />
         ) : currentScreen === 2 ? (
@@ -424,6 +424,7 @@ export default function App() {
               constraints={constraints}
               selectedProgramId={selectedProgramId}
               additionalPrograms={additionalPrograms}
+              declaredProgramIds={declaredProgramIds}
               catalogYear={catalogYear}
             />
           ) : (
