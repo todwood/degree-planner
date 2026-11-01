@@ -1788,3 +1788,35 @@
      - Headless Playwright script `.tmp/verify_path_to_graduation.mjs` verifying Brandon Paz transcript flow, DOM SVGs, initial collapsed state, drawer expansion, and clean process teardown.
      - Total Vitest suite: **351 / 351 tests passing (100% green)** across all 33 test files (`npm test`).
      - Production build: `npm run build` compiled cleanly in 6.94s.
+
+### 97. Phase 3 — Screen 2 Degree Audit Override Matrix, Course Recommender & GE Locking
+- **Objective:** Enable advisor-controlled interactive audit overrides in Screen 2: General Education bucket freezing/locking based on declared Major prescribed requirements, course unmatching (`[ ✕ ]`) returning attempts to free electives with dynamic recalculation of graduation progress meters, "Set to Complete" manual assignment modal with policy exemptions and double-dip warnings, "Suggest Recommended Course" searchable catalog modal with prior student history badges, and an itemized Free Electives discrete slot bucket.
+- **Architectural Implementation:**
+  1. *General Education Bucket Freezing / Locking (`src/utils/auditOverrideHelpers.js` & `src/components/Screen2Audit.jsx`):*
+     - Evaluates `getPrescribedGeForCategory(currentProgram, catId)` using `masterProgramsDatabase.json` (`prescribed_ge_requirements` / `prescribed_ge_satisfactions`).
+     - Visually freezes/locks GE distribution cards with subtle border and lock icon (`🔒`).
+     - Surfaces info pill `Satisfied via {Major Name}` (`data-testid="ge-locked-pill"`) and explanatory tooltip: `"This distribution requirement is fulfilled directly within the {Major Name} major coursework to avoid redundant credits."`.
+  2. *Interactive Unmatch Action (`[ ✕ ]`):*
+     - Added unmatch button `[ ✕ ]` (`data-testid="unmatch-course-{code}"`) to all satisfied requirement rows in GE, Primary Major, Secondary Major, and Minors/Certificates.
+     - Detaches assigned course attempt into unassigned/free electives in `auditOverrides.unmatched`.
+     - Flips the row to `○ Unfulfilled`, exposing `[ Set to Complete ]` and `[ 🔍 Suggest Recommended Course ]` buttons.
+     - Dynamically recalculates completed/in-progress credits, immediately updating the Lion Paw progress marker and credit counts.
+  3. *"Set to Complete" Manual Assignment Modal (`src/components/audit/ManualAssignmentModal.jsx`):*
+     - Top administrative option: `🛡️ Student is Exempted (Policy Exemption Form Filed)` marks row as `✓ Exempted` (0 earned credits).
+     - Student course roster displaying completed, in-progress, and scheduled attempts, with an appended tag `(already matched to [Requirement Name])`.
+     - Displays policy alert in GE panel: `"⚠️ General Education Policy: Each GE course may satisfy only one distribution category (except for the /HD Human Diversity tag)."` (`data-testid="double-dip-warning"`).
+     - Submitting applies override to `auditOverrides.manualMatches`.
+  4. *"Suggest Recommended Course" Modal (`src/components/audit/CourseRecommenderModal.jsx`):*
+     - Searchable catalog modal filtering courses by requirement scope (MOTR GE category, elective choice pool, or general electives).
+     - Appends prior student history badges: `(Completed already)` [emerald], `(In-Progress already)` [blue], `(Scheduled already)` [purple].
+     - Includes search bar and level filter pills (`[ All ]`, `[ 10000–20000 Lower Div ]`, `[ 30000–40000 Upper Div ]`).
+     - Selecting a course assigns it as the target recommendation for Screen 3 scheduling.
+  5. *Free Electives Itemized Bucket (`src/utils/auditOverrideHelpers.js` & `src/components/Screen2Audit.jsx`):*
+     - Dynamically calculates: `freeElectivesNeeded = Math.max(0, targetGraduationCredits - totalEarnedAndActiveCredits - remainingMajorCredits)`.
+     - Itemizes balance into discrete slots: multiples of 3 as `Free Elective (3 credits)` and remainder (1 or 2) as `Free Elective (at least {remainder} credits)`.
+     - Each discrete slot provides `[ Set to Complete ]` and `[ 🔍 Suggest Recommended Course ]`.
+  6. *Verification & Zero Regression:*
+     - Vitest suite `tests/auditOverridesMatrix.test.js` (13 unit tests) verifying all 6 requirement areas.
+     - Headless Playwright script `.tmp/verify_audit_overrides.mjs` verifying Brandon Paz transcript flow, GE locked card pill and tooltip, unmatching `ENGL 15000` (credits drop 74 -> 71 and paw updates), "Set to Complete" exemption assignment (`✓ Exempted`), and "Suggest Recommended Course" modal.
+     - Total Vitest suite: **370 / 370 tests passing (100% green)** across all 35 test files (`npm test`).
+     - Production bundle: `npm run build` compiled cleanly in 5.94s.

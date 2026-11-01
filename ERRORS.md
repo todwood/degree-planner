@@ -105,3 +105,8 @@
 - **Resolution:** Updated test selectors to target explicit listbox IDs: `#catalog-year-option-2025-2026`, `#catalog-year-option-2026-2027`, and `#optionB-program-listbox [role="option"]:has-text("Theatre")`, and used `#optionB-program-search-input` for the search field. Verified clean execution with exit code 0.
 
 
+
+### Issue 18: State-Aligned GE Category ID Discrepancy (`mathematics` vs `mathematical_sciences`)
+- **Symptom:** `getPrescribedGeForCategory` returned `null` for `cybersecurity_bs_2026` inside the rendered GE section in browser tests, despite being present in `masterProgramsDatabase.json`.
+- **Root Cause:** `auditGeneralEducationCategories` in `waterfallAudit.js` outputs `cat.id = 'mathematics'` and `'additional_ge_electives'`, whereas `CATEGORY_BUCKET_MAP` in `auditOverrideHelpers.js` initially only keyed on `'mathematical_sciences'` and `'general_education_elective'`.
+- **Resolution:** Added `'mathematics'` and `'additional_ge_electives'` directly into `CATEGORY_BUCKET_MAP`, ensuring robust alias resolution whether the category ID originates from MOTR bucket strings or engine output objects.

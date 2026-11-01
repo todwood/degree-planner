@@ -19,8 +19,19 @@ import {
   Calendar,
   Layers,
   BookOpen,
-  Award
+  Award,
+  Lock
 } from 'lucide-react';
+import masterProgramsDb from '../data/masterProgramsDatabase.json' with { type: 'json' };
+import ManualAssignmentModal from './audit/ManualAssignmentModal.jsx';
+import CourseRecommenderModal from './audit/CourseRecommenderModal.jsx';
+import {
+  getPrescribedGeForCategory,
+  getPrescribedGeExplanation,
+  calculateFreeElectivesNeeded,
+  itemizeFreeElectives,
+  buildCourseMatchedMap
+} from '../utils/auditOverrideHelpers.js';
 import {
   buildProgramAuditLedgers,
   auditGeneralEducationCategories,
@@ -105,6 +116,149 @@ export default function Screen2Audit({
   const [rowOverrides, setRowOverrides] = useState(auditResult?.advisorOverrides || {});
   const [missingSessionInputs, setMissingSessionInputs] = useState({});
 
+  // Persistent Audit Overrides state (unmatched courses, manual assignments, target recommendations)
+  const [auditOverrides, setAuditOverrides] = useState(() => {
+    return (
+      auditOptions?.auditOverrides ||
+      auditResult?.auditOverrides || {
+        unmatched: {},
+        manualMatches: {},
+        targetRecommendations: {}
+      }
+    );
+  });
+
+  const updateAuditOverrides = (nextOverrides) => {
+    setAuditOverrides(nextOverrides);
+    if (onUpdateAuditOptions) {
+      onUpdateAuditOptions({ auditOverrides: nextOverrides });
+    }
+  };
+
+  // Directive C: Manual Assignment Modal state ("Set to Complete")
+  const [manualModalState, setManualModalState] = useState({
+    isOpen: false,
+    reqKey: '',
+    reqCode: '',
+    reqTitle: '',
+    isGEPanel: false
+  });
+
+  // Directive D: Course Recommender Modal state ("Suggest Recommended Course")
+  const [recommenderModalState, setRecommenderModalState] = useState({
+    isOpen: false,
+    reqKey: '',
+    reqCode: '',
+    reqTitle: '',
+    bucketId: null,
+    poolCourses: null,
+    isFreeElective: false
+  });
+
+  const handleOpenManualModal = (reqKey, req = {}) => {
+    setManualModalState({
+      isOpen: true,
+      reqKey,
+      reqCode: req.code || req.compactCode || req.id || '',
+      reqTitle: req.title || req.name || req.displayPlaceholderTitle || 'Requirement',
+      isGEPanel: String(reqKey).startsWith('GE:')
+    });
+  };
+
+  const handleOpenRecommenderModal = (reqKey, req = {}) => {
+    setRecommenderModalState({
+      isOpen: true,
+      reqKey,
+      reqCode: req.code || req.compactCode || req.id || '',
+      reqTitle: req.title || req.name || req.displayPlaceholderTitle || 'Requirement',
+      bucketId: req.bucket_id || (String(reqKey).startsWith('GE:') ? reqKey.replace('GE:', '') : null),
+      poolCourses: req.poolCourses || req.allowed_courses || req.approvedCourses || null,
+      isFreeElective: String(reqKey).startsWith('FREE_ELEC:') || req.isFreeElective || false
+    });
+  };
+
+  const handleAssignOverride = ({ type, course, note, credits, reqKey, reqTitle, warning }) => {
+    const nextUnmatched = { ...(auditOverrides.unmatched || {}) };
+    delete nextUnmatched[reqKey];
+
+    const next = {
+      ...auditOverrides,
+      unmatched: nextUnmatched,
+      manualMatches: {
+        ...(auditOverrides.manualMatches || {}),
+        [reqKey]: {
+          type,
+          course,
+          note,
+          credits: Number(credits) || (course ? Number(course.credits) || 3 : 0),
+          requirementTitle: reqTitle,
+          warning
+        }
+      }
+    };
+    updateAuditOverrides(next);
+  };
+
+  const handleSelectRecommendation = ({ reqKey, course }) => {
+    const next = {
+      ...auditOverrides,
+      targetRecommendations: {
+        ...(auditOverrides.targetRecommendations || {}),
+        [reqKey]: course
+      }
+    };
+    updateAuditOverrides(next);
+  };
+
+  const handleClearRecommendation = (reqKey) => {
+    const next = {
+      ...auditOverrides,
+      targetRecommendations: { ...(auditOverrides.targetRecommendations || {}) }
+    };
+    delete next.targetRecommendations[reqKey];
+    updateAuditOverrides(next);
+  };
+
+  const handleUnmatchCourse = (reqKey, courseOrReq) => {
+    const course = courseOrReq?.matchedCourse || courseOrReq;
+    const code = course?.code || courseOrReq?.code || '';
+    const credits = Number(course?.credits) || Number(courseOrReq?.credits) || 3;
+    const isCompleted =
+      course?.operationalStatus === 'COMPLETED' ||
+      course?.state === 'Complete' ||
+      course?.state === 'Completed' ||
+      course?.state === 'TR' ||
+      course?.state === 'Transfer' ||
+      Boolean(course?.grade);
+    const isInProgress =
+      course?.operationalStatus === 'IN_PROGRESS' ||
+      course?.state === 'In-Progress' ||
+      course?.state === 'Current';
+    const isScheduled =
+      course?.operationalStatus === 'SCHEDULED' ||
+      course?.state === 'Scheduled';
+
+    const nextManual = { ...(auditOverrides.manualMatches || {}) };
+    delete nextManual[reqKey];
+
+    const next = {
+      ...auditOverrides,
+      manualMatches: nextManual,
+      unmatched: {
+        ...(auditOverrides.unmatched || {}),
+        [reqKey]: {
+          detachedCourse: course,
+          detachedCode: code,
+          credits,
+          isCompleted,
+          isInProgress,
+          isScheduled
+        }
+      }
+    };
+    updateAuditOverrides(next);
+  };
+
   // Curricular Track Bifurcation & Commitment Mode state
   const [activeTrackId, setActiveTrackId] = useState(
     auditResult?.activeTrackId || auditOptions?.activeTrackId || 'option_a'
@@ -133,6 +287,7 @@ export default function Screen2Audit({
       auditResult?.primaryProgram?.id ||
       'cybersecurity_bs_2026';
     return (
+      masterProgramsDb?.programs?.[progId] ||
       (masterDb?.programs || []).find((p) => p.id === progId) ||
       auditResult?.primaryProgram ||
       null
@@ -311,7 +466,7 @@ export default function Screen2Audit({
   // Credit Summations for Race to Graduation
   const allCourses = parsedTranscript?.validCourses || auditResult?.allStudentCourses || [];
 
-  const completedCr = useMemo(() => {
+  const baseCompletedCr = useMemo(() => {
     if (typeof auditResult?.totalCompletedCredits === 'number') {
       return auditResult.totalCompletedCredits;
     }
@@ -327,8 +482,30 @@ export default function Screen2Audit({
       .reduce((s, c) => s + (Number(c.credits) || 0), 0);
   }, [auditResult, allCourses]);
 
+  const completedCr = useMemo(() => {
+    let cr = baseCompletedCr;
+    // Detached completed courses subtract credits
+    for (const u of Object.values(auditOverrides.unmatched || {})) {
+      if (u && (u.isCompleted || u.state === 'Completed' || u.operationalStatus === 'COMPLETED')) {
+        cr -= Number(u.credits) || 0;
+      }
+    }
+    // Manually matched completed courses add credits back
+    for (const mm of Object.values(auditOverrides.manualMatches || {})) {
+      if (
+        mm &&
+        mm.type === 'MANUAL_MATCH' &&
+        mm.course &&
+        (mm.course.state === 'Completed' || mm.course.operationalStatus === 'COMPLETED' || mm.course.grade)
+      ) {
+        cr += Number(mm.credits) || 0;
+      }
+    }
+    return Math.max(0, cr);
+  }, [baseCompletedCr, auditOverrides]);
+
   const inProgressCr = useMemo(() => {
-    return allCourses
+    let cr = allCourses
       .filter(
         (c) =>
           c.operationalStatus === 'IN_PROGRESS' ||
@@ -336,17 +513,37 @@ export default function Screen2Audit({
           c.state === 'Current'
       )
       .reduce((s, c) => s + (Number(c.credits) || 0), 0);
-  }, [allCourses]);
+
+    for (const u of Object.values(auditOverrides.unmatched || {})) {
+      if (
+        u &&
+        (u.isInProgress ||
+          u.state === 'In-Progress' ||
+          u.state === 'Current' ||
+          u.operationalStatus === 'IN_PROGRESS')
+      ) {
+        cr -= Number(u.credits) || 0;
+      }
+    }
+    return Math.max(0, cr);
+  }, [allCourses, auditOverrides]);
 
   const scheduledCr = useMemo(() => {
-    return allCourses
+    let cr = allCourses
       .filter(
         (c) =>
           c.operationalStatus === 'SCHEDULED' ||
           c.state === 'Scheduled'
       )
       .reduce((s, c) => s + (Number(c.credits) || 0), 0);
-  }, [allCourses]);
+
+    for (const u of Object.values(auditOverrides.unmatched || {})) {
+      if (u && (u.isScheduled || u.state === 'Scheduled' || u.operationalStatus === 'SCHEDULED')) {
+        cr -= Number(u.credits) || 0;
+      }
+    }
+    return Math.max(0, cr);
+  }, [allCourses, auditOverrides]);
 
   const totalEarnedAndActive = completedCr + inProgressCr + scheduledCr;
 
@@ -366,13 +563,58 @@ export default function Screen2Audit({
   const completedPct = Math.min(100, Math.max(0, (completedCr / targetCr) * 100));
   const activePct = Math.min(100 - completedPct, Math.max(0, ((inProgressCr + scheduledCr) / targetCr) * 100));
 
-  const remainingFreeElectivesCr = useMemo(() => {
-    if (typeof auditResult?.remainingFreeElectives === 'number') {
-      return auditResult.remainingFreeElectives;
-    }
-    const appliedReqs = (auditResult?.remainingCourseItems || []).reduce((s, c) => s + (c.credits || 0), 0);
-    return Math.max(0, targetCr - (totalEarnedAndActive + appliedReqs));
-  }, [auditResult, targetCr, totalEarnedAndActive]);
+  // Directive E: Remaining Major Credits calculation
+  const remainingMajorCredits = useMemo(() => {
+    if (!primaryLedger?.requirements) return 0;
+    return primaryLedger.requirements
+      .filter((req) => {
+        const reqKey = `MAJOR:${req.compactCode}`;
+        if (auditOverrides?.unmatched?.[reqKey]) return true; // unmatched is unfulfilled
+        if (auditOverrides?.manualMatches?.[reqKey]) return false; // manually assigned/exempted is fulfilled
+        return !req.satisfied && !req.matchedCourse && !req.waived;
+      })
+      .reduce((s, req) => s + (Number(req.credits) || 0), 0);
+  }, [primaryLedger, auditOverrides]);
+
+  // Directive E: Remaining Free Electives Needed formula
+  // freeElectivesNeeded = Math.max(0, targetGraduationCredits - totalEarnedAndActiveCredits - remainingMajorCredits)
+  const freeElectivesNeeded = useMemo(() => {
+    return calculateFreeElectivesNeeded({
+      targetGraduationCredits: targetCr,
+      totalEarnedAndActiveCredits: totalEarnedAndActive,
+      remainingMajorCredits
+    });
+  }, [targetCr, totalEarnedAndActive, remainingMajorCredits]);
+
+  const itemizedFreeElectives = useMemo(() => {
+    return itemizeFreeElectives(freeElectivesNeeded);
+  }, [freeElectivesNeeded]);
+
+  const remainingFreeElectivesCr = freeElectivesNeeded;
+
+  const courseMatchedMap = useMemo(() => {
+    return buildCourseMatchedMap({
+      geBuckets: auditResult?.geBuckets || [],
+      programLedgers,
+      auditOverrides
+    });
+  }, [auditResult?.geBuckets, programLedgers, auditOverrides]);
+
+  const studentCourseRoster = useMemo(() => {
+    return (auditResult?.normalizedHistory || auditResult?.allStudentCourses || allCourses).filter(
+      (c) =>
+        c.state === 'Complete' ||
+        c.state === 'Completed' ||
+        c.state === 'Transfer' ||
+        c.state === 'TR' ||
+        c.state === 'Current' ||
+        c.state === 'Scheduled' ||
+        c.state === 'In-Progress' ||
+        c.operationalStatus === 'COMPLETED' ||
+        c.operationalStatus === 'IN_PROGRESS' ||
+        c.operationalStatus === 'SCHEDULED'
+    );
+  }, [auditResult, allCourses]);
 
   // Institutional Policy Metrics
   const upperDivCompleted = upperDivisionGate?.completed ?? 0;
@@ -618,7 +860,8 @@ export default function Screen2Audit({
       activeTrackMode,
       activeTrackId,
       primaryRemainingQueue: finalPrimaryQueue,
-      secondaryRemainingQueue: secondaryQueue
+      secondaryRemainingQueue: secondaryQueue,
+      auditOverrides
     };
 
     onProceedToSchedule(handoffPayload);
@@ -1350,13 +1593,17 @@ export default function Screen2Audit({
                       const isCatSatisfied = cat.satisfied;
                       const isWritten = cat.id === 'written_communication';
                       const hasCompWarning = isWritten && compositionGatekeeper.hasWarning;
+                      const prescribedInfo = getPrescribedGeForCategory(currentProgram, cat.id);
+                      const isPrescribed = Boolean(prescribedInfo?.isPrescribed);
 
                       return (
                         <div
                           key={cat.id}
                           data-testid={`ge-category-${cat.id}`}
-                          className={`p-2.5 rounded-lg border text-xs space-y-1 ${
-                            isCatSatisfied
+                          className={`p-2.5 rounded-lg border text-xs space-y-1 transition ${
+                            isPrescribed
+                              ? 'bg-[#FAF8F5] border-[#B5A36A]/70 ring-1 ring-[#857542]/20'
+                              : isCatSatisfied
                               ? 'bg-emerald-50/50 border-emerald-200'
                               : hasCompWarning
                               ? 'bg-amber-50/50 border-amber-300'
@@ -1364,22 +1611,44 @@ export default function Screen2Audit({
                           }`}
                         >
                           <div className="flex items-center justify-between font-bold">
-                            <span className="text-neutral-900 truncate">{cat.name}</span>
+                            <span className="text-neutral-900 truncate flex items-center gap-1">
+                              {isPrescribed && <Lock className="w-3 h-3 text-[#857542]" />}
+                              <span>{cat.name}</span>
+                            </span>
                             <span className="font-mono text-[11px] text-neutral-600 shrink-0 ml-1">
                               {cat.credits}cr
                             </span>
                           </div>
 
-                          {isCatSatisfied ? (
+                          {isPrescribed && (
+                            <div className="pt-1 space-y-1">
+                              <span
+                                data-testid="ge-locked-pill"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#F7F5EE] text-[#857542] border border-[#B5A36A]"
+                                title={prescribedInfo.tooltip}
+                              >
+                                <Lock className="w-2.5 h-2.5 text-[#857542]" />
+                                <span>Satisfied via {prescribedInfo.programName}</span>
+                              </span>
+                              <p
+                                data-testid="ge-locked-tooltip"
+                                className="text-[10px] text-neutral-500 italic leading-tight"
+                              >
+                                {prescribedInfo.tooltip}
+                              </p>
+                            </div>
+                          )}
+
+                          {!isPrescribed && isCatSatisfied ? (
                             <div className="flex items-center space-x-1 text-emerald-700 font-semibold text-[11px] pt-1">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                               <span>Distribution requirement met</span>
                             </div>
-                          ) : (
+                          ) : !isPrescribed ? (
                             <div className="text-amber-800 font-semibold text-[11px] pt-1">
                               {cat.remainingCredits} cr remaining
                             </div>
-                          )}
+                          ) : null}
 
                           {hasCompWarning && (
                             <div
@@ -1413,6 +1682,13 @@ export default function Screen2Audit({
                       const reqKey = `GE:${b.bucket_id}`;
                       const activeOverride = rowOverrides[reqKey] || '';
                       const activeNote = rowNotes[reqKey] || '';
+                      const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+                      const manualMatch = auditOverrides?.manualMatches?.[reqKey];
+                      const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
+
+                      const mc = isUnmatched ? null : (manualMatch?.course || b.matchedCourse);
+                      const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(b.satisfied) || Boolean(mc));
+
                       return (
                         <tr key={b.bucket_id} className="hover:bg-neutral-50/70 transition">
                           <td className="py-2.5 px-4 font-bold text-neutral-900">
@@ -1435,8 +1711,81 @@ export default function Screen2Audit({
                                 <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
                                 <span>Override: {activeOverride}</span>
                               </span>
+                            ) : manualMatch ? (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {manualMatch.type === 'EXEMPTION' ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                    <span>✓ Exempted</span>
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                    <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  data-testid={`unmatch-course-${manualMatch.course?.code || b.bucket_id}`}
+                                  onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: b.bucket_id, credits: b.required_credits })}
+                                  className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                  title="Unmatch / Remove override"
+                                >
+                                  [ ✕ ]
+                                </button>
+                              </div>
+                            ) : isSatisfied && mc ? (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {renderStatusBadge({ ...b, matchedCourse: mc, satisfied: true })}
+                                <button
+                                  type="button"
+                                  data-testid={`unmatch-course-${mc.code}`}
+                                  onClick={() => handleUnmatchCourse(reqKey, mc)}
+                                  className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                  title={`Unmatch ${mc.code}`}
+                                >
+                                  [ ✕ ]
+                                </button>
+                              </div>
                             ) : (
-                              renderStatusBadge(b)
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                                    <span>○ Unfulfilled</span>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    data-testid={`set-complete-${b.bucket_id}`}
+                                    onClick={() => handleOpenManualModal(reqKey, b)}
+                                    className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                                  >
+                                    [ Set to Complete ]
+                                  </button>
+                                  <button
+                                    type="button"
+                                    data-testid={`suggest-course-${b.bucket_id}`}
+                                    onClick={() => handleOpenRecommenderModal(reqKey, b)}
+                                    className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                                  >
+                                    [ 🔍 Suggest Recommended Course ]
+                                  </button>
+                                </div>
+                                {targetRec && (
+                                  <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                                    <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                                      🎯 Target: {targetRec.code} · {targetRec.title}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleClearRecommendation(reqKey)}
+                                      className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                                      title="Clear Recommendation"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </td>
                           <td className="py-2.5 px-4 text-neutral-600">
@@ -1713,6 +2062,13 @@ export default function Screen2Audit({
                         const reqKey = `MAJOR:${req.compactCode}`;
                         const activeOverride = rowOverrides[reqKey] || '';
                         const activeNote = rowNotes[reqKey] || '';
+                        const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+                        const manualMatch = auditOverrides?.manualMatches?.[reqKey];
+                        const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
+
+                        const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse);
+                        const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
+
                         return (
                           <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
                             <td className="py-2 px-3">
@@ -1720,7 +2076,84 @@ export default function Screen2Audit({
                               <span className="text-neutral-700">{req.title}</span>
                             </td>
                             <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
-                            <td className="py-2 px-3">{renderStatusBadge(req)}</td>
+                            <td className="py-2 px-3">
+                              {manualMatch ? (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {manualMatch.type === 'EXEMPTION' ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                      <span>✓ Exempted</span>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                      <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                                    </span>
+                                  )}
+                                  <button
+                                    type="button"
+                                    data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
+                                    onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits })}
+                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                    title="Unmatch / Remove override"
+                                  >
+                                    [ ✕ ]
+                                  </button>
+                                </div>
+                              ) : isSatisfied && mc ? (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
+                                  <button
+                                    type="button"
+                                    data-testid={`unmatch-course-${mc.code}`}
+                                    onClick={() => handleUnmatchCourse(reqKey, mc)}
+                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                    title={`Unmatch ${mc.code}`}
+                                  >
+                                    [ ✕ ]
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                                      <span>○ Unfulfilled</span>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      data-testid={`set-complete-${req.compactCode}`}
+                                      onClick={() => handleOpenManualModal(reqKey, req)}
+                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                                    >
+                                      [ Set to Complete ]
+                                    </button>
+                                    <button
+                                      type="button"
+                                      data-testid={`suggest-course-${req.compactCode}`}
+                                      onClick={() => handleOpenRecommenderModal(reqKey, req)}
+                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                                    >
+                                      [ 🔍 Suggest Recommended Course ]
+                                    </button>
+                                  </div>
+                                  {targetRec && (
+                                    <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                                      <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                                        🎯 Target: {targetRec.code} · {targetRec.title}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleClearRecommendation(reqKey)}
+                                        className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                                        title="Clear Recommendation"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </td>
                             <td className="py-2 px-3">
                               {req.isCrossCounted ? (
                                 <span
@@ -1852,26 +2285,112 @@ export default function Screen2Audit({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-100">
-                      {secLedger.requirements.map((req) => (
-                        <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
-                          <td className="py-2 px-3">
-                            <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
-                            <span className="text-neutral-700">{req.title}</span>
-                          </td>
-                          <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
-                          <td className="py-2 px-3">{renderStatusBadge(req)}</td>
-                          <td className="py-2 px-3">
-                            {req.isCrossCounted && (
-                              <span
-                                data-testid={`cross-counted-${req.compactCode}`}
-                                className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
-                              >
-                                🔗 Cross-Counted with {req.sharedWithProgramName || 'Primary Major'}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                      {secLedger.requirements.map((req) => {
+                        const reqKey = `SEC_${secLedger.programId}:${req.compactCode}`;
+                        const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+                        const manualMatch = auditOverrides?.manualMatches?.[reqKey];
+                        const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
+                        const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse);
+                        const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
+
+                        return (
+                          <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
+                            <td className="py-2 px-3">
+                              <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
+                              <span className="text-neutral-700">{req.title}</span>
+                            </td>
+                            <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
+                            <td className="py-2 px-3">
+                              {manualMatch ? (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {manualMatch.type === 'EXEMPTION' ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                      <span>✓ Exempted</span>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                      <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                                    </span>
+                                  )}
+                                  <button
+                                    type="button"
+                                    data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
+                                    onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits })}
+                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                    title="Unmatch / Remove override"
+                                  >
+                                    [ ✕ ]
+                                  </button>
+                                </div>
+                              ) : isSatisfied && mc ? (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
+                                  <button
+                                    type="button"
+                                    data-testid={`unmatch-course-${mc.code}`}
+                                    onClick={() => handleUnmatchCourse(reqKey, mc)}
+                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                    title={`Unmatch ${mc.code}`}
+                                  >
+                                    [ ✕ ]
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                                      <span>○ Unfulfilled</span>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      data-testid={`set-complete-${req.compactCode}`}
+                                      onClick={() => handleOpenManualModal(reqKey, req)}
+                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                                    >
+                                      [ Set to Complete ]
+                                    </button>
+                                    <button
+                                      type="button"
+                                      data-testid={`suggest-course-${req.compactCode}`}
+                                      onClick={() => handleOpenRecommenderModal(reqKey, req)}
+                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                                    >
+                                      [ 🔍 Suggest Recommended Course ]
+                                    </button>
+                                  </div>
+                                  {targetRec && (
+                                    <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                                      <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                                        🎯 Target: {targetRec.code} · {targetRec.title}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleClearRecommendation(reqKey)}
+                                        className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                                        title="Clear Recommendation"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-2 px-3">
+                              {req.isCrossCounted && (
+                                <span
+                                  data-testid={`cross-counted-${req.compactCode}`}
+                                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
+                                >
+                                  🔗 Cross-Counted with {req.sharedWithProgramName || 'Primary Major'}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1948,28 +2467,114 @@ export default function Screen2Audit({
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-neutral-100">
-                            {ledger.requirements.map((req) => (
-                              <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
-                                <td className="py-2 px-3">
-                                  <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
-                                  <span className="text-neutral-700">{req.title}</span>
-                                </td>
-                                <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
-                                <td className="py-2 px-3">{renderStatusBadge(req)}</td>
-                                <td className="py-2 px-3">
-                                  {req.isCrossCounted ? (
-                                    <span
-                                      data-testid={`cross-counted-${req.compactCode}`}
-                                      className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
-                                    >
-                                      🔗 Cross-Counted with {req.sharedWithProgramName || 'Primary Major'}
-                                    </span>
-                                  ) : (
-                                    <span className="text-neutral-400 text-[10px]">—</span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
+                            {ledger.requirements.map((req) => {
+                              const reqKey = `CREDENTIAL_${ledger.programId}:${req.compactCode}`;
+                              const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+                              const manualMatch = auditOverrides?.manualMatches?.[reqKey];
+                              const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
+                              const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse);
+                              const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
+
+                              return (
+                                <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
+                                  <td className="py-2 px-3">
+                                    <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
+                                    <span className="text-neutral-700">{req.title}</span>
+                                  </td>
+                                  <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
+                                  <td className="py-2 px-3">
+                                    {manualMatch ? (
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        {manualMatch.type === 'EXEMPTION' ? (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                            <span>✓ Exempted</span>
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                            <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                                          </span>
+                                        )}
+                                        <button
+                                          type="button"
+                                          data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
+                                          onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits })}
+                                          className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                          title="Unmatch / Remove override"
+                                        >
+                                          [ ✕ ]
+                                        </button>
+                                      </div>
+                                    ) : isSatisfied && mc ? (
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
+                                        <button
+                                          type="button"
+                                          data-testid={`unmatch-course-${mc.code}`}
+                                          onClick={() => handleUnmatchCourse(reqKey, mc)}
+                                          className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                          title={`Unmatch ${mc.code}`}
+                                        >
+                                          [ ✕ ]
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-1.5">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                                            <span>○ Unfulfilled</span>
+                                          </span>
+                                          <button
+                                            type="button"
+                                            data-testid={`set-complete-${req.compactCode}`}
+                                            onClick={() => handleOpenManualModal(reqKey, req)}
+                                            className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                                          >
+                                            [ Set to Complete ]
+                                          </button>
+                                          <button
+                                            type="button"
+                                            data-testid={`suggest-course-${req.compactCode}`}
+                                            onClick={() => handleOpenRecommenderModal(reqKey, req)}
+                                            className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                                          >
+                                            [ 🔍 Suggest Recommended Course ]
+                                          </button>
+                                        </div>
+                                        {targetRec && (
+                                          <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                                            <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                                              🎯 Target: {targetRec.code} · {targetRec.title}
+                                            </span>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleClearRecommendation(reqKey)}
+                                              className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                                              title="Clear Recommendation"
+                                            >
+                                              ✕
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="py-2 px-3">
+                                    {req.isCrossCounted ? (
+                                      <span
+                                        data-testid={`cross-counted-${req.compactCode}`}
+                                        className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
+                                      >
+                                        🔗 Cross-Counted with {req.sharedWithProgramName || 'Primary Major'}
+                                      </span>
+                                    ) : (
+                                      <span className="text-neutral-400 text-[10px]">—</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -2053,6 +2658,28 @@ export default function Screen2Audit({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">
+                    {/* Detached / Unassigned Electives from Overrides */}
+                    {Object.entries(auditOverrides.unmatched || {}).map(([key, u]) => {
+                      if (!u?.detachedCourse && !u?.detachedCode) return null;
+                      const code = u.detachedCode || u.detachedCourse?.code;
+                      const title = u.detachedCourse?.title || 'Unassigned / Available Elective';
+                      const cr = u.credits || 3;
+                      return (
+                        <tr key={`unmatched-${key}`} className="hover:bg-neutral-50/70 transition bg-neutral-50/50">
+                          <td className="py-2 px-3 font-mono font-bold text-neutral-800">
+                            {code} <span className="font-normal font-sans ml-1 text-neutral-600">{title}</span>
+                          </td>
+                          <td className="py-2 px-2 font-mono text-neutral-600 text-center">{cr}cr</td>
+                          <td className="py-2 px-3">
+                            <span className="text-amber-800 font-bold text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                              Unassigned / Detached Elective
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 text-neutral-500 italic">Available to Reassign toward Finish Line</td>
+                        </tr>
+                      );
+                    })}
+
                     {/* Applied Free Electives from Transcript */}
                     {(auditResult?.freeElectives || []).map((fe, idx) => (
                       <tr key={`fe-${fe.code}-${idx}`} className="hover:bg-neutral-50/70 transition">
@@ -2069,6 +2696,109 @@ export default function Screen2Audit({
                         <td className="py-2 px-3 text-neutral-500">Applied toward Degree Finish Line</td>
                       </tr>
                     ))}
+
+                    {/* Itemized Discrete Free Elective Slots (Directive E) */}
+                    {itemizedFreeElectives.map((slot) => {
+                      const slotReqKey = `FREE_ELEC:${slot.id}`;
+                      const manualMatch = auditOverrides?.manualMatches?.[slotReqKey];
+                      const targetRec = auditOverrides?.targetRecommendations?.[slotReqKey];
+
+                      return (
+                        <tr
+                          key={slot.id}
+                          data-testid={`free-elective-row-${slot.id}`}
+                          className="hover:bg-neutral-50/70 transition bg-white"
+                        >
+                          <td className="py-2.5 px-3 font-semibold text-neutral-900">
+                            <span>{slot.title}</span>
+                          </td>
+                          <td className="py-2.5 px-2 font-mono text-neutral-600 text-center">{slot.credits}cr</td>
+                          <td className="py-2.5 px-3">
+                            {manualMatch ? (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {manualMatch.type === 'EXEMPTION' ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                    <span>✓ Exempted</span>
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                    <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  data-testid={`unmatch-course-${manualMatch.course?.code || slot.id}`}
+                                  onClick={() =>
+                                    handleUnmatchCourse(
+                                      slotReqKey,
+                                      manualMatch.course || { code: slot.id, credits: slot.credits }
+                                    )
+                                  }
+                                  className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                                  title="Unmatch / Remove override"
+                                >
+                                  [ ✕ ]
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                                    <span>○ Unfulfilled</span>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    data-testid={`set-complete-${slot.id}`}
+                                    onClick={() =>
+                                      handleOpenManualModal(slotReqKey, {
+                                        id: slot.id,
+                                        title: slot.title,
+                                        credits: slot.credits
+                                      })
+                                    }
+                                    className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                                  >
+                                    [ Set to Complete ]
+                                  </button>
+                                  <button
+                                    type="button"
+                                    data-testid={`suggest-course-${slot.id}`}
+                                    onClick={() =>
+                                      handleOpenRecommenderModal(slotReqKey, {
+                                        id: slot.id,
+                                        title: slot.title,
+                                        isFreeElective: true
+                                      })
+                                    }
+                                    className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                                  >
+                                    [ 🔍 Suggest Recommended Course ]
+                                  </button>
+                                </div>
+                                {targetRec && (
+                                  <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                                    <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                                      🎯 Target: {targetRec.code} · {targetRec.title}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleClearRecommendation(slotReqKey)}
+                                      className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                                      title="Clear Recommendation"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-neutral-500 italic">Itemized Degree Finish Line Slot</td>
+                        </tr>
+                      );
+                    })}
 
                     {/* Generated Upper-Level Safeguard Placeholders */}
                     {(auditResult?.generatedUpperLevelElectives || []).map((ul) => (
@@ -2368,6 +3098,38 @@ export default function Screen2Audit({
           </div>
         </div>
       )}
+
+      {/* =========================================================================
+          MODAL: MANUAL ASSIGNMENT ("SET TO COMPLETE")
+      ========================================================================= */}
+      <ManualAssignmentModal
+        isOpen={manualModalState.isOpen}
+        onClose={() => setManualModalState((prev) => ({ ...prev, isOpen: false }))}
+        onAssign={handleAssignOverride}
+        reqKey={manualModalState.reqKey}
+        reqCode={manualModalState.reqCode}
+        reqTitle={manualModalState.reqTitle}
+        isGEPanel={manualModalState.isGEPanel}
+        studentCourses={studentCourseRoster}
+        courseMatchedMap={courseMatchedMap}
+      />
+
+      {/* =========================================================================
+          MODAL: COURSE RECOMMENDER ("SUGGEST RECOMMENDED COURSE")
+      ========================================================================= */}
+      <CourseRecommenderModal
+        isOpen={recommenderModalState.isOpen}
+        onClose={() => setRecommenderModalState((prev) => ({ ...prev, isOpen: false }))}
+        onSelect={handleSelectRecommendation}
+        reqKey={recommenderModalState.reqKey}
+        reqCode={recommenderModalState.reqCode}
+        reqTitle={recommenderModalState.reqTitle}
+        bucketId={recommenderModalState.bucketId}
+        poolCourses={recommenderModalState.poolCourses}
+        isFreeElective={recommenderModalState.isFreeElective}
+        catalogCourses={masterDb?.courses || []}
+        studentCourses={studentCourseRoster}
+      />
     </div>
   );
 }
