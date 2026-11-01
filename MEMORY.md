@@ -1761,3 +1761,30 @@
      - Created and ran `.tmp/verify_major_progression_gate.mjs` headless Playwright automation, testing 0-program stack, minor-only stack, major stack transition to Screen 2, major removal on back-navigation, and clean server teardown.
      - Total Vitest suite: **345 / 345 tests passing (100% green)** across all 32 test files (`npm test`).
      - Production build: `npm run build` compiled cleanly in 6.03s.
+
+### 96. Phase 2 — "Path to Graduation" Infographic & Compact Institutional Policy Drawer
+- **Objective:** Overhaul Screen 2 Card 2 from "Race to Graduation" to "Path to Graduation", introduce a gender-neutral Lion Paw progress marker and Diploma finish line SVG, house Institutional Policy Checks and Excluded Courses Ledger inside a single full-card collapsible drawer, and eliminate mini-graphs/internal progress bars in policy cards.
+- **Architectural Implementation:**
+  1. *"Path to Graduation" Infographic Card (`src/components/Screen2Audit.jsx`):*
+     - Replaced "Race to Graduation" with `PATH TO GRADUATION` and dynamic target badge (`Dynamic Target: {targetCr} cr`).
+     - Implemented 3-segment linear path:
+       - Segment 1 (Completed): Solid gold `#857542` bar.
+       - Progress Marker: Custom gender-neutral Lion Paw print SVG positioned at the exact completed percentage coordinate.
+       - Segment 2 (In-Progress & Scheduled): Textured/striped translucent gold `#B5A36A` bar extending ahead of the Lion Paw.
+       - Segment 3 (Remaining): Light neutral dashed/dotted track leading to the graduation milestone.
+       - Finish Milestone: Custom Diploma / Degree Scroll SVG positioned at 100% target mark.
+     - Credit Metrics Line: `{completedCr} Completed • {inProgressCr} In-Progress • {scheduledCr} Scheduled • {remainingCr} Remaining to Graduation` with right-aligned `Earned + Active: {totalEarnedAndActive} Credits`.
+  2. *Single Full-Card Collapsible Drawer:*
+     - Defaults to collapsed (`drawerOpen === false`).
+     - Disclosure trigger button with smooth toggle text: `[ ▼ View Institutional Policy Checks & Excluded Courses Ledger ({excludedCount} Excluded) ]` when closed, and `[ ▲ Hide ... ]` when open.
+     - **Subpanel 1: Institutional Policy Checks Grid:** 4-card responsive grid displaying informative titles, descriptive text, and a single status badge in the top-right corner (`[ Met ]`, `[ In-Progress ]`, `[ Not Yet Met ]` / `[ Grade Not Yet Met ]`). Removed all internal progress bars and mini-graphs.
+       - Card 1: `42 Upper-Division Credits` (`{upperDivCompleted} of 42 credits (30000+ level) completed.` with remaining deficit).
+       - Card 2: `Composition Courses (ENGL 15000 & ENGL 17000)` (Requires grade $\ge \text{C}$; otherwise `[ Grade Not Yet Met ]` with general elective routing subtext).
+       - Card 3: `Human Diversity (HD) Courses` (Verifies 2 `/HD` courses; `[ Met ]` for 2 completed, `[ In-Progress ]` for 1 enrolled, `[ Not Yet Met ]` for 0).
+       - Card 4: `Lindenwood Residency` (Minimum 30 institutional credits, with 24 of final 30 in residency).
+     - **Subpanel 2: Excluded Courses Ledger:** Clean table with columns `Course`, `Credits`, `Term`, `Grade`, `Reason` using concise advisor badges: `[ Developmental ]`, `[ Retake Attempt ]`, `[ Below Minimum Grade ]`.
+  3. *Verification & Zero Regression:*
+     - Vitest suite `tests/pathToGraduationCard.test.js` (6 unit tests) verifying header, SVGs, credit metrics line, drawer collapse/expand, absence of progress bars, and `/HD` gate evaluation.
+     - Headless Playwright script `.tmp/verify_path_to_graduation.mjs` verifying Brandon Paz transcript flow, DOM SVGs, initial collapsed state, drawer expansion, and clean process teardown.
+     - Total Vitest suite: **351 / 351 tests passing (100% green)** across all 33 test files (`npm test`).
+     - Production build: `npm run build` compiled cleanly in 6.94s.

@@ -29,7 +29,9 @@ import {
   resolveTrackConfiguration,
   orderDeclaredPrograms,
   toCompact,
-  CORE42_CLEARANCE_REASON
+  CORE42_CLEARANCE_REASON,
+  hasHumanDiversityAttribute,
+  isUpperDivisionCourse
 } from '../engine/waterfallAudit.js';
 
 export default function Screen2Audit({
@@ -44,7 +46,8 @@ export default function Screen2Audit({
   selectedProgramId: propSelectedProgramId,
   additionalPrograms: propAdditionalPrograms,
   catalogYear: propCatalogYear,
-  parsedTranscript
+  parsedTranscript,
+  initialDrawerOpen = false
 }) {
   const planCreationDate = useMemo(() => {
     const d = new Date();
@@ -59,8 +62,8 @@ export default function Screen2Audit({
   // Filter tabs for table views (if advisor wants to focus on a subsection)
   const [activeTab, setActiveTab] = useState('ALL'); // 'ALL', 'GE', 'MAJOR', 'EMPHASIS', 'ELECTIVE'
   
-  // Card 2 Collapsible Drawer State (Institutional Details & Excluded Courses Ledger - default expanded)
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  // Card 2 Collapsible Drawer State (Institutional Details & Excluded Courses Ledger - default collapsed)
+  const [drawerOpen, setDrawerOpen] = useState(initialDrawerOpen);
 
   // Accordion Expand/Collapse States (All expanded by default for full visibility)
   const [accordionOpen, setAccordionOpen] = useState({
@@ -371,6 +374,89 @@ export default function Screen2Audit({
     return Math.max(0, targetCr - (totalEarnedAndActive + appliedReqs));
   }, [auditResult, targetCr, totalEarnedAndActive]);
 
+  // Institutional Policy Metrics
+  const upperDivCompleted = upperDivisionGate?.completed ?? 0;
+  const upperDivInProgress = useMemo(() => {
+    return allCourses
+      .filter(
+        (c) =>
+          (c.state === 'In-Progress' ||
+            c.state === 'Current' ||
+            c.state === 'Scheduled' ||
+            c.operationalStatus === 'IN_PROGRESS' ||
+            c.operationalStatus === 'SCHEDULED') &&
+          isUpperDivisionCourse(c)
+      )
+      .reduce((s, c) => s + (Number(c.credits) || 0), 0);
+  }, [allCourses]);
+
+  const isCompMet = Boolean(
+    compositionGatekeeper?.writtenCommunicationSatisfied &&
+      (!compositionGatekeeper.warnings || compositionGatekeeper.warnings.length === 0)
+  );
+
+  const isCompInProgress = useMemo(() => {
+    if (isCompMet) return false;
+    return allCourses.some((c) => {
+      const comp = c.compactCode || toCompact(c.code);
+      return (
+        (comp === 'ENGL15000' || comp === 'EPP15000' || comp === 'ENGL17000') &&
+        (c.state === 'In-Progress' ||
+          c.state === 'Current' ||
+          c.state === 'Scheduled' ||
+          c.operationalStatus === 'IN_PROGRESS' ||
+          c.operationalStatus === 'SCHEDULED')
+      );
+    });
+  }, [isCompMet, allCourses]);
+
+  const hdCompletedCount = useMemo(() => {
+    return allCourses.filter((c) => {
+      const isCompleted =
+        c.state === 'Completed' ||
+        c.state === 'Complete' ||
+        c.state === 'TR' ||
+        c.state === 'Transfer' ||
+        c.operationalStatus === 'COMPLETED';
+      if (!isCompleted) return false;
+      const catCourse = (masterDb?.courses || []).find((cat) => toCompact(cat.code) === toCompact(c.code));
+      return hasHumanDiversityAttribute(c, catCourse);
+    }).length;
+  }, [allCourses, masterDb]);
+
+  const hdInProgressCount = useMemo(() => {
+    return allCourses.filter((c) => {
+      const isActive =
+        c.state === 'In-Progress' ||
+        c.state === 'Current' ||
+        c.state === 'Scheduled' ||
+        c.operationalStatus === 'IN_PROGRESS' ||
+        c.operationalStatus === 'SCHEDULED';
+      if (!isActive) return false;
+      const catCourse = (masterDb?.courses || []).find((cat) => toCompact(cat.code) === toCompact(c.code));
+      return hasHumanDiversityAttribute(c, catCourse);
+    }).length;
+  }, [allCourses, masterDb]);
+
+  const residencyInfo = auditResult?.policyChecklist?.residency;
+  const transferCr =
+    parsedTranscript?.transferCredits ||
+    auditResult?.policyChecklist?.totalCredits?.transferCredits ||
+    0;
+  const institutionalCreditsEarned =
+    residencyInfo?.currentInstitutionalCredits ??
+    residencyInfo?.currentLindenwoodCredits ??
+    Math.max(0, completedCr - transferCr);
+
+  const isResidencyMet = Boolean(
+    residencyInfo?.satisfied ||
+      (institutionalCreditsEarned >= 30 && (residencyInfo?.final24ResidencyMet ?? true))
+  );
+
+  const isResidencyInProgress =
+    !isResidencyMet &&
+    ((residencyInfo?.projectedInstitutionalCredits ?? (institutionalCreditsEarned + inProgressCr)) >= 30);
+
   // Helper to render Anthology operational status badge
   const renderStatusBadge = (req) => {
     if (req.isOverride) {
@@ -450,24 +536,25 @@ export default function Screen2Audit({
 
   // Helper for Excluded Courses Ledger badges
   const renderExclusionReasonBadge = (reason) => {
-    if (reason === 'DEVELOPMENTAL') {
+    const r = String(reason || '').toUpperCase();
+    if (r.includes('DEVELOPMENTAL') || r === 'DEVELOPMENTAL') {
       return (
         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-          [Developmental / Non-College Level]
+          [ Developmental ]
         </span>
       );
     }
-    if (reason === 'REPEATED_ATTEMPT') {
+    if (r.includes('REPEATED') || r.includes('RETAKE') || r === 'REPEATED_ATTEMPT') {
       return (
         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-300">
-          [Repeated Attempt / Subsequent Used]
+          [ Retake Attempt ]
         </span>
       );
     }
-    if (reason === 'BELOW_MIN_GRADE') {
+    if (r.includes('BELOW_MIN') || r.includes('GRADE') || r === 'BELOW_MIN_GRADE') {
       return (
         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-900 border border-red-300">
-          [Below Minimum Grade Threshold]
+          [ Below Minimum Grade ]
         </span>
       );
     }
@@ -839,18 +926,21 @@ export default function Screen2Audit({
       )}
 
       {/* =========================================================================
-          CARD 2: STREAMLINED "RACE TO GRADUATION" CARD & EXCLUDED COURSES DRAWER
+          CARD 2: "PATH TO GRADUATION" INFOGRAPHIC & COMPACT POLICY DRAWER
       ========================================================================= */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm space-y-6">
-        {/* Glanceable Race Header */}
+      <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm space-y-6" data-testid="path-to-graduation-card">
+        {/* Header & Target Badge */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
-            <h2 className="text-lg font-bold text-neutral-900 tracking-tight">
-              RACE TO GRADUATION <span className="text-xs font-normal text-neutral-500">(Race to the Graduation Flag)</span>
+            <h2 className="text-lg font-bold text-neutral-900 tracking-tight" data-testid="path-to-graduation-title">
+              PATH TO GRADUATION
             </h2>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#857542]/10 text-[#857542] border border-[#857542]/30">
+            <span
+              data-testid="dynamic-target-badge"
+              className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#857542]/10 text-[#857542] border border-[#857542]/30"
+            >
               Dynamic Target: {targetCr} cr
             </span>
             <span
@@ -862,52 +952,91 @@ export default function Screen2Audit({
           </div>
         </div>
 
-        {/* Visual Progress Track with Milestones */}
-        <div className="relative pt-8 pb-3">
-          {/* Stick-Figure Avatar at Completed Coordinate */}
+        {/* Minimalist Linear Path Infographic */}
+        <div className="relative pt-10 pb-4" data-testid="path-infographic-container">
+          {/* Lion Paw Progress Marker at Completed Coordinate */}
           <div
-            className="absolute top-0 transform -translate-x-1/2 flex flex-col items-center pointer-events-none transition-all duration-300"
-            style={{ left: `${Math.max(4, Math.min(96, completedPct))}%` }}
+            data-testid="lion-paw-marker-container"
+            className="absolute top-0 transform -translate-x-1/2 flex flex-col items-center pointer-events-none transition-all duration-300 z-10"
+            style={{ left: `${Math.max(3, Math.min(97, completedPct))}%` }}
           >
-            <div className="bg-[#857542] text-white text-[10px] font-bold font-mono px-1.5 py-0.5 rounded shadow">
+            <div className="bg-[#857542] text-white text-[10px] font-bold font-mono px-1.5 py-0.5 rounded shadow whitespace-nowrap">
               {completedCr} cr
             </div>
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-neutral-900 mt-0.5 fill-current">
-              <circle cx="12" cy="4" r="3" />
-              <path d="M12 7v7M9 9l3 2 3-2M9 18l3-4 3 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+            <svg
+              viewBox="0 0 24 24"
+              className="w-5 h-5 text-[#857542] fill-current mt-0.5 drop-shadow-xs"
+              data-testid="lion-paw-marker"
+              aria-label="Lion Paw Progress Marker"
+            >
+              <path d="M12 11.5c-2.8 0-4.5 1.8-4.5 3.8 0 1.8 1.6 3.7 4.5 3.7s4.5-1.9 4.5-3.7c0-2-1.7-3.8-4.5-3.8z" />
+              <ellipse cx="6.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(-20 6.5 9.5)" />
+              <ellipse cx="10" cy="6.8" rx="1.6" ry="2.2" transform="rotate(-8 10 6.8)" />
+              <ellipse cx="14" cy="6.8" rx="1.6" ry="2.2" transform="rotate(8 14 6.8)" />
+              <ellipse cx="17.5" cy="9.5" rx="1.6" ry="2.2" transform="rotate(20 17.5 9.5)" />
             </svg>
           </div>
 
-          {/* 15-degree Sheared Graduation Flag at Target Mark (100%) */}
-          <div className="absolute right-0 top-1 flex flex-col items-center">
-            <div className="lu-shear bg-black text-[#B5A36A] font-bold text-[10px] px-2 py-0.5 shadow flex items-center space-x-1 border border-[#B5A36A]">
-              <span className="lu-shear-content flex items-center space-x-1">
-                <Flag className="w-3 h-3 text-[#B5A36A]" />
-                <span>GRADUATION FLAG ({targetCr} CR)</span>
-              </span>
+          {/* Diploma / Degree Scroll Finish Milestone at Target Mark (100%) */}
+          <div
+            data-testid="diploma-finish-container"
+            className="absolute right-0 top-1 flex flex-col items-center z-10"
+          >
+            <div className="bg-neutral-900 text-[#B5A36A] font-bold text-[10px] px-2 py-0.5 rounded shadow flex items-center space-x-1.5 border border-[#B5A36A]">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-3.5 h-3.5 text-[#B5A36A] fill-none stroke-current"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                data-testid="diploma-finish-icon"
+                aria-label="Diploma Degree Scroll"
+              >
+                <path d="M19 4H8.5A3.5 3.5 0 0 0 5 7.5v11A2.5 2.5 0 0 0 7.5 21H19a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" fill="#FFF9ED" stroke="#B5A36A" />
+                <path d="M5 7.5A2.5 2.5 0 0 1 7.5 5H19" stroke="#B5A36A" />
+                <path d="M9 10h8" stroke="#B5A36A" />
+                <path d="M9 14h5" stroke="#B5A36A" />
+                <path d="M17 14l2 6-2.5-1.5L14 20l1-5" fill="#B5A36A" stroke="#B5A36A" />
+              </svg>
+              <span>DIPLOMA ({targetCr} CR)</span>
             </div>
           </div>
 
-          {/* Horizontal Track Bar */}
-          <div className="w-full h-7 bg-neutral-100 rounded-full overflow-hidden flex border border-neutral-300">
-            {/* Completed Segment (Digital Gold #857542) */}
+          {/* Horizontal Track Bar with 3 Segments */}
+          <div className="w-full h-6 bg-neutral-100 rounded-full overflow-hidden flex border border-neutral-300 relative">
+            {/* Path Segment 1: Completed (Solid Gold) */}
             <div
+              data-testid="path-segment-completed"
               className="bg-[#857542] h-full transition-all duration-500"
               style={{ width: `${completedPct}%` }}
+              title={`Completed: ${completedCr} credits`}
             />
-            {/* Active In-Progress + Scheduled Segment (Striped Gold #B5A36A) */}
+            {/* Path Segment 2: In-Progress & Scheduled (Textured / Striped Gold) */}
             <div
+              data-testid="path-segment-active"
               className="bg-[#B5A36A] h-full transition-all duration-500 relative"
               style={{
                 width: `${activePct}%`,
                 backgroundImage:
-                  'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.3) 5px, rgba(255,255,255,0.3) 10px)'
+                  'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.35) 5px, rgba(255,255,255,0.35) 10px)'
               }}
+              title={`Active (In-Progress & Scheduled): ${inProgressCr + scheduledCr} credits`}
+            />
+            {/* Path Segment 3: Remaining (Light Neutral with dashed border and dotted pattern) */}
+            <div
+              data-testid="path-segment-remaining"
+              className="flex-1 h-full bg-neutral-100 border-l border-dashed border-neutral-300"
+              style={{
+                backgroundImage:
+                  'radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px)',
+                backgroundSize: '8px 8px'
+              }}
+              title={`Remaining: ${remainingCr} credits`}
             />
           </div>
 
-          {/* Milestone Markers */}
-          <div className="flex justify-between text-[11px] font-mono text-neutral-500 mt-2">
+          {/* Milestone Ticks */}
+          <div className="flex justify-between text-[11px] font-mono text-neutral-500 mt-2 px-1">
             <span>0 cr</span>
             <span className={completedCr >= 30 ? 'font-bold text-emerald-700' : ''}>
               30 cr {completedCr >= 30 ? '[✓]' : ''} (Sophomore)
@@ -922,34 +1051,38 @@ export default function Screen2Audit({
           </div>
         </div>
 
-        {/* Credit Breakdown Summary */}
-        <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex flex-wrap items-center justify-between text-xs text-neutral-700 gap-2">
-          <div className="flex flex-wrap items-center gap-3">
+        {/* Credit Metrics Line (Below Path) */}
+        <div
+          data-testid="credit-metrics-line"
+          className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex flex-wrap items-center justify-between text-xs text-neutral-700 gap-2"
+        >
+          <div className="flex flex-wrap items-center gap-2">
             <span>
               <strong className="text-neutral-950 font-bold font-mono" data-testid="audit-completed-cr">{completedCr}</strong> Completed
             </span>
             <span className="text-neutral-300">•</span>
             <span>
-              <strong className="text-blue-800 font-bold font-mono" data-testid="audit-current-cr">{inProgressCr}</strong> Active In-Progress
+              <strong className="text-blue-800 font-bold font-mono" data-testid="audit-current-cr">{inProgressCr}</strong> In-Progress
             </span>
             <span className="text-neutral-300">•</span>
             <span>
-              <strong className="text-purple-800 font-bold font-mono">{scheduledCr}</strong> Active Scheduled
+              <strong className="text-purple-800 font-bold font-mono">{scheduledCr}</strong> Scheduled
             </span>
             <span className="text-neutral-300">•</span>
             <span>
-              <strong className="text-neutral-900 font-bold font-mono">{remainingCr}</strong> Remaining to Finish Line
+              <strong className="text-neutral-900 font-bold font-mono">{remainingCr}</strong> Remaining to Graduation
             </span>
           </div>
-          <span className="text-[11px] text-neutral-500 font-mono">
-            Earned + Active: <strong className="text-neutral-900 font-bold" data-testid="audit-total-cr">{totalEarnedAndActive}</strong> cr
-          </span>
+          <div className="text-[11px] text-neutral-500 font-mono">
+            Earned + Active: <strong className="text-neutral-900 font-bold" data-testid="audit-total-cr">{totalEarnedAndActive}</strong> Credits
+          </div>
         </div>
 
         {/* Collapsible Drawer Toggle Button */}
         <div>
           <button
             type="button"
+            id="audit-details-drawer-toggle"
             data-testid="audit-details-drawer-toggle"
             onClick={() => setDrawerOpen(!drawerOpen)}
             className="w-full flex items-center justify-between p-3.5 bg-neutral-50 hover:bg-neutral-100/80 rounded-lg border border-neutral-200 transition text-xs font-bold text-neutral-800 cursor-pointer"
@@ -957,112 +1090,157 @@ export default function Screen2Audit({
             <div className="flex items-center space-x-2">
               <ShieldAlert className="w-4 h-4 text-neutral-600" />
               <span>
-                View Institutional Audit Details & Excluded Courses Ledger ({excludedCoursesList.length} Courses)
+                {drawerOpen ? '▲ Hide' : '▼ View'} Institutional Policy Checks &amp; Excluded Courses Ledger ({excludedCoursesList.length} Excluded)
               </span>
             </div>
             <div className="flex items-center space-x-1.5 text-neutral-500">
-              <span className="text-[11px] font-semibold">{drawerOpen ? 'Hide' : 'Show'}</span>
+              <span className="text-[11px] font-semibold">{drawerOpen ? 'Collapse' : 'Expand'}</span>
               {drawerOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </button>
 
           {/* Collapsible Drawer Body */}
           {drawerOpen && (
-            <div className="mt-3 p-4 bg-neutral-50/60 rounded-lg border border-neutral-200 space-y-6">
-              {/* Sub-Panel A: Institutional Policy Gates */}
+            <div data-testid="policy-and-ledger-drawer" className="mt-3 p-4 bg-neutral-50/60 rounded-lg border border-neutral-200 space-y-6">
+              {/* Sub-Panel 1: Institutional Policy Checks Grid */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wider flex items-center gap-1.5">
                   <Award className="w-4 h-4 text-[#857542]" />
-                  <span>Institutional Policy Verification Gates</span>
+                  <span>Institutional Policy Verification Checks</span>
                 </h4>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  {/* Gate 1: 42 Upper-Division Hours */}
+                <div data-testid="policy-checks-grid" className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  {/* Card 1: 42 Upper-Division Hours */}
                   <div
-                    data-testid="upper-division-meter"
-                    className="p-3 bg-white rounded border border-neutral-200 space-y-2"
+                    data-testid="policy-card-upper-division"
+                    className="p-3 bg-white rounded border border-neutral-200 space-y-1.5"
                   >
                     <div className="flex items-center justify-between font-bold">
-                      <span className="text-neutral-900">42 Upper-Division Hours (30000+ Level)</span>
-                      {upperDivisionGate.isSatisfied ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          ✓ {upperDivisionGate.completed} / 42 cr Completed
+                      <span className="text-neutral-900">42 Upper-Division Credits</span>
+                      {upperDivCompleted >= 42 ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          [ Met ]
+                        </span>
+                      ) : upperDivInProgress > 0 || upperDivCompleted > 0 ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                          [ In-Progress ]
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                          ⚠️ {upperDivisionGate.remaining} cr 30000+ remaining
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          [ Not Yet Met ]
                         </span>
                       )}
                     </div>
-                    <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-300 ${
-                          upperDivisionGate.isSatisfied ? 'bg-emerald-600' : 'bg-amber-500'
-                        }`}
-                        style={{ width: `${Math.min(100, (upperDivisionGate.completed / 42) * 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-[10.5px] text-neutral-500">
-                      {upperDivisionGate.completed} earned or active upper-division credits applied.
-                    </span>
-                  </div>
-
-                  {/* Gate 2: Missouri CORE 42 / AA Status */}
-                  <div className="p-3 bg-white rounded border border-neutral-200 space-y-1.5">
-                    <div className="flex items-center justify-between font-bold">
-                      <span className="text-neutral-900">General Education Framework</span>
-                      <span className="text-[10px] font-mono text-neutral-500">42 Credits</span>
-                    </div>
-                    {core42Completed ? (
-                      <p className="text-emerald-700 font-bold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>✓ Cleared via Block Transfer Override (CORE 42 / AA)</span>
+                    <p className="text-[11px] text-neutral-700 font-medium">
+                      {upperDivCompleted} of 42 credits (30000+ level) completed.
+                    </p>
+                    {upperDivCompleted < 42 ? (
+                      <p className="text-[10.5px] text-amber-700">
+                        ⚠️ {42 - upperDivCompleted} credits remaining
                       </p>
                     ) : (
-                      <p className="text-neutral-700 font-semibold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#857542]" />
-                        <span>Distributed across 8 Categories ({geAudit.earnedCredits} / 42 cr Met)</span>
+                      <p className="text-[10.5px] text-emerald-700">
+                        ✓ All 42 upper-division credits satisfied.
                       </p>
                     )}
                   </div>
 
-                  {/* Gate 3: Composition Gatekeeper */}
-                  <div className="p-3 bg-white rounded border border-neutral-200 space-y-1.5">
+                  {/* Card 2: Composition Courses */}
+                  <div
+                    data-testid="policy-card-composition"
+                    className="p-3 bg-white rounded border border-neutral-200 space-y-1.5"
+                  >
                     <div className="flex items-center justify-between font-bold">
-                      <span className="text-neutral-900">Composition Gate (ENGL 15000 & 17000)</span>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                          compositionGatekeeper.writtenCommunicationSatisfied
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-900'
-                        }`}
-                      >
-                        {compositionGatekeeper.writtenCommunicationSatisfied ? 'PASSED' : 'C-GRADE DEFICIT'}
-                      </span>
+                      <span className="text-neutral-900">Composition Courses (ENGL 15000 &amp; ENGL 17000)</span>
+                      {isCompMet ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          [ Met ]
+                        </span>
+                      ) : isCompInProgress ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                          [ In-Progress ]
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          [ Grade Not Yet Met ]
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[11px] text-neutral-600">
-                      {compositionGatekeeper.writtenCommunicationSatisfied
-                        ? '✓ Composition I & II completed with C or higher.'
-                        : 'Composition requires grade of C or higher; credits earned count towards general electives.'}
+                    <p className="text-[11px] text-neutral-700 font-medium">
+                      Both courses require a grade of C or higher.
+                    </p>
+                    {isCompMet ? (
+                      <p className="text-[10.5px] text-emerald-700">
+                        ✓ Composition I &amp; II verified with grade of C or higher.
+                      </p>
+                    ) : (
+                      <p className="text-[10.5px] text-amber-800">
+                        Composition requires grade of C or higher; credits earned count towards general electives.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Card 3: Human Diversity (HD) Requirement */}
+                  <div
+                    data-testid="policy-card-human-diversity"
+                    className="p-3 bg-white rounded border border-neutral-200 space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between font-bold">
+                      <span className="text-neutral-900">Human Diversity (HD) Courses</span>
+                      {hdCompletedCount >= 2 ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          [ Met ]
+                        </span>
+                      ) : (hdCompletedCount + hdInProgressCount) >= 1 ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                          [ In-Progress ]
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          [ Not Yet Met ]
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-neutral-700 font-medium">
+                      2 General Education courses tagged with /HD.
+                    </p>
+                    <p className="text-[10.5px] text-neutral-600">
+                      {hdCompletedCount} of 2 /HD courses completed{hdInProgressCount > 0 ? ` • ${hdInProgressCount} in-progress` : ''}.
                     </p>
                   </div>
 
-                  {/* Gate 4: Institutional Residency */}
-                  <div className="p-3 bg-white rounded border border-neutral-200 space-y-1.5">
+                  {/* Card 4: Institutional Residency */}
+                  <div
+                    data-testid="policy-card-residency"
+                    className="p-3 bg-white rounded border border-neutral-200 space-y-1.5"
+                  >
                     <div className="flex items-center justify-between font-bold">
-                      <span className="text-neutral-900">Institutional Residency Requirements</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                        30cr Met
-                      </span>
+                      <span className="text-neutral-900">Lindenwood Residency</span>
+                      {isResidencyMet ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          [ Met ]
+                        </span>
+                      ) : isResidencyInProgress ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                          [ In-Progress ]
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          [ Not Yet Met ]
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[11px] text-neutral-600">
-                      Minimum 30 credits institutional residency satisfied | Final 24 of 30 credits in residency: Met.
+                    <p className="text-[11px] text-neutral-700 font-medium">
+                      Minimum 30 institutional credits, with 24 of the final 30 credits taken at Lindenwood.
+                    </p>
+                    <p className="text-[10.5px] text-neutral-600">
+                      {institutionalCreditsEarned} institutional credits earned.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Sub-Panel B: Excluded Courses Ledger Table */}
+              {/* Sub-Panel 2: Excluded Courses Ledger Table */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldAlert className="w-4 h-4 text-neutral-600" />
@@ -1077,7 +1255,7 @@ export default function Screen2Audit({
                         <th className="py-2 px-3">Credits</th>
                         <th className="py-2 px-3">Term</th>
                         <th className="py-2 px-2 text-center">Grade</th>
-                        <th className="py-2 px-3">Reason Badge</th>
+                        <th className="py-2 px-3">Reason</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-100">
