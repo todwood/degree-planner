@@ -2,7 +2,7 @@
   "catalog_year": "2026-2027",
   "catoid": 12,
   "source_url": "https://catalogs.lindenwood.edu/content.php?catoid=12&navoid=319",
-  "last_harvested_iso": "2026-11-01T17:06:43.293Z",
+  "last_harvested_iso": "2026-11-01T17:39:52.188Z",
   "framework_title": "Missouri Higher Education Core Transfer Curriculum (CORE 42) & Lindenwood General Education Program",
   "total_credits_required": 42,
   "aa_transfer_block_override": {
@@ -12,7 +12,7 @@
     "bypasses_category_audits": true,
     "preserves_major_prerequisites": true,
     "human_diversity_requirement_retained": true,
-    "policy_statement": "An official Associate of Arts (AA) degree or Missouri \"CORE 42 Completed\" transcript notation satisfies the 42-credit lower-division General Education requirement in its entirety, bypassing individual category distribution audits while preserving major-specific prerequisite courses and the 2-course Human Diversity (/HD) graduation overlay."
+    "policy_statement": "An official Associate of Arts (AA) degree or Missouri \"CORE 42 Completed\" transcript notation satisfies the 42-credit lower-division General Education requirement in its entirety."
   },
   "distribution_categories": {
     "written_communication": {
@@ -92,7 +92,6 @@
       "name": "Social & Behavioral Sciences",
       "credits_required": 9,
       "minimum_grade": "D",
-      "notes": "Requires 3cr Civics + 6cr across 2+ social science disciplines.",
       "courses": [
         "ANT 11200",
         "CCJ 20000",
@@ -117,7 +116,6 @@
       "name": "Humanities & Fine Arts",
       "credits_required": 9,
       "minimum_grade": "D",
-      "notes": "Requires 3cr Arts, 3cr Literature, and 3cr Non-Literature/Non-Arts across 2+ disciplines.",
       "sub_groups": {
         "arts": [
           "ART 10000",
@@ -155,7 +153,6 @@
       "name": "Natural Sciences",
       "credits_required": 7,
       "minimum_grade": "D",
-      "notes": "Requires at least 1 Lab course (4cr) + 1 Non-Lab course across 2 distinct disciplines.",
       "approved_lab_courses": [
         "BSC 10000",
         "BSC 11200",
@@ -183,8 +180,7 @@
       "category_id": "ADDITIONAL_GE_ELECTIVES",
       "name": "Additional General Education Electives",
       "credits_required": 2,
-      "minimum_grade": "D",
-      "notes": "Any remaining course with a General Education designation or MOTR transfer code to complete the 42-credit framework."
+      "minimum_grade": "D"
     }
   }
 }

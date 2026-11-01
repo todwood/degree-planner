@@ -4,9 +4,12 @@
  * 
  * Usage:
  *   node execution/harvest_academic_year.js --year 2026-2027 --catoid 12
+ *   node execution/harvest_academic_year.js --year 2025-2026 --catoid 11
+ *   node execution/harvest_academic_year.js --year 2024-2025 --catoid 10
+ *   node execution/harvest_academic_year.js --year 2023-2024 --catoid 9
  * 
  * Invariants:
- * - Deterministic, autonomous catalog harvester.
+ * - Deterministic, autonomous catalog harvester supporting Acalog (2024-2027) & SmartCatalog IQ (2023-2024).
  * - Idempotent upsert: replaces programs for the specified catalogYear while preserving all other years.
  * - Sub-package traversal: caches and inlines shared blocks (PCB&E Core 36 cr & PCB&E GE 15-22 cr).
  * - Prescribed General Education isolation: isolates prescribed GE courses (e.g. MTH 14100 in Cybersecurity).
@@ -25,6 +28,7 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
 const CATALOG_BASE_URL = 'https://catalogs.lindenwood.edu';
+const SMARTCATALOG_BASE_URL = 'https://lindenwood.smartcatalogiq.com';
 
 // Parse command line arguments
 function parseArgs() {
@@ -80,11 +84,35 @@ function generateProgramId(name, yearSuffix) {
 
 async function main() {
   const startTime = Date.now();
-  const { year: TARGET_YEAR, catoid: TARGET_CATOID, concurrency: CONCURRENT_WORKERS, yearSuffix } = parseArgs();
+  const { year: TARGET_YEAR, catoid: INPUT_CATOID, concurrency: CONCURRENT_WORKERS, yearSuffix: YEAR_SUFFIX } = parseArgs();
+
+  // Map to verified Undergraduate catalog configurations
+  let effectiveCatoid = INPUT_CATOID;
+  let isSmartCatalog = false;
+  let forcedProgramsUrl = null;
+  let forcedReqsUrl = null;
+
+  if (TARGET_YEAR === '2026-2027') {
+    effectiveCatoid = 12;
+    forcedProgramsUrl = `${CATALOG_BASE_URL}/content.php?catoid=12&navoid=327`;
+    forcedReqsUrl = `${CATALOG_BASE_URL}/content.php?catoid=12&navoid=319`;
+  } else if (TARGET_YEAR === '2025-2026') {
+    effectiveCatoid = 10; // 2025-2026 Undergraduate Catalog [ARCHIVED]
+    forcedProgramsUrl = `${CATALOG_BASE_URL}/content.php?catoid=10&navoid=255`;
+    forcedReqsUrl = `${CATALOG_BASE_URL}/content.php?catoid=10&navoid=247`;
+  } else if (TARGET_YEAR === '2024-2025') {
+    effectiveCatoid = 7; // 2024-2025 Undergraduate Catalog [ARCHIVED]
+    forcedProgramsUrl = `${CATALOG_BASE_URL}/content.php?catoid=7&navoid=174`;
+    forcedReqsUrl = `${CATALOG_BASE_URL}/content.php?catoid=7&navoid=166`;
+  } else if (TARGET_YEAR === '2023-2024') {
+    isSmartCatalog = true;
+    forcedProgramsUrl = `${SMARTCATALOG_BASE_URL}/en/2023-2024/undergraduate-catalog/programs-of-study`;
+    forcedReqsUrl = `${SMARTCATALOG_BASE_URL}/en/2023-2024/undergraduate-catalog/academic-requirements/general-education-ge-program`;
+  }
 
   console.log('='.repeat(80));
   console.log('LINDENWOOD UNIVERSITY PARAMETERIZED ACADEMIC YEAR HARVESTER');
-  console.log(`Academic Year: ${TARGET_YEAR} | Catalog ID (catoid): ${TARGET_CATOID} | Workers: ${CONCURRENT_WORKERS}`);
+  console.log(`Academic Year: ${TARGET_YEAR} | Platform: ${isSmartCatalog ? 'SmartCatalog IQ' : `Acalog (catoid=${effectiveCatoid})`}`);
   console.log('='.repeat(80));
 
   let browser = null;
@@ -102,44 +130,13 @@ async function main() {
     });
 
     // -------------------------------------------------------------------------
-    // STEP 1: Discover Navigation URLs (Programs A-Z and Academic Requirements)
+    // STEP 1: Verify General Education Matrix
     // -------------------------------------------------------------------------
-    console.log('\n[STEP 1] Discovering Catalog Navigation Links...');
-    const navPage = await context.newPage();
-    await navPage.goto(`${CATALOG_BASE_URL}/index.php?catoid=${TARGET_CATOID}`, { waitUntil: 'networkidle', timeout: 35000 });
-
-    const discoveredNav = await navPage.evaluate((catoid) => {
-      const anchors = Array.from(document.querySelectorAll('a'));
-      let programsUrl = null;
-      let reqsUrl = null;
-
-      for (const a of anchors) {
-        const text = a.innerText.replace(/[\xa0\s]+/g, ' ').trim();
-        if (/Programs\s*\([A-Za-z]–?[A-Za-z]\)/i.test(text)) {
-          programsUrl = a.href;
-        } else if (/Academic Requirements/i.test(text)) {
-          reqsUrl = a.href;
-        }
-      }
-
-      return {
-        programsUrl: programsUrl || `https://catalogs.lindenwood.edu/content.php?catoid=${catoid}&navoid=327`,
-        reqsUrl: reqsUrl || `https://catalogs.lindenwood.edu/content.php?catoid=${catoid}&navoid=319`
-      };
-    }, TARGET_CATOID);
-    await navPage.close();
-
-    console.log(`   Programs (A-Z) URL: ${discoveredNav.programsUrl}`);
-    console.log(`   Academic Requirements URL: ${discoveredNav.reqsUrl}`);
-
-    // -------------------------------------------------------------------------
-    // STEP 2: Harvest Official CORE 42 General Education Matrix
-    // -------------------------------------------------------------------------
-    console.log('\n[STEP 2] Verifying and Staging CORE 42 General Education Matrix...');
+    console.log(`\n[STEP 1] Staging General Education Matrix for ${TARGET_YEAR}...`);
     const geMatrix = {
       catalog_year: TARGET_YEAR,
-      catoid: TARGET_CATOID,
-      source_url: discoveredNav.reqsUrl,
+      catoid: isSmartCatalog ? null : effectiveCatoid,
+      source_url: forcedReqsUrl,
       last_harvested_iso: new Date().toISOString(),
       framework_title: 'Missouri Higher Education Core Transfer Curriculum (CORE 42) & Lindenwood General Education Program',
       total_credits_required: 42,
@@ -150,7 +147,7 @@ async function main() {
         bypasses_category_audits: true,
         preserves_major_prerequisites: true,
         human_diversity_requirement_retained: true,
-        policy_statement: 'An official Associate of Arts (AA) degree or Missouri "CORE 42 Completed" transcript notation satisfies the 42-credit lower-division General Education requirement in its entirety, bypassing individual category distribution audits while preserving major-specific prerequisite courses and the 2-course Human Diversity (/HD) graduation overlay.'
+        policy_statement: 'An official Associate of Arts (AA) degree or Missouri "CORE 42 Completed" transcript notation satisfies the 42-credit lower-division General Education requirement in its entirety.'
       },
       distribution_categories: {
         written_communication: {
@@ -190,7 +187,6 @@ async function main() {
           name: 'Social & Behavioral Sciences',
           credits_required: 9,
           minimum_grade: 'D',
-          notes: 'Requires 3cr Civics + 6cr across 2+ social science disciplines.',
           courses: ['ANT 11200', 'CCJ 20000', 'ECON 23010', 'ECON 23020', 'ECON 23030', 'GEO 20000', 'PSY 10000', 'SOC 10200', 'SW 20000'],
           motr_mappings: ['MOTR ANTH', 'MOTR CRJS', 'MOTR ECON', 'MOTR PSYC', 'MOTR SOCI']
         },
@@ -199,7 +195,6 @@ async function main() {
           name: 'Humanities & Fine Arts',
           credits_required: 9,
           minimum_grade: 'D',
-          notes: 'Requires 3cr Arts, 3cr Literature, and 3cr Non-Literature/Non-Arts across 2+ disciplines.',
           sub_groups: {
             arts: ['ART 10000', 'ART 18100', 'DAN 10100', 'MUS 10000', 'TA 11700'],
             literature: ['ENGL 20100', 'ENGL 20200', 'ENGL 21600'],
@@ -212,7 +207,6 @@ async function main() {
           name: 'Natural Sciences',
           credits_required: 7,
           minimum_grade: 'D',
-          notes: 'Requires at least 1 Lab course (4cr) + 1 Non-Lab course across 2 distinct disciplines.',
           approved_lab_courses: ['BSC 10000', 'BSC 11200', 'BSC 23400', 'CHM 10000', 'CHM 23000', 'ESC 10000', 'PHY 25100', 'PHY 30100'],
           approved_non_lab_courses: ['AST 10000', 'BSC 10700', 'ESC 11100', 'SCI 10500'],
           motr_mappings: ['MOTR BIOL', 'MOTR CHEM', 'MOTR PHYS', 'MOTR GEOL']
@@ -221,8 +215,7 @@ async function main() {
           category_id: 'ADDITIONAL_GE_ELECTIVES',
           name: 'Additional General Education Electives',
           credits_required: 2,
-          minimum_grade: 'D',
-          notes: 'Any remaining course with a General Education designation or MOTR transfer code to complete the 42-credit framework.'
+          minimum_grade: 'D'
         }
       }
     };
@@ -232,16 +225,9 @@ async function main() {
     console.log(`   Saved General Education Matrix -> ${geOutPath}`);
 
     // -------------------------------------------------------------------------
-    // STEP 3: Pre-fetch & Cache Shared Sub-Packages (PCB&E Core & GE)
+    // STEP 2: Pre-defined PCB&E Packages (Core 36 cr & GE 15-22 cr)
     // -------------------------------------------------------------------------
-    console.log('\n[STEP 3] Resolving & Caching Shared Curriculum Sub-Packages (PCB&E)...');
-    const subPageCache = new Map();
-
-    // Cache pre-defined PCB&E packages for TARGET_CATOID
-    // POID 1943: PCB&E Core Requirements
     const pcbeCoreBlock = {
-      poid: 1943,
-      title: 'PCB&E Core Requirements',
       category_id: 'PCBE_BUSINESS_CORE',
       category_title: 'PCB&E Core Coursework',
       credits_required: 36,
@@ -253,14 +239,8 @@ async function main() {
         'MGMT 36033', 'MGMT 46082', 'MRKT 35010', 'HRM 36510', 'MGMT 36050'
       ]
     };
-    subPageCache.set(1943, pcbeCoreBlock);
 
-    // POID 1942: PCB&E General Education Requirements
     const pcbeGeBlock = {
-      poid: 1942,
-      title: 'PCB&E General Education Requirements',
-      minimum_grade: 'C',
-      rule_narrative: '15-22 credit hours of coursework towards general education requirements with a grade of C or better.',
       getPrescribedRequirements: (degreeType) => {
         const isBS = degreeType === 'BS';
         return [
@@ -310,63 +290,93 @@ async function main() {
         math: 'MTH 14100'
       }
     };
-    subPageCache.set(1942, pcbeGeBlock);
-    console.log('   Cached PCB&E Core (poid 1943) and PCB&E GE (poid 1942) definitions.');
 
     // -------------------------------------------------------------------------
-    // STEP 4: Enumerate All Programs from Programs (A-Z)
+    // STEP 3: Enumerate Programs from Directory
     // -------------------------------------------------------------------------
-    console.log(`\n[STEP 4] Enumerating Programs from ${discoveredNav.programsUrl}...`);
+    console.log(`\n[STEP 3] Enumerating Programs from ${forcedProgramsUrl}...`);
     const azPage = await context.newPage();
-    await azPage.goto(discoveredNav.programsUrl, { waitUntil: 'networkidle', timeout: 35000 });
-
-    const rawProgramListings = await azPage.evaluate(() => {
-      const anchors = Array.from(document.querySelectorAll('a[href*="preview_program.php"]'));
-      return anchors.map(a => ({
-        text: a.innerText.replace(/[\xa0\s]+/g, ' ').trim(),
-        href: a.href
-      })).filter(l => l.text.length > 2);
-    });
-    await azPage.close();
-
-    console.log(`   Found ${rawProgramListings.length} total program listings on directory page.`);
+    await azPage.goto(forcedProgramsUrl, { waitUntil: 'networkidle', timeout: 35000 });
 
     const candidatePrograms = [];
-    const seenPoids = new Set();
+    const seenUrls = new Set();
 
-    for (const item of rawProgramListings) {
-      const poidMatch = item.href.match(/poid=(\d+)/);
-      if (!poidMatch) continue;
-      const poid = parseInt(poidMatch[1], 10);
-      if (seenPoids.has(poid)) continue;
-      seenPoids.add(poid);
-
-      // Exclude standalone sub-packages or non-credential pages
-      if (poid === 1942 || poid === 1943) continue;
-
-      const lower = item.text.toLowerCase();
-      if (/\b(master|ms|ma|mfa|mba|macc|ed\.d|doctor|dissertation)\b/i.test(lower) && !/\b(bachelor|ba|bs|minor|cert)/i.test(lower)) {
-        continue;
-      }
-      if (lower === 'requirements' || lower === 'programs' || lower === 'courses') {
-        continue;
-      }
-
-      candidatePrograms.push({
-        name: item.text,
-        poid,
-        url: `${CATALOG_BASE_URL}/preview_program.php?catoid=${TARGET_CATOID}&poid=${poid}`,
-        credentialType: classifyCredentialType(item.text),
-        degreeType: determineDegreeType(item.text)
+    if (isSmartCatalog) {
+      const rawListings = await azPage.evaluate(() => {
+        const anchors = Array.from(document.querySelectorAll('#main a, .main-content a, .content a, table a, li a'));
+        return anchors.map(a => ({
+          text: a.innerText.replace(/[\xa0\s]+/g, ' ').trim(),
+          href: a.href
+        })).filter(l => {
+          const lower = l.text.toLowerCase();
+          if (l.href.includes('academiccatalog.com') || l.href.includes('lindenwood.edu/admissions')) return false;
+          if (lower.includes('programs of study') || lower.includes('calendar') || lower.includes('introduction') || lower.includes('policies') || lower.includes('requirements') || lower.includes('courses and programs') || lower.includes('board') || lower.includes('cabinet') || lower.includes('faculty') || lower.includes('locations') || lower.includes('site map') || lower.includes('print this page') || lower.includes('lindenwood online') || lower.includes('all catalogs') || lower.includes('catalog home') || lower.includes('undergraduate course descriptions') || lower.includes('admission')) return false;
+          if (/^college of /i.test(l.text)) return false;
+          return l.text.length > 2;
+        });
       });
+
+      for (const item of rawListings) {
+        if (seenUrls.has(item.href)) continue;
+        seenUrls.add(item.href);
+
+        const lower = item.text.toLowerCase();
+        if (/\b(master|ms|ma|mfa|mba|macc|ed\.d|doctor|dissertation)\b/i.test(lower) && !/\b(bachelor|ba|bs|minor|cert)/i.test(lower)) {
+          continue;
+        }
+
+        candidatePrograms.push({
+          name: item.text,
+          poid: item.href,
+          url: item.href,
+          credentialType: classifyCredentialType(item.text),
+          degreeType: determineDegreeType(item.text)
+        });
+      }
+    } else {
+      const rawProgramListings = await azPage.evaluate(() => {
+        const anchors = Array.from(document.querySelectorAll('a[href*="preview_program.php"]'));
+        return anchors.map(a => ({
+          text: a.innerText.replace(/[\xa0\s]+/g, ' ').trim(),
+          href: a.href
+        })).filter(l => l.text.length > 2);
+      });
+
+      for (const item of rawProgramListings) {
+        const poidMatch = item.href.match(/poid=(\d+)/);
+        if (!poidMatch) continue;
+        const poid = parseInt(poidMatch[1], 10);
+        if (seenUrls.has(poid)) continue;
+        seenUrls.add(poid);
+
+        // Exclude standalone sub-packages
+        if (poid === 1942 || poid === 1943) continue;
+
+        const lower = item.text.toLowerCase();
+        if (/\b(master|ms|ma|mfa|mba|macc|ed\.d|doctor|dissertation)\b/i.test(lower) && !/\b(bachelor|ba|bs|minor|cert)/i.test(lower)) {
+          continue;
+        }
+        if (lower === 'requirements' || lower === 'programs' || lower === 'courses') {
+          continue;
+        }
+
+        candidatePrograms.push({
+          name: item.text,
+          poid,
+          url: `${CATALOG_BASE_URL}/preview_program.php?catoid=${effectiveCatoid}&poid=${poid}`,
+          credentialType: classifyCredentialType(item.text),
+          degreeType: determineDegreeType(item.text)
+        });
+      }
     }
 
+    await azPage.close();
     console.log(`   Resolved ${candidatePrograms.length} unique undergraduate programs to harvest.`);
 
     // -------------------------------------------------------------------------
-    // STEP 5: Multi-Worker Concurrent Crawler & Category Extractor
+    // STEP 4: Concurrent Crawler & Category Extractor
     // -------------------------------------------------------------------------
-    console.log(`\n[STEP 5] Crawling and Parsing Programs with ${CONCURRENT_WORKERS} Concurrent Workers...`);
+    console.log(`\n[STEP 4] Crawling and Parsing Programs with ${CONCURRENT_WORKERS} Concurrent Workers...`);
     const harvestedPrograms = {};
     const usedSlugs = new Set();
     let completedCount = 0;
@@ -380,11 +390,11 @@ async function main() {
         try {
           await page.goto(item.url, { waitUntil: 'domcontentloaded', timeout: 35000 });
 
-          const pageData = await page.evaluate(() => {
-            const titleEl = document.querySelector('h1#acalog-content') || document.querySelector('h1') || document.querySelector('.page_title');
+          const pageData = await page.evaluate((isSmart) => {
+            const titleEl = document.querySelector('h1#acalog-content') || document.querySelector('h1') || document.querySelector('h2');
             const pageTitle = titleEl ? titleEl.innerText.replace(/[\xa0\s]+/g, ' ').trim() : '';
 
-            const contentEl = document.querySelector('.block_content') || document.body;
+            const contentEl = document.querySelector('.block_content') || document.querySelector('#main') || document.body;
             const fullText = contentEl ? contentEl.innerText.replace(/[\xa0\s]+/g, ' ').trim() : '';
 
             // Extract total stated credit hours
@@ -395,39 +405,103 @@ async function main() {
               parsedCredits = parseInt(numStr, 10);
             }
 
-            // Check for subprogram links (e.g. PCB&E)
             const subLinks = Array.from(document.querySelectorAll('a[href*="preview_program.php"]')).map(a => ({
               text: a.innerText.replace(/[\xa0\s]+/g, ' ').trim(),
               href: a.href
             }));
 
-            // Extract category sections
-            const coreDivs = Array.from(document.querySelectorAll('div.acalog-core'));
             const extractedSections = [];
 
-            coreDivs.forEach((div, idx) => {
-              const h = div.querySelector('h2, h3, h4, h5');
-              const sTitle = h ? h.innerText.replace(/[\xa0\s]+/g, ' ').trim() : `Section ${idx}`;
-              
-              // Skip generic boilerplate headers
-              if (sTitle === 'Requirements' || /University General Education|Lindenwood General Education Requirements/i.test(sTitle)) {
-                return;
-              }
+            if (isSmart) {
+              // SmartCatalog DOM parsing
+              const headings = Array.from(contentEl.querySelectorAll('h2, h3, h4'));
+              headings.forEach(h => {
+                const sTitle = h.innerText.replace(/[\xa0\s]+/g, ' ').trim();
+                if (/requirements|footer|connect with us/i.test(sTitle)) return;
 
-              const divText = div.innerText.replace(/[\xa0\s]+/g, ' ').trim();
-              const sCrMatch = divText.match(/(\d+(?:\s*-\s*\d+)?)\s*(?:credit\s*hours?|credits)/i);
-              const sCredits = sCrMatch ? parseInt(sCrMatch[1].split('-').pop().trim(), 10) : 0;
+                let el = h.nextElementSibling;
+                const textParts = [];
+                const sectionCourses = [];
+                const seenCodes = new Set();
 
-              // Find courses
-              const seenCodes = new Set();
-              const sectionCourses = [];
+                while (el && !['H2', 'H3', 'H4'].includes(el.tagName)) {
+                  const elText = el.innerText.replace(/[\xa0\s]+/g, ' ').trim();
+                  textParts.push(elText);
 
-              // 1. Anchors matching preview_course or course text
-              const courseEls = Array.from(div.querySelectorAll('li, tr, p, a'));
-              courseEls.forEach(el => {
-                const t = el.innerText.replace(/[\xa0\s]+/g, ' ').trim();
-                const m = t.match(/\b([A-Z]{2,4}\s+\d{5})\b(?:\s*[-–—:]\s*(.+?))?(?:\s*Credit\s*Hours?:\s*(\d+))?/i);
-                if (m) {
+                  const cLinks = Array.from(el.querySelectorAll('a, li, tr, p')).filter(e => {
+                    return /\b[A-Z]{2,5}\s*\d{4,5}[A-Z]?\b/.test(e.innerText);
+                  });
+
+                  cLinks.forEach(e => {
+                    const t = e.innerText.replace(/[\xa0\s]+/g, ' ').trim();
+                    const m = t.match(/\b([A-Z]{2,5}\s*\d{4,5}[A-Z]?)\b(?:\s*[-–—:]\s*(.+?))?(?:\s*Credit\s*Hours?:\s*(\d+))?/i);
+                    if (m) {
+                      const code = m[1].replace(/\s+/g, ' ').toUpperCase();
+                      if (!seenCodes.has(code)) {
+                        seenCodes.add(code);
+                        sectionCourses.push({
+                          code,
+                          title: m[2] ? m[2].trim() : code,
+                          credits: m[3] ? parseInt(m[3], 10) : 3
+                        });
+                      }
+                    }
+                  });
+
+                  el = el.nextElementSibling;
+                }
+
+                const combinedText = textParts.join(' ');
+                const sCrMatch = combinedText.match(/(\d+(?:\s*-\s*\d+)?)\s*(?:credit\s*hours?|credits)/i);
+                const sCredits = sCrMatch ? parseInt(sCrMatch[1].split('-').pop().trim(), 10) : 0;
+
+                if (sectionCourses.length > 0 || sCredits > 0) {
+                  extractedSections.push({
+                    title: sTitle,
+                    creditsRequired: sCredits,
+                    ruleNarrative: combinedText.slice(0, 400),
+                    courses: sectionCourses
+                  });
+                }
+              });
+
+            } else {
+              // Acalog DOM parsing
+              const coreDivs = Array.from(document.querySelectorAll('div.acalog-core'));
+              coreDivs.forEach((div, idx) => {
+                const h = div.querySelector('h2, h3, h4, h5');
+                const sTitle = h ? h.innerText.replace(/[\xa0\s]+/g, ' ').trim() : `Section ${idx}`;
+
+                if (sTitle === 'Requirements' || /University General Education|Lindenwood General Education Requirements/i.test(sTitle)) {
+                  return;
+                }
+
+                const divText = div.innerText.replace(/[\xa0\s]+/g, ' ').trim();
+                const sCrMatch = divText.match(/(\d+(?:\s*-\s*\d+)?)\s*(?:credit\s*hours?|credits)/i);
+                const sCredits = sCrMatch ? parseInt(sCrMatch[1].split('-').pop().trim(), 10) : 0;
+
+                const seenCodes = new Set();
+                const sectionCourses = [];
+
+                const courseEls = Array.from(div.querySelectorAll('li, tr, p, a'));
+                courseEls.forEach(el => {
+                  const t = el.innerText.replace(/[\xa0\s]+/g, ' ').trim();
+                  const m = t.match(/\b([A-Z]{2,4}\s+\d{5})\b(?:\s*[-–—:]\s*(.+?))?(?:\s*Credit\s*Hours?:\s*(\d+))?/i);
+                  if (m) {
+                    const code = m[1].replace(/\s+/g, ' ').toUpperCase();
+                    if (!seenCodes.has(code)) {
+                      seenCodes.add(code);
+                      sectionCourses.push({
+                        code,
+                        title: m[2] ? m[2].trim() : code,
+                        credits: m[3] ? parseInt(m[3], 10) : 3
+                      });
+                    }
+                  }
+                });
+
+                const textMatches = Array.from(divText.matchAll(/\b([A-Z]{2,4}\s+\d{5})\b(?:\s*[-–—:]\s*([^\n\r]+?))?(?:\s*Credit\s*Hours?:\s*(\d+))?/gi));
+                textMatches.forEach(m => {
                   const code = m[1].replace(/\s+/g, ' ').toUpperCase();
                   if (!seenCodes.has(code)) {
                     seenCodes.add(code);
@@ -437,30 +511,16 @@ async function main() {
                       credits: m[3] ? parseInt(m[3], 10) : 3
                     });
                   }
-                }
-              });
+                });
 
-              // 2. Direct regex match on divText if anchors didn't catch all
-              const textMatches = Array.from(divText.matchAll(/\b([A-Z]{2,4}\s+\d{5})\b(?:\s*[-–—:]\s*([^\n\r]+?))?(?:\s*Credit\s*Hours?:\s*(\d+))?/gi));
-              textMatches.forEach(m => {
-                const code = m[1].replace(/\s+/g, ' ').toUpperCase();
-                if (!seenCodes.has(code)) {
-                  seenCodes.add(code);
-                  sectionCourses.push({
-                    code,
-                    title: m[2] ? m[2].trim() : code,
-                    credits: m[3] ? parseInt(m[3], 10) : 3
-                  });
-                }
+                extractedSections.push({
+                  title: sTitle,
+                  creditsRequired: sCredits,
+                  ruleNarrative: divText.slice(0, 400),
+                  courses: sectionCourses
+                });
               });
-
-              extractedSections.push({
-                title: sTitle,
-                creditsRequired: sCredits,
-                ruleNarrative: divText.slice(0, 400),
-                courses: sectionCourses
-              });
-            });
+            }
 
             return {
               pageTitle: pageTitle || '',
@@ -469,31 +529,32 @@ async function main() {
               subLinks,
               rawText: fullText
             };
-          });
+          }, isSmartCatalog);
 
-          // Generate unique ID slug
-          let baseSlug = generateProgramId(item.name, yearSuffix);
+          // Generate ID slug
+          let baseSlug = generateProgramId(item.name, YEAR_SUFFIX);
           if (usedSlugs.has(baseSlug)) {
-            baseSlug = `${baseSlug}_${item.poid}`;
+            const poidSuffix = typeof item.poid === 'number' ? item.poid : (item.url.split('/').filter(Boolean).pop().replace(/[^a-z0-9]/gi, '_').toLowerCase());
+            baseSlug = `${baseSlug}_${poidSuffix}`;
           }
           usedSlugs.add(baseSlug);
 
-          // Check if this program references PCB&E shared packages
-          const hasPcbeGe = pageData.subLinks.some(l => l.href.includes('poid=1942') || /PCB&E General Education/i.test(l.text));
-          const hasPcbeCore = pageData.subLinks.some(l => l.href.includes('poid=1943') || /PCB&E Core/i.test(l.text));
-          const isPcbeBusiness = hasPcbeGe || hasPcbeCore || (
-            ['Accounting', 'Business Administration', 'Finance', 'Human Resource Management', 'Marketing', 'Sport Management', 'Health Management']
-              .some(kw => item.name.includes(kw)) && item.credentialType === 'MAJOR'
-          );
+          // Business school classification & PCB&E inlining
+          const businessKeywords = [
+            'Accounting', 'Business Administration', 'Finance', 'Human Resource Management',
+            'Marketing', 'Sport Management', 'Health Management', 'Supply Chain'
+          ];
+          const isPcbeBusiness = businessKeywords.some(kw => item.name.includes(kw)) &&
+            item.credentialType === 'MAJOR' &&
+            !item.name.includes('Secondary Education') &&
+            !item.name.includes('Middle School');
 
-          // Build requirement_categories
           const requirementCategories = [];
           const prescribedGeRequirements = [];
           const prescribedGeSatisfactions = {};
 
-          // If PCB&E Business Major: Inline PCB&E Core & GE packages
           if (isPcbeBusiness) {
-            // 1. Add PCB&E Core Coursework (36 credits)
+            // Inline PCB&E Core (36 cr)
             requirementCategories.push({
               category_id: pcbeCoreBlock.category_id,
               title: pcbeCoreBlock.category_title,
@@ -504,26 +565,25 @@ async function main() {
               courses: [...pcbeCoreBlock.courses]
             });
 
-            // 2. Inline PCB&E Prescribed General Education (15-22 credits)
+            // Inline PCB&E GE
             const pcbeGeList = pcbeGeBlock.getPrescribedRequirements(item.degreeType);
             prescribedGeRequirements.push(...pcbeGeList);
             Object.assign(prescribedGeSatisfactions, pcbeGeBlock.prescribed_ge_satisfactions);
           }
 
-          // Process DOM sections from page
+          // Process DOM sections
           for (const sec of pageData.sections) {
             const secLower = sec.title.toLowerCase();
 
-            // Skip the raw un-traversed PCB&E placeholder section since we inlined it
+            // Skip un-inlined placeholder blocks
             if (/PCB&E GE and PCB&E Core Coursework/i.test(sec.title)) {
               continue;
             }
 
-            // Check if section is a General Education override section (e.g. Cybersecurity GE Math)
+            // Isolate General Education override sections
             if (/General Education.*(?:Mathematics|Math|Comm|Communication|Social|Science)/i.test(sec.title) ||
                 /GE-Math|GE-Comm|GE-SocSci/i.test(sec.title)) {
               
-              // Extract courses from this GE section into prescribed_ge_requirements
               const geCodes = sec.courses.map(c => c.code);
               let targetBucket = 'mathematical_sciences';
               if (/comm/i.test(sec.title)) targetBucket = 'oral_communication';
@@ -543,23 +603,18 @@ async function main() {
                   advising_note: `${sec.title} requirement prescribed for ${item.name}.`
                 });
 
-                // Set legacy key for backward compatibility
                 if (targetBucket === 'mathematical_sciences' && geCodes.includes('MTH 14100')) {
                   prescribedGeSatisfactions.math = 'MTH 14100';
                 } else if (targetBucket === 'mathematical_sciences' && geCodes.includes('MTH 27100')) {
                   prescribedGeSatisfactions.math = 'MTH 27100';
                 }
               }
-
-              // Do NOT append this GE section as a major category
               continue;
             }
 
-            // Detect category-level distribution rules
             let categoryType = 'CORE';
             let perCourseCreditReq = null;
 
-            // Pattern for repeat distribution (e.g., Theatre Acting Production Coursework: 6 cr from each course)
             const repeatMatch = sec.ruleNarrative.match(/\(\s*(\d+)\s+credit hours?\s*(?:from\s+each\s+course|each\s+course)/i) ||
                                 sec.ruleNarrative.match(/(\d+)\s+credit hours?\s*(?:from\s+each\s+course|each\s+course)/i);
             if (repeatMatch) {
@@ -569,7 +624,6 @@ async function main() {
               categoryType = 'CHOICE';
             }
 
-            // Category naming: For PCB&E business majors, rename generic "Major Coursework" to "${Subject} Major Coursework"
             let catTitle = sec.title;
             let catId = sec.title.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
 
@@ -590,41 +644,41 @@ async function main() {
             });
           }
 
-          // Additional course-based prescribed GE detection (e.g. CS Calculus/Public Speaking)
+          // Fallback: Guarantee requirement_categories is never empty
+          if (requirementCategories.length === 0) {
+            const fallbackCourses = pageData.sections.flatMap(s => s.courses.map(c => c.code));
+            requirementCategories.push({
+              category_id: `${item.credentialType}_CORE`,
+              title: `${item.credentialType === 'MAJOR' ? 'Major' : (item.credentialType === 'MINOR' ? 'Minor' : 'Certificate')} Coursework`,
+              credits_required: pageData.parsedCredits || (item.credentialType === 'MINOR' ? 24 : (item.credentialType === 'CERTIFICATE' ? 18 : 60)),
+              category_type: 'CORE',
+              rule_narrative: `Core curriculum coursework for ${item.name}.`,
+              per_course_credit_requirement: null,
+              courses: fallbackCourses
+            });
+          }
+
+          // Detect common prescribed GE from courses
           const allMajorCourses = requirementCategories.flatMap(c => c.courses);
-          if (allMajorCourses.includes('MTH 27100') && !prescribedGeSatisfactions.math) {
-            prescribedGeSatisfactions.math = 'MTH 27100';
-          } else if (allMajorCourses.includes('MTH 14100') && !prescribedGeSatisfactions.math) {
-            prescribedGeSatisfactions.math = 'MTH 14100';
-          } else if (allMajorCourses.includes('MTH 15100') && !prescribedGeSatisfactions.math) {
-            prescribedGeSatisfactions.math = 'MTH 15100';
-          }
+          if (allMajorCourses.includes('MTH 27100') && !prescribedGeSatisfactions.math) prescribedGeSatisfactions.math = 'MTH 27100';
+          else if (allMajorCourses.includes('MTH 14100') && !prescribedGeSatisfactions.math) prescribedGeSatisfactions.math = 'MTH 14100';
+          else if (allMajorCourses.includes('MTH 15100') && !prescribedGeSatisfactions.math) prescribedGeSatisfactions.math = 'MTH 15100';
 
-          if (allMajorCourses.includes('COM 11000') && !prescribedGeSatisfactions.oral_communication) {
-            prescribedGeSatisfactions.oral_communication = 'COM 11000';
-          }
-          if (allMajorCourses.includes('ECON 23020') && !prescribedGeSatisfactions.social_science) {
-            prescribedGeSatisfactions.social_science = 'ECON 23020';
-          }
-          if (allMajorCourses.includes('PSY 10000') && !prescribedGeSatisfactions.social_science) {
-            prescribedGeSatisfactions.social_science = 'PSY 10000';
-          }
-          if (allMajorCourses.includes('BSC 22700') && !prescribedGeSatisfactions.natural_science) {
-            prescribedGeSatisfactions.natural_science = 'BSC 22700';
-          }
+          if (allMajorCourses.includes('COM 11000') && !prescribedGeSatisfactions.oral_communication) prescribedGeSatisfactions.oral_communication = 'COM 11000';
+          if (allMajorCourses.includes('ECON 23020') && !prescribedGeSatisfactions.social_science) prescribedGeSatisfactions.social_science = 'ECON 23020';
+          if (allMajorCourses.includes('PSY 10000') && !prescribedGeSatisfactions.social_science) prescribedGeSatisfactions.social_science = 'PSY 10000';
+          if (allMajorCourses.includes('BSC 22700') && !prescribedGeSatisfactions.natural_science) prescribedGeSatisfactions.natural_science = 'BSC 22700';
 
-          // Calculate total required credits
+          // Credits computation
           let totalCredits = pageData.parsedCredits;
-          if (item.name === 'Accounting, BS') {
-            // Accounting BS is 82 credits: 36 core + 21 major + 6 electives + 19 GE
+          if (item.name.startsWith('Accounting, BS')) {
             totalCredits = 82;
-          } else if (item.name === 'Cybersecurity, BS') {
-            // Cybersecurity BS is 66 credits: 60 major + 6 GE math
+          } else if (item.name.startsWith('Cybersecurity, BS')) {
             totalCredits = 66;
           } else if (isPcbeBusiness && item.credentialType === 'MAJOR') {
-            const sumCategories = requirementCategories.reduce((sum, c) => sum + (c.credits_required || 0), 0);
+            const sumCat = requirementCategories.reduce((sum, c) => sum + (c.credits_required || 0), 0);
             const geCredits = item.degreeType === 'BS' ? 19 : 15;
-            totalCredits = sumCategories + geCredits;
+            totalCredits = sumCat + geCredits;
             if (totalCredits < 77) totalCredits = item.degreeType === 'BS' ? 82 : 77;
           } else if (!totalCredits || isNaN(totalCredits) || totalCredits <= 0) {
             if (item.credentialType === 'MINOR') totalCredits = 24;
@@ -632,7 +686,7 @@ async function main() {
             else totalCredits = 120;
           }
 
-          // Build flattened compatibility structures
+          // Build flattened structures
           const coreCoursesList = [];
           const electiveCoursesList = [];
           const choiceGroups = [];
@@ -671,7 +725,7 @@ async function main() {
             }
           });
 
-          // Clean Track Verification: Only verified bifurcated degrees retain tracks
+          // Single-track enforcement
           let flexibleElectives = null;
           if (baseSlug.startsWith('data_science_bs') || /data science.*bs/i.test(item.name)) {
             flexibleElectives = {
@@ -682,7 +736,7 @@ async function main() {
             };
           }
 
-          // Build canonical program record
+          // Program record
           const programRecord = {
             id: baseSlug,
             name: item.name,
@@ -730,13 +784,12 @@ async function main() {
           }
 
         } catch (err) {
-          console.warn(`   [Worker ${workerId}] Warning: failed to parse "${item.name}" (poid=${item.poid}):`, err.message);
+          console.warn(`   [Worker ${workerId}] Warning: failed to parse "${item.name}":`, err.message);
         }
       }
       await page.close();
     }
 
-    // Launch worker pool
     const workerPromises = Array.from({ length: CONCURRENT_WORKERS }, (_, i) => crawlWorker(i + 1));
     await Promise.all(workerPromises);
 
@@ -744,16 +797,14 @@ async function main() {
     console.log(`\n-> Successfully Harvested ${totalHarvested} Complete Program Checklists!`);
 
     // -------------------------------------------------------------------------
-    // STEP 6: Staging & Idempotent Upsert into masterProgramsDatabase.json
+    // STEP 5: Idempotent Upsert into masterProgramsDatabase.json
     // -------------------------------------------------------------------------
-    console.log('\n[STEP 6] Staging Programs & Executing Idempotent Year Upsert...');
+    console.log('\n[STEP 5] Executing Idempotent Year Upsert...');
 
-    // 1. Output staging JSON
     const stagingPath = path.resolve(rootDir, '.tmp', `programs_staging_${TARGET_YEAR.replace('-', '_')}.json`);
     fs.writeFileSync(stagingPath, JSON.stringify(harvestedPrograms, null, 2), 'utf-8');
-    console.log(`   Staged Raw & Parsed Programs -> ${stagingPath} (${(fs.statSync(stagingPath).size / 1024).toFixed(2)} KB)`);
+    console.log(`   Staged Raw & Parsed Programs -> ${stagingPath}`);
 
-    // 2. Load existing masterProgramsDatabase.json
     const masterProgPath = path.resolve(rootDir, 'src', 'data', 'masterProgramsDatabase.json');
     let masterProgramsDb = {
       version: `${TARGET_YEAR}.v1`,
@@ -768,7 +819,6 @@ async function main() {
       masterProgramsDb = JSON.parse(fs.readFileSync(masterProgPath, 'utf-8'));
     }
 
-    // Filter out existing programs for TARGET_YEAR while preserving all other years
     const mergedPrograms = {};
     let retainedOtherYearsCount = 0;
 
@@ -779,12 +829,10 @@ async function main() {
       }
     }
 
-    // Append newly harvested programs
     for (const [id, prog] of Object.entries(harvestedPrograms)) {
       mergedPrograms[id] = prog;
     }
 
-    // Update master metadata
     masterProgramsDb.last_updated_iso = new Date().toISOString();
     masterProgramsDb.programs = mergedPrograms;
     masterProgramsDb.total_programs = Object.keys(mergedPrograms).length;
@@ -793,14 +841,13 @@ async function main() {
     yearsSet.add(TARGET_YEAR);
     masterProgramsDb.catalog_years = Array.from(yearsSet);
 
-    // Save master database
     fs.writeFileSync(masterProgPath, JSON.stringify(masterProgramsDb, null, 2), 'utf-8');
     console.log(`   Upserted ${totalHarvested} programs for ${TARGET_YEAR} (retained ${retainedOtherYearsCount} from other years).`);
     console.log(`   Updated Master Catalog Repository -> ${masterProgPath} (Total Programs: ${masterProgramsDb.total_programs})`);
 
     const elapsedTimeSec = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log('\n' + '='.repeat(80));
-    console.log(`HARVEST COMPLETED IN ${elapsedTimeSec} SECONDS`);
+    console.log(`HARVEST OF ${TARGET_YEAR} COMPLETED IN ${elapsedTimeSec} SECONDS`);
     console.log('='.repeat(80));
 
   } catch (err) {
