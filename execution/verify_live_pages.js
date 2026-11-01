@@ -158,6 +158,31 @@ async function verifyLive() {
 
     // Checkpoint 7: Test Modal B on zero-course state
     console.log('Testing Modal B Registration Start Term Confirmation Modal on live site...');
+    // Provide student identity and declare a primary major to satisfy intake progression gate
+    await page.type('#optionB-student-name', 'Jane Doe');
+    await page.type('#optionB-student-id', 'A00998877');
+
+    const comboboxTrigger = await page.$('#optionB-program-combobox-trigger');
+    if (comboboxTrigger) {
+      await comboboxTrigger.click();
+      await new Promise((r) => setTimeout(r, 400));
+      const searchInput = await page.$('#optionB-program-search-input');
+      if (searchInput) {
+        await searchInput.type('Cybersecurity, BS');
+        await new Promise((r) => setTimeout(r, 400));
+      }
+      await page.evaluate(() => {
+        const opt = Array.from(document.querySelectorAll('div[id^="program-option-"]')).find(
+          (el) => el.textContent.includes('Cybersecurity, BS')
+        );
+        if (opt) opt.click();
+      });
+      await new Promise((r) => setTimeout(r, 300));
+      const addBtn = await page.$('#add-program-to-stack-button');
+      if (addBtn) await addBtn.click();
+      await new Promise((r) => setTimeout(r, 400));
+    }
+
     const submitBtn = await page.$('#optionB-submit-btn');
     if (!submitBtn) throw new Error('FAILED: #optionB-submit-btn missing on live site!');
     await submitBtn.click();
@@ -217,6 +242,40 @@ async function verifyLive() {
       if (btn) btn.click();
     });
     await new Promise((r) => setTimeout(r, 400));
+
+    // Checkpoint 10: Screen 2 "Path to Graduation" & Policy Drawer Verification
+    console.log('Testing Screen 2 "Path to Graduation" on live site...');
+    const runAuditBtn = await page.$('#optionB-submit-btn');
+    if (!runAuditBtn) throw new Error('FAILED: #optionB-submit-btn missing for Brandon Paz!');
+    await runAuditBtn.click();
+    await new Promise((r) => setTimeout(r, 1500));
+
+    const pathTitle = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="path-to-graduation-title"]');
+      return el ? el.textContent.trim() : null;
+    });
+    if (pathTitle !== 'PATH TO GRADUATION') {
+      throw new Error(`FAILED: Expected "PATH TO GRADUATION" on live Screen 2, found: "${pathTitle}"`);
+    }
+    console.log('[PASS] Live Checkpoint 10: "PATH TO GRADUATION" confirmed on live Screen 2.');
+
+    const lionPawExists = await page.$('[data-testid="lion-paw-marker"]');
+    if (!lionPawExists) throw new Error('FAILED: [data-testid="lion-paw-marker"] missing on live Screen 2!');
+    console.log('[PASS] Live Checkpoint 11: Lion Paw marker verified on live site.');
+
+    const diplomaExists = await page.$('[data-testid="diploma-finish-icon"]');
+    if (!diplomaExists) throw new Error('FAILED: [data-testid="diploma-finish-icon"] missing on live Screen 2!');
+    console.log('[PASS] Live Checkpoint 12: Diploma finish line verified on live site.');
+
+    // Toggle drawer open
+    const drawerToggle = await page.$('#audit-details-drawer-toggle');
+    if (!drawerToggle) throw new Error('FAILED: #audit-details-drawer-toggle missing on live Screen 2!');
+    await drawerToggle.click();
+    await new Promise((r) => setTimeout(r, 500));
+
+    const policyGridExists = await page.$('[data-testid="policy-checks-grid"]');
+    if (!policyGridExists) throw new Error('FAILED: [data-testid="policy-checks-grid"] missing after opening drawer!');
+    console.log('[PASS] Live Checkpoint 13: Policy drawer expanded and verified on live site.');
 
     // Save screenshot
     const screenPath = '.tmp/live_github_pages_verification.png';
