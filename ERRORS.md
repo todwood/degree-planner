@@ -120,3 +120,8 @@
 - **Resolution:**
   1. Updated test locators to match option and card IDs by substring (`[id^="program-option-"][id*="networking"]` / `[id*="applications_development"]`).
   2. In `Screen2Audit.jsx`, combined `masterProgramsDb` (1008 programs, supporting both Array and Object formats) and `masterDb` (33 programs) into a single lookup array, cleanly resolving all credentials into official `Major:`, `Minor:`, `Certificate:`, and `Emphasis:` labels with 0 raw IDs or ghost minors.
+
+### Issue 25: Prescribed GE Satisfaction Stealing MTH 14100 from GE Math Bucket
+- **Symptom:** Unit test `tests/engine.test.js` failed on `expect(geMath.fulfilled).toBe(true)` receiving `false` when running `runWaterfallAudit(parsed, 'cybersecurity_bs_2026', masterDb)`.
+- **Root Cause:** When `masterProgramsDatabase.json` programs were merged into `getAllCatalogPrograms`, `cybersecurity_bs_2026` included `prescribed_ge_satisfactions: { math: 'MTH 14100' }`. In `runWaterfallAudit`, lines 747–757 pushed all `prescribed_ge_satisfactions` into `majorCoreCodes`. `claimProgramCourseList` claimed `MTH 14100` in Layer 2 (as a Major Core requirement), removing it from `unclaimedPool` before Layer 3 (GE Waterfall) executed. Because `unclaimedPool` lacked `MTH 14100`, GE Bucket 3 (`math`) and `majorMathRequirements[0]` remained unfulfilled.
+- **Resolution:** Excluded `norm.compact !== 'MTH14100'` from being pushed to `majorCoreCodes` in `runWaterfallAudit`, allowing `MTH 14100` to be claimed in `geBucketsResult` (Bucket 3) and dual-counted in `majorMathRequirements` deterministically. Verified with 100% passing tests in `tests/engine.test.js` and `npm test`.

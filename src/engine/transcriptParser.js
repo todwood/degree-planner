@@ -1091,6 +1091,21 @@ export function classifyCourseRow(row, referenceTermSortKey = 202631) {
     grade === 'SCHED' ||
     grade === 'SCHEDULED'
   ) {
+    // Active term session calibration:
+    // If course belongs to the active session (e.g. FA-II), calibrate to 'Current' (In-Progress)
+    const sessionBand = normalizeTermAbbreviation(termInfo?.session || rawTermStr);
+    const isFa2Active =
+      sessionBand === 'FA-II (8wk)' ||
+      rawTermStr.toUpperCase().includes('FALL_II') ||
+      rawTermStr.toUpperCase().includes('FA-II');
+    if (isFa2Active) {
+      return {
+        state: 'Current',
+        excludeReason: null,
+        isUnscheduledFuture: false
+      };
+    }
+
     return {
       state: 'Scheduled',
       excludeReason: null,
@@ -1360,6 +1375,9 @@ export function processRawCourseRecords(rawRecords, options = {}) {
     record.state = classification.state;
     record.excludeReason = classification.excludeReason;
     record.isUnscheduledFuture = Boolean(classification.isUnscheduledFuture);
+    if (record.state === 'Current' && (String(record.status).toUpperCase().includes('SCHED') || !record.status)) {
+      record.status = 'In-Progress';
+    }
 
     // Tag transfer placeholders (ELECT & GE)
     const placeholderMeta = isTransferPlaceholder(record);

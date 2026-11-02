@@ -1854,3 +1854,27 @@
      - Full Vitest suite: **375 / 375 tests passing (100% green)** across all 36 test files (`npm test`).
      - Headless Playwright verification `.tmp/verify_screen2_fixes.mjs` verifying Connor Brown transcript ingestion, adding secondary IT App Dev major, advancing to Screen 2, checking Info Card labels (`Major: Information Technology, BS Networking Emphasis` and `Major: Information Technology, BS Applications Development Emphasis`, zero ghost minors), verifying dynamic target scaled to 153 cr, verifying progress bar and paw marker, navigating back to Screen 1, and confirming both majors persist in the stack.
      - Production build: `npm run build` compiled cleanly in 5.75s.
+
+### 99. Institutional GE Alignment, Common Course Schedule GE Tags, Active Term Normalization, and Screen 2 Category Accordions
+- **Objective:** Re-enrich course database with canonical Common Course Schedule GE tags, calibrate active term status normalization (FA-II 8wk -> In-Progress), lock ProgramCombobox catalog year selection, enforce Natural Science lab packing (4cr combo or 3cr lecture + 1cr lab), block 1cr/2cr labs from 3cr standalone buckets, and overhaul Screen 2 major accordions into structured category headers with sub-totals.
+- **Architectural Implementation:**
+  1. *Canonical Course GE Tag Re-Enrichment (`masterDatabase.json` & `ge_*.json`):*
+     - Course titles in `src/data/masterDatabase.json` default to canonical Common Course Schedule database naming convention with official GE tag suffix (e.g., `BSC 22700 - Human Anatomy and Physiology I (GE-NatSciLec/Lab)`).
+     - Enriched 40 GE courses across all catalog years with accurate `geTag` attributes matching their title suffixes.
+     - Added approved lab courses (`BSC 22700`, `BSC 11020`) and non-lab courses (`BSC 11000`) across all year schemas.
+  2. *Active Term Normalization (`transcriptParser.js` & `intakeHelpers.js`):*
+     - Courses in the active session (`FA-II (8wk)` / `FALL_II`) normalize to `In-Progress` with `state: 'Current'`, even if Anthology exported them as `Scheduled`.
+     - Future terms (`SP (16wk) 2027`) remain `Scheduled`.
+  3. *Catalog Year Program Locking & Unversioned Slug Resolution (`ProgramCombobox.jsx` & `waterfallAudit.js`):*
+     - `ProgramCombobox` strictly filters search results by active `catalogYear` and displays `[2026-2027]` badge.
+     - `waterfallAudit.js` resolves unversioned slugs (`cybersecurity_bs` -> `cybersecurity_bs_2026`) and unblocks `MTH 14100` dual-satisfaction.
+  4. *Natural Science Lab Packing & 3-Credit Bucket Minimum (`waterfallAudit.js`):*
+     - 4-credit Natural Science with Lab satisfied by either single 4cr integrated combo (`BSC 22700`) or paired 3cr lecture (`BSC 11000`) + 1cr lab (`BSC 11020`), setting `catEntry.labSatisfied = true`.
+     - Standalone distribution buckets require courses $\ge 3.0$ credits; 1-credit or 2-credit standalone labs are blocked from satisfying 3-credit standalone GE buckets while remaining eligible for `additional_ge_electives`.
+  5. *Screen 2 Category Accordions Overhaul (`Screen2Audit.jsx`):*
+     - Major, Secondary Major, and Minors/Certificates accordions check for `ledger.categories` and render structured category headers (`cat.title`), credit progress (`${cat.credits_satisfied} / ${cat.credits_required} Credits Completed`), `CHOICE` badges (`Choose X credits from the following:`), and `REPEAT_DISTRIBUTION` badges (`6 cr required from each course`), mapping courses into clean tabular rows.
+  6. *Verification & Zero Regression:*
+     - Authored Vitest suite `tests/geArchitectureAndLabPacking.test.js` (8 unit tests) verifying all 8 items.
+     - Full Vitest suite: **383 / 383 tests passing (100% green)** across all 37 test files (`npm test`).
+     - Production build: `npm run build` compiled cleanly in 5.79s.
+     - Headless Playwright script `.tmp/verify_audit_corrections.mjs` verifying Garrett Bullock intake with 2026-2027 catalog year, `[2026-2027]` combobox badge, transition to Screen 2, Major Accordion category headers with credit sub-totals (`Major Coursework`), ICS/IIT completed/active rows, and Natural Sciences section.

@@ -852,6 +852,405 @@ export default function Screen2Audit({
     );
   };
 
+  // Helper to render a requirement row for primary major
+  const renderPrimaryRow = (req) => {
+    const reqKey = `MAJOR:${req.compactCode}`;
+    const activeOverride = rowOverrides[reqKey] || '';
+    const activeNote = rowNotes[reqKey] || '';
+    const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+    const manualMatch = auditOverrides?.manualMatches?.[reqKey];
+    const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
+
+    const reqFromLedger = (primaryLedger?.requirements || []).find((r) => r.compactCode === req.compactCode) || req;
+    const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse || (req.attempts && req.attempts[0]) || reqFromLedger.matchedCourse);
+    const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
+    const isCrossCounted = Boolean(req.isCrossCounted || reqFromLedger.isCrossCounted);
+    const sharedWithProgramName = req.sharedWithProgramName || reqFromLedger.sharedWithProgramName;
+
+    return (
+      <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
+        <td className="py-2 px-3">
+          <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
+          <span className="text-neutral-700">{req.title}</span>
+        </td>
+        <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits || req.creditsRequired}cr</td>
+        <td className="py-2 px-3">
+          {manualMatch ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {manualMatch.type === 'EXEMPTION' ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>✓ Exempted</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                </span>
+              )}
+              <button
+                type="button"
+                data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
+                onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits || req.creditsRequired })}
+                className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                title="Unmatch / Remove override"
+              >
+                [ ✕ ]
+              </button>
+            </div>
+          ) : isSatisfied && mc ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
+              <button
+                type="button"
+                data-testid={`unmatch-course-${mc.code}`}
+                onClick={() => handleUnmatchCourse(reqKey, mc)}
+                className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                title={`Unmatch ${mc.code}`}
+              >
+                [ ✕ ]
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                  <span>○ Unfulfilled</span>
+                </span>
+                <button
+                  type="button"
+                  data-testid={`set-complete-${req.compactCode}`}
+                  onClick={() => handleOpenManualModal(reqKey, req)}
+                  className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                >
+                  [ Set to Complete ]
+                </button>
+                <button
+                  type="button"
+                  data-testid={`suggest-course-${req.compactCode}`}
+                  onClick={() => handleOpenRecommenderModal(reqKey, req)}
+                  className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                >
+                  [ 🔍 Suggest Recommended Course ]
+                </button>
+              </div>
+              {targetRec && (
+                <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                  <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                    🎯 Target: {targetRec.code} · {targetRec.title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleClearRecommendation(reqKey)}
+                    className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                    title="Clear Recommendation"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </td>
+        <td className="py-2 px-3">
+          {isCrossCounted ? (
+            <span
+              data-testid={`cross-counted-${req.compactCode}`}
+              className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
+            >
+              🔗 Cross-Counted with {sharedWithProgramName || 'Declared Program'}
+            </span>
+          ) : (
+            <span className="text-neutral-400 text-[10px]">—</span>
+          )}
+        </td>
+        <td className="py-2 px-3 text-neutral-600">
+          <select
+            aria-label={`Equivalence override for ${req.code}`}
+            value={activeOverride}
+            onChange={(e) => handleOverrideChange(reqKey, e.target.value)}
+            className="px-2 py-1 text-[11px] border border-neutral-300 rounded bg-white text-neutral-800 font-medium max-w-[200px]"
+          >
+            <option value="">
+              {req.matchedCourse ? `Matched: ${req.matchedCourse.code}` : 'Standard Catalog Rule'}
+            </option>
+            <option value="PE: Waived via Policy Exception">Policy Exception (PE) — Waive</option>
+            {studentCourseOptions.map((sc) => (
+              <option key={`tent-${sc.code}`} value={`${sc.code} (* Tentative DB)`}>
+                {sc.code} — Save Equivalence (* Tentative)
+              </option>
+            ))}
+            {studentCourseOptions.map((sc) => (
+              <option key={`pe-${sc.code}`} value={`${sc.code} (Student PE)`}>
+                {sc.code} — Substitute via Student PE
+              </option>
+            ))}
+          </select>
+        </td>
+        <td className="py-2 px-3 text-right">
+          {editingNoteKey === reqKey ? (
+            <div className="inline-flex items-center space-x-1">
+              <input
+                type="text"
+                value={noteDraft}
+                onChange={(e) => setNoteDraft(e.target.value)}
+                placeholder="Note..."
+                className="px-2 py-0.5 text-[11px] border border-[#857542] rounded w-24"
+              />
+              <button
+                type="button"
+                onClick={() => handleSaveRowNote(reqKey)}
+                className="px-1.5 py-0.5 bg-[#857542] text-white text-[10px] font-bold rounded"
+              >
+                Save
+              </button>
+            </div>
+          ) : (
+            <div className="inline-flex items-center space-x-2">
+              {activeNote && (
+                <span className="text-[10px] bg-[#F7F5EE] border border-[#B5A36A] text-[#857542] px-1.5 py-0.5 rounded font-semibold">
+                  {activeNote}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingNoteKey(reqKey);
+                  setNoteDraft(activeNote);
+                }}
+                className="text-[11px] text-neutral-500 hover:text-black font-semibold"
+              >
+                [+ Note]
+              </button>
+            </div>
+          )}
+        </td>
+      </tr>
+    );
+  };
+
+  // Helper to render a requirement row for secondary major
+  const renderSecRow = (secLedger, req) => {
+    const reqKey = `SEC_${secLedger.programId}:${req.compactCode}`;
+    const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+    const manualMatch = auditOverrides?.manualMatches?.[reqKey];
+    const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
+    const reqFromLedger = (secLedger.requirements || []).find((r) => r.compactCode === req.compactCode) || req;
+    const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse || (req.attempts && req.attempts[0]) || reqFromLedger.matchedCourse);
+    const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
+    const isCrossCounted = Boolean(req.isCrossCounted || reqFromLedger.isCrossCounted);
+    const sharedWithProgramName = req.sharedWithProgramName || reqFromLedger.sharedWithProgramName;
+
+    return (
+      <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
+        <td className="py-2 px-3">
+          <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
+          <span className="text-neutral-700">{req.title}</span>
+        </td>
+        <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits || req.creditsRequired}cr</td>
+        <td className="py-2 px-3">
+          {manualMatch ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {manualMatch.type === 'EXEMPTION' ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>✓ Exempted</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                </span>
+              )}
+              <button
+                type="button"
+                data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
+                onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits || req.creditsRequired })}
+                className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                title="Unmatch / Remove override"
+              >
+                [ ✕ ]
+              </button>
+            </div>
+          ) : isSatisfied && mc ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
+              <button
+                type="button"
+                data-testid={`unmatch-course-${mc.code}`}
+                onClick={() => handleUnmatchCourse(reqKey, mc)}
+                className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                title={`Unmatch ${mc.code}`}
+              >
+                [ ✕ ]
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                  <span>○ Unfulfilled</span>
+                </span>
+                <button
+                  type="button"
+                  data-testid={`set-complete-${req.compactCode}`}
+                  onClick={() => handleOpenManualModal(reqKey, req)}
+                  className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                >
+                  [ Set to Complete ]
+                </button>
+                <button
+                  type="button"
+                  data-testid={`suggest-course-${req.compactCode}`}
+                  onClick={() => handleOpenRecommenderModal(reqKey, req)}
+                  className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                >
+                  [ 🔍 Suggest Recommended Course ]
+                </button>
+              </div>
+              {targetRec && (
+                <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                  <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                    🎯 Target: {targetRec.code} · {targetRec.title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleClearRecommendation(reqKey)}
+                    className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                    title="Clear Recommendation"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </td>
+        <td className="py-2 px-3">
+          {isCrossCounted && (
+            <span
+              data-testid={`cross-counted-${req.compactCode}`}
+              className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
+            >
+              🔗 Cross-Counted with {sharedWithProgramName || 'Primary Major'}
+            </span>
+          )}
+        </td>
+      </tr>
+    );
+  };
+
+  // Helper to render a requirement row for minor or certificate
+  const renderCredentialRow = (ledger, req) => {
+    const reqKey = `CREDENTIAL_${ledger.programId}:${req.compactCode}`;
+    const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
+    const manualMatch = auditOverrides?.manualMatches?.[reqKey];
+    const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
+    const reqFromLedger = (ledger.requirements || []).find((r) => r.compactCode === req.compactCode) || req;
+    const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse || (req.attempts && req.attempts[0]) || reqFromLedger.matchedCourse);
+    const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
+    const isCrossCounted = Boolean(req.isCrossCounted || reqFromLedger.isCrossCounted);
+    const sharedWithProgramName = req.sharedWithProgramName || reqFromLedger.sharedWithProgramName;
+
+    return (
+      <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
+        <td className="py-2 px-3">
+          <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
+          <span className="text-neutral-700">{req.title}</span>
+        </td>
+        <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits || req.creditsRequired}cr</td>
+        <td className="py-2 px-3">
+          {manualMatch ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {manualMatch.type === 'EXEMPTION' ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>✓ Exempted</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>✓ Manually Matched ({manualMatch.course?.code})</span>
+                </span>
+              )}
+              <button
+                type="button"
+                data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
+                onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits || req.creditsRequired })}
+                className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                title="Unmatch / Remove override"
+              >
+                [ ✕ ]
+              </button>
+            </div>
+          ) : isSatisfied && mc ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
+              <button
+                type="button"
+                data-testid={`unmatch-course-${mc.code}`}
+                onClick={() => handleUnmatchCourse(reqKey, mc)}
+                className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
+                title={`Unmatch ${mc.code}`}
+              >
+                [ ✕ ]
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
+                  <span>○ Unfulfilled</span>
+                </span>
+                <button
+                  type="button"
+                  data-testid={`set-complete-${req.compactCode}`}
+                  onClick={() => handleOpenManualModal(reqKey, req)}
+                  className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
+                >
+                  [ Set to Complete ]
+                </button>
+                <button
+                  type="button"
+                  data-testid={`suggest-course-${req.compactCode}`}
+                  onClick={() => handleOpenRecommenderModal(reqKey, req)}
+                  className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
+                >
+                  [ 🔍 Suggest Recommended Course ]
+                </button>
+              </div>
+              {targetRec && (
+                <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
+                  <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
+                    🎯 Target: {targetRec.code} · {targetRec.title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleClearRecommendation(reqKey)}
+                    className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
+                    title="Clear Recommendation"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </td>
+        <td className="py-2 px-3">
+          {isCrossCounted && (
+            <span
+              data-testid={`cross-counted-${req.compactCode}`}
+              className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
+            >
+              🔗 Cross-Counted with {sharedWithProgramName || 'Primary Major'}
+            </span>
+          )}
+        </td>
+      </tr>
+    );
+  };
+
   // Screen 2 -> Screen 3 Handoff Compiler
   const handleCompileAndProceed = () => {
     // 1. Identify active enrolled and scheduled course codes to strictly exclude from scheduling queue
@@ -2170,195 +2569,79 @@ export default function Screen2Audit({
                   </div>
                 )}
 
-                {/* Primary Major Requirements Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
-                        <th className="py-2.5 px-3">Course Code & Title</th>
-                        <th className="py-2.5 px-2 text-center">Cr</th>
-                        <th className="py-2.5 px-3">Status</th>
-                        <th className="py-2.5 px-3">Cross-Counting / Credential Sharing</th>
-                        <th className="py-2.5 px-3">Equivalence Override / PE</th>
-                        <th className="py-2.5 px-3 text-right">Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-100">
-                      {primaryLedger.requirements.map((req) => {
-                        const reqKey = `MAJOR:${req.compactCode}`;
-                        const activeOverride = rowOverrides[reqKey] || '';
-                        const activeNote = rowNotes[reqKey] || '';
-                        const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
-                        const manualMatch = auditOverrides?.manualMatches?.[reqKey];
-                        const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
-
-                        const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse);
-                        const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
-
-                        return (
-                          <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
-                            <td className="py-2 px-3">
-                              <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
-                              <span className="text-neutral-700">{req.title}</span>
-                            </td>
-                            <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
-                            <td className="py-2 px-3">
-                              {manualMatch ? (
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {manualMatch.type === 'EXEMPTION' ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                                      <span>✓ Exempted</span>
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                                      <span>✓ Manually Matched ({manualMatch.course?.code})</span>
-                                    </span>
-                                  )}
-                                  <button
-                                    type="button"
-                                    data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
-                                    onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits })}
-                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
-                                    title="Unmatch / Remove override"
-                                  >
-                                    [ ✕ ]
-                                  </button>
-                                </div>
-                              ) : isSatisfied && mc ? (
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
-                                  <button
-                                    type="button"
-                                    data-testid={`unmatch-course-${mc.code}`}
-                                    onClick={() => handleUnmatchCourse(reqKey, mc)}
-                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
-                                    title={`Unmatch ${mc.code}`}
-                                  >
-                                    [ ✕ ]
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="space-y-1.5">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
-                                      <span>○ Unfulfilled</span>
-                                    </span>
-                                    <button
-                                      type="button"
-                                      data-testid={`set-complete-${req.compactCode}`}
-                                      onClick={() => handleOpenManualModal(reqKey, req)}
-                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
-                                    >
-                                      [ Set to Complete ]
-                                    </button>
-                                    <button
-                                      type="button"
-                                      data-testid={`suggest-course-${req.compactCode}`}
-                                      onClick={() => handleOpenRecommenderModal(reqKey, req)}
-                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
-                                    >
-                                      [ 🔍 Suggest Recommended Course ]
-                                    </button>
-                                  </div>
-                                  {targetRec && (
-                                    <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
-                                      <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
-                                        🎯 Target: {targetRec.code} · {targetRec.title}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleClearRecommendation(reqKey)}
-                                        className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
-                                        title="Clear Recommendation"
-                                      >
-                                        ✕
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
+                {/* Primary Major Requirements Table (Categorized or Flat) */}
+                {primaryLedger.categories && primaryLedger.categories.length > 0 ? (
+                  <div className="space-y-6">
+                    {primaryLedger.categories.map((cat) => {
+                      const isChoice = cat.category_type === 'CHOICE';
+                      const isRepeat = cat.category_type === 'REPEAT_DISTRIBUTION';
+                      return (
+                        <div key={cat.category_id || cat.title} className="space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-2">
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wider">
+                                  {cat.title}
+                                </h4>
+                                {isChoice && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                    Choose {cat.credits_required} credits from the following:
+                                  </span>
+                                )}
+                                {isRepeat && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
+                                    {cat.per_course_credit_requirement || 6} cr required from each course
+                                  </span>
+                                )}
+                              </div>
+                              {cat.rule_narrative && (
+                                <p className="text-[11px] text-neutral-500 italic mt-0.5">{cat.rule_narrative}</p>
                               )}
-                            </td>
-                            <td className="py-2 px-3">
-                              {req.isCrossCounted ? (
-                                <span
-                                  data-testid={`cross-counted-${req.compactCode}`}
-                                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
-                                >
-                                  🔗 Cross-Counted with {req.sharedWithProgramName || 'Declared Program'}
-                                </span>
-                              ) : (
-                                <span className="text-neutral-400 text-[10px]">—</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-neutral-600">
-                              <select
-                                aria-label={`Equivalence override for ${req.code}`}
-                                value={activeOverride}
-                                onChange={(e) => handleOverrideChange(reqKey, e.target.value)}
-                                className="px-2 py-1 text-[11px] border border-neutral-300 rounded bg-white text-neutral-800 font-medium max-w-[200px]"
-                              >
-                                <option value="">
-                                  {req.matchedCourse ? `Matched: ${req.matchedCourse.code}` : 'Standard Catalog Rule'}
-                                </option>
-                                <option value="PE: Waived via Policy Exception">Policy Exception (PE) — Waive</option>
-                                {studentCourseOptions.map((sc) => (
-                                  <option key={`tent-${sc.code}`} value={`${sc.code} (* Tentative DB)`}>
-                                    {sc.code} — Save Equivalence (* Tentative)
-                                  </option>
-                                ))}
-                                {studentCourseOptions.map((sc) => (
-                                  <option key={`pe-${sc.code}`} value={`${sc.code} (Student PE)`}>
-                                    {sc.code} — Substitute via Student PE
-                                  </option>
-                                ))}
-                              </select>
-                            </td>
-                            <td className="py-2 px-3 text-right">
-                              {editingNoteKey === reqKey ? (
-                                <div className="inline-flex items-center space-x-1">
-                                  <input
-                                    type="text"
-                                    value={noteDraft}
-                                    onChange={(e) => setNoteDraft(e.target.value)}
-                                    placeholder="Note..."
-                                    className="px-2 py-0.5 text-[11px] border border-[#857542] rounded w-24"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSaveRowNote(reqKey)}
-                                    className="px-1.5 py-0.5 bg-[#857542] text-white text-[10px] font-bold rounded"
-                                  >
-                                    Save
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="inline-flex items-center space-x-2">
-                                  {activeNote && (
-                                    <span className="text-[10px] bg-[#F7F5EE] border border-[#B5A36A] text-[#857542] px-1.5 py-0.5 rounded font-semibold">
-                                      {activeNote}
-                                    </span>
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setEditingNoteKey(reqKey);
-                                      setNoteDraft(activeNote);
-                                    }}
-                                    className="text-[11px] text-neutral-500 hover:text-black font-semibold"
-                                  >
-                                    [+ Note]
-                                  </button>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                            </div>
+                            <div className="text-xs font-mono font-semibold text-neutral-700">
+                              <strong className="text-neutral-900">{cat.credits_satisfied}</strong> / {cat.credits_required} Credits Completed
+                            </div>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                              <thead>
+                                <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
+                                  <th className="py-2.5 px-3">Course Code & Title</th>
+                                  <th className="py-2.5 px-2 text-center">Cr</th>
+                                  <th className="py-2.5 px-3">Status</th>
+                                  <th className="py-2.5 px-3">Cross-Counting / Credential Sharing</th>
+                                  <th className="py-2.5 px-3">Equivalence Override / PE</th>
+                                  <th className="py-2.5 px-3 text-right">Notes</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-neutral-100">
+                                {(cat.courses || []).map((req) => renderPrimaryRow(req))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
+                          <th className="py-2.5 px-3">Course Code & Title</th>
+                          <th className="py-2.5 px-2 text-center">Cr</th>
+                          <th className="py-2.5 px-3">Status</th>
+                          <th className="py-2.5 px-3">Cross-Counting / Credential Sharing</th>
+                          <th className="py-2.5 px-3">Equivalence Override / PE</th>
+                          <th className="py-2.5 px-3 text-right">Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {primaryLedger.requirements.map((req) => renderPrimaryRow(req))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -2400,126 +2683,74 @@ export default function Screen2Audit({
 
             {accordionOpen[`sec_${secLedger.programId}`] !== false && (
               <div className="p-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
-                        <th className="py-2.5 px-3">Course Code & Title</th>
-                        <th className="py-2.5 px-2 text-center">Cr</th>
-                        <th className="py-2.5 px-3">Status</th>
-                        <th className="py-2.5 px-3">Cross-Counting / Credential Sharing</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-100">
-                      {secLedger.requirements.map((req) => {
-                        const reqKey = `SEC_${secLedger.programId}:${req.compactCode}`;
-                        const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
-                        const manualMatch = auditOverrides?.manualMatches?.[reqKey];
-                        const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
-                        const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse);
-                        const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
-
-                        return (
-                          <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
-                            <td className="py-2 px-3">
-                              <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
-                              <span className="text-neutral-700">{req.title}</span>
-                            </td>
-                            <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
-                            <td className="py-2 px-3">
-                              {manualMatch ? (
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {manualMatch.type === 'EXEMPTION' ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                                      <span>✓ Exempted</span>
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                                      <span>✓ Manually Matched ({manualMatch.course?.code})</span>
-                                    </span>
-                                  )}
-                                  <button
-                                    type="button"
-                                    data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
-                                    onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits })}
-                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
-                                    title="Unmatch / Remove override"
-                                  >
-                                    [ ✕ ]
-                                  </button>
-                                </div>
-                              ) : isSatisfied && mc ? (
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
-                                  <button
-                                    type="button"
-                                    data-testid={`unmatch-course-${mc.code}`}
-                                    onClick={() => handleUnmatchCourse(reqKey, mc)}
-                                    className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
-                                    title={`Unmatch ${mc.code}`}
-                                  >
-                                    [ ✕ ]
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="space-y-1.5">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
-                                      <span>○ Unfulfilled</span>
-                                    </span>
-                                    <button
-                                      type="button"
-                                      data-testid={`set-complete-${req.compactCode}`}
-                                      onClick={() => handleOpenManualModal(reqKey, req)}
-                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
-                                    >
-                                      [ Set to Complete ]
-                                    </button>
-                                    <button
-                                      type="button"
-                                      data-testid={`suggest-course-${req.compactCode}`}
-                                      onClick={() => handleOpenRecommenderModal(reqKey, req)}
-                                      className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
-                                    >
-                                      [ 🔍 Suggest Recommended Course ]
-                                    </button>
-                                  </div>
-                                  {targetRec && (
-                                    <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
-                                      <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
-                                        🎯 Target: {targetRec.code} · {targetRec.title}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleClearRecommendation(reqKey)}
-                                        className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
-                                        title="Clear Recommendation"
-                                      >
-                                        ✕
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
+                {secLedger.categories && secLedger.categories.length > 0 ? (
+                  <div className="space-y-6">
+                    {secLedger.categories.map((cat) => {
+                      const isChoice = cat.category_type === 'CHOICE';
+                      const isRepeat = cat.category_type === 'REPEAT_DISTRIBUTION';
+                      return (
+                        <div key={cat.category_id || cat.title} className="space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-2">
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wider">
+                                  {cat.title}
+                                </h4>
+                                {isChoice && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                    Choose {cat.credits_required} credits from the following:
+                                  </span>
+                                )}
+                                {isRepeat && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
+                                    {cat.per_course_credit_requirement || 6} cr required from each course
+                                  </span>
+                                )}
+                              </div>
+                              {cat.rule_narrative && (
+                                <p className="text-[11px] text-neutral-500 italic mt-0.5">{cat.rule_narrative}</p>
                               )}
-                            </td>
-                            <td className="py-2 px-3">
-                              {req.isCrossCounted && (
-                                <span
-                                  data-testid={`cross-counted-${req.compactCode}`}
-                                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
-                                >
-                                  🔗 Cross-Counted with {req.sharedWithProgramName || 'Primary Major'}
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                            </div>
+                            <div className="text-xs font-mono font-semibold text-neutral-700">
+                              <strong className="text-neutral-900">{cat.credits_satisfied}</strong> / {cat.credits_required} Credits Completed
+                            </div>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                              <thead>
+                                <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
+                                  <th className="py-2.5 px-3">Course Code & Title</th>
+                                  <th className="py-2.5 px-2 text-center">Cr</th>
+                                  <th className="py-2.5 px-3">Status</th>
+                                  <th className="py-2.5 px-3">Cross-Counting / Credential Sharing</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-neutral-100">
+                                {(cat.courses || []).map((req) => renderSecRow(secLedger, req))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
+                          <th className="py-2.5 px-3">Course Code & Title</th>
+                          <th className="py-2.5 px-2 text-center">Cr</th>
+                          <th className="py-2.5 px-3">Status</th>
+                          <th className="py-2.5 px-3">Cross-Counting / Credential Sharing</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100">
+                        {secLedger.requirements.map((req) => renderSecRow(secLedger, req))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -2582,128 +2813,74 @@ export default function Screen2Audit({
                         </div>
                       </div>
 
-                      <div className="overflow-x-auto bg-white rounded border border-neutral-200">
-                        <table className="w-full text-left text-xs border-collapse">
-                          <thead>
-                            <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
-                              <th className="py-2 px-3">Course Code & Title</th>
-                              <th className="py-2 px-2 text-center">Cr</th>
-                              <th className="py-2 px-3">Status</th>
-                              <th className="py-2 px-3">Cross-Counting / Credential Sharing</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-neutral-100">
-                            {ledger.requirements.map((req) => {
-                              const reqKey = `CREDENTIAL_${ledger.programId}:${req.compactCode}`;
-                              const isUnmatched = Boolean(auditOverrides?.unmatched?.[reqKey]);
-                              const manualMatch = auditOverrides?.manualMatches?.[reqKey];
-                              const targetRec = auditOverrides?.targetRecommendations?.[reqKey];
-                              const mc = isUnmatched ? null : (manualMatch?.course || req.matchedCourse);
-                              const isSatisfied = !isUnmatched && (Boolean(manualMatch) || Boolean(req.satisfied) || Boolean(mc));
-
-                              return (
-                                <tr key={req.compactCode} className="hover:bg-neutral-50/70 transition">
-                                  <td className="py-2 px-3">
-                                    <span className="font-mono font-bold text-neutral-900 mr-2">{req.code}</span>
-                                    <span className="text-neutral-700">{req.title}</span>
-                                  </td>
-                                  <td className="py-2 px-2 font-mono text-neutral-600 text-center">{req.credits}cr</td>
-                                  <td className="py-2 px-3">
-                                    {manualMatch ? (
-                                      <div className="flex items-center gap-1.5 flex-wrap">
-                                        {manualMatch.type === 'EXEMPTION' ? (
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                                            <span>✓ Exempted</span>
-                                          </span>
-                                        ) : (
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                                            <span>✓ Manually Matched ({manualMatch.course?.code})</span>
-                                          </span>
-                                        )}
-                                        <button
-                                          type="button"
-                                          data-testid={`unmatch-course-${manualMatch.course?.code || req.compactCode}`}
-                                          onClick={() => handleUnmatchCourse(reqKey, manualMatch.course || { code: req.compactCode, credits: req.credits })}
-                                          className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
-                                          title="Unmatch / Remove override"
-                                        >
-                                          [ ✕ ]
-                                        </button>
-                                      </div>
-                                    ) : isSatisfied && mc ? (
-                                      <div className="flex items-center gap-1.5 flex-wrap">
-                                        {renderStatusBadge({ ...req, matchedCourse: mc, satisfied: true })}
-                                        <button
-                                          type="button"
-                                          data-testid={`unmatch-course-${mc.code}`}
-                                          onClick={() => handleUnmatchCourse(reqKey, mc)}
-                                          className="text-neutral-400 hover:text-red-600 text-xs px-1 font-bold cursor-pointer"
-                                          title={`Unmatch ${mc.code}`}
-                                        >
-                                          [ ✕ ]
-                                        </button>
-                                      </div>
-                                    ) : (
-                                      <div className="space-y-1.5">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-300">
-                                            <span>○ Unfulfilled</span>
-                                          </span>
-                                          <button
-                                            type="button"
-                                            data-testid={`set-complete-${req.compactCode}`}
-                                            onClick={() => handleOpenManualModal(reqKey, req)}
-                                            className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 rounded shadow-2xs transition cursor-pointer"
-                                          >
-                                            [ Set to Complete ]
-                                          </button>
-                                          <button
-                                            type="button"
-                                            data-testid={`suggest-course-${req.compactCode}`}
-                                            onClick={() => handleOpenRecommenderModal(reqKey, req)}
-                                            className="px-2 py-0.5 text-[11px] font-bold bg-white hover:bg-[#F7F5EE] text-[#857542] border border-[#B5A36A] rounded shadow-2xs transition cursor-pointer"
-                                          >
-                                            [ 🔍 Suggest Recommended Course ]
-                                          </button>
-                                        </div>
-                                        {targetRec && (
-                                          <div className="flex items-center gap-1 text-[11px] text-[#857542] font-semibold">
-                                            <span className="bg-[#F7F5EE] border border-[#B5A36A] px-1.5 py-0.5 rounded">
-                                              🎯 Target: {targetRec.code} · {targetRec.title}
-                                            </span>
-                                            <button
-                                              type="button"
-                                              onClick={() => handleClearRecommendation(reqKey)}
-                                              className="text-neutral-400 hover:text-red-600 text-xs px-1 cursor-pointer"
-                                              title="Clear Recommendation"
-                                            >
-                                              ✕
-                                            </button>
-                                          </div>
-                                        )}
-                                      </div>
+                      {ledger.categories && ledger.categories.length > 0 ? (
+                        <div className="space-y-4">
+                          {ledger.categories.map((cat) => {
+                            const isChoice = cat.category_type === 'CHOICE';
+                            const isRepeat = cat.category_type === 'REPEAT_DISTRIBUTION';
+                            return (
+                              <div key={cat.category_id || cat.title} className="space-y-2">
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-1.5">
+                                  <div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <h5 className="text-[11px] font-bold text-neutral-800 uppercase tracking-wider">
+                                        {cat.title}
+                                      </h5>
+                                      {isChoice && (
+                                        <span className="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                          Choose {cat.credits_required} credits from the following:
+                                        </span>
+                                      )}
+                                      {isRepeat && (
+                                        <span className="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
+                                          {cat.per_course_credit_requirement || 6} cr required from each course
+                                        </span>
+                                      )}
+                                    </div>
+                                    {cat.rule_narrative && (
+                                      <p className="text-[10px] text-neutral-500 italic mt-0.5">{cat.rule_narrative}</p>
                                     )}
-                                  </td>
-                                  <td className="py-2 px-3">
-                                    {req.isCrossCounted ? (
-                                      <span
-                                        data-testid={`cross-counted-${req.compactCode}`}
-                                        className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-900 border border-indigo-200"
-                                      >
-                                        🔗 Cross-Counted with {req.sharedWithProgramName || 'Primary Major'}
-                                      </span>
-                                    ) : (
-                                      <span className="text-neutral-400 text-[10px]">—</span>
-                                    )}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+                                  </div>
+                                  <div className="text-[11px] font-mono font-semibold text-neutral-700">
+                                    <strong className="text-neutral-900">{cat.credits_satisfied}</strong> / {cat.credits_required} Credits Completed
+                                  </div>
+                                </div>
+                                <div className="overflow-x-auto bg-white rounded border border-neutral-200">
+                                  <table className="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                      <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
+                                        <th className="py-2 px-3">Course Code & Title</th>
+                                        <th className="py-2 px-2 text-center">Cr</th>
+                                        <th className="py-2 px-3">Status</th>
+                                        <th className="py-2 px-3">Cross-Counting / Credential Sharing</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-neutral-100">
+                                      {(cat.courses || []).map((req) => renderCredentialRow(ledger, req))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto bg-white rounded border border-neutral-200">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-200">
+                                <th className="py-2 px-3">Course Code & Title</th>
+                                <th className="py-2 px-2 text-center">Cr</th>
+                                <th className="py-2 px-3">Status</th>
+                                <th className="py-2 px-3">Cross-Counting / Credential Sharing</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-100">
+                              {ledger.requirements.map((req) => renderCredentialRow(ledger, req))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
                   );
                 })

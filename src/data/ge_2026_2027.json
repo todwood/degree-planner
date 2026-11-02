@@ -161,13 +161,16 @@
         "CHM 23000",
         "ESC 10000",
         "PHY 25100",
-        "PHY 30100"
+        "PHY 30100",
+        "BSC 22700",
+        "BSC 11020"
       ],
       "approved_non_lab_courses": [
         "AST 10000",
         "BSC 10700",
         "ESC 11100",
-        "SCI 10500"
+        "SCI 10500",
+        "BSC 11000"
       ],
       "motr_mappings": [
         "MOTR BIOL",

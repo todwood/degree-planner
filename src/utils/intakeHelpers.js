@@ -140,17 +140,35 @@ export function validateIntakeEligibility({
 /**
  * Normalize course status to one of three canonical tokens:
  * 'Completed', 'In-Progress', 'Scheduled'
+ *
+ * ACTIVE TERM CALIBRATION RULE:
+ * Courses belonging to the currently active session (e.g., FA-II (8wk))
+ * must be interpreted and normalized to 'In-Progress', even if Anthology exported them as 'Scheduled'.
+ * Future terms (e.g. SP (16wk) 2027) remain 'Scheduled'.
  */
 export function normalizeActiveCourseStatus(courseOrStatus, fallbackState = 'In-Progress') {
   if (!courseOrStatus) return fallbackState;
 
   let val = '';
+  let isFa2ActiveSession = false;
+
   if (typeof courseOrStatus === 'object') {
     val = String(
       courseOrStatus.status ||
       courseOrStatus.state ||
       fallbackState
     ).trim();
+
+    const termStr = String(courseOrStatus.term || courseOrStatus.sessionBand || courseOrStatus.semester || '').toUpperCase();
+    const sessionBand = String(courseOrStatus.sessionBand || '').toUpperCase();
+    const rawTerm = String(courseOrStatus.termInfo?.raw || '').toUpperCase();
+    isFa2ActiveSession =
+      sessionBand.includes('FA-II') ||
+      termStr.includes('FA-II') ||
+      termStr.includes('FALL_II') ||
+      termStr.includes('FALL II') ||
+      rawTerm.includes('FA-II') ||
+      rawTerm.includes('FALL_II');
   } else {
     val = String(courseOrStatus).trim();
   }
@@ -160,6 +178,12 @@ export function normalizeActiveCourseStatus(courseOrStatus, fallbackState = 'In-
   if (upper === 'COMPLETED' || upper === 'COMPLETE' || upper.startsWith('COMPLET')) {
     return 'Completed';
   }
+
+  // Active session calibration: Courses in currently active FA-II session normalize to 'In-Progress'
+  if (isFa2ActiveSession) {
+    return 'In-Progress';
+  }
+
   if (upper === 'SCHEDULED' || upper.startsWith('SCHEDUL')) {
     return 'Scheduled';
   }

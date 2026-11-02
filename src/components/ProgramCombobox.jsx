@@ -55,15 +55,16 @@ export default function ProgramCombobox({
   const searchInputRef = useRef(null);
   const listboxRef = useRef(null);
 
-  // Fallback to masterProgramsDatabase filtered by catalogYear if programs prop is empty
+  // Strict catalog year filtering: ensure advisors only select credentials corresponding to that catalog year
   const effectivePrograms = useMemo(() => {
-    if (Array.isArray(programs) && programs.length > 0) {
-      return programs;
-    }
-    const all = masterProgramsDb?.programs
-      ? (Array.isArray(masterProgramsDb.programs) ? masterProgramsDb.programs : Object.values(masterProgramsDb.programs))
-      : [];
-    return all.filter(
+    const rawList =
+      Array.isArray(programs) && programs.length > 0
+        ? programs
+        : masterProgramsDb?.programs
+        ? (Array.isArray(masterProgramsDb.programs) ? masterProgramsDb.programs : Object.values(masterProgramsDb.programs))
+        : [];
+    if (!catalogYear) return rawList;
+    return rawList.filter(
       (p) =>
         p.catalogYear === catalogYear ||
         p.catalog_year === catalogYear ||
@@ -359,12 +360,17 @@ export default function ProgramCombobox({
                     }`}
                   >
                     <div className="min-w-0 flex-1">
-                      <div
-                        className={`text-xs font-bold leading-tight ${
-                          isSelected ? 'text-[#857542]' : 'text-neutral-900'
-                        }`}
-                      >
-                        {details.discipline}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span
+                          className={`text-xs font-bold leading-tight ${
+                            isSelected ? 'text-[#857542]' : 'text-neutral-900'
+                          }`}
+                        >
+                          {details.discipline}
+                        </span>
+                        <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">
+                          [{prog.catalogYear || prog.catalog_year || catalogYear}]
+                        </span>
                       </div>
                       <div className="flex items-center gap-1.5 mt-1">
                         <span

@@ -107,7 +107,39 @@
       },
       "program_name": "Cybersecurity, BS",
       "degree_type": "BS",
-      "catalog_year": "2026-2027"
+      "catalog_year": "2026-2027",
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 60,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 60 credit hours of coursework from the following options: ICS 21300 - Foundations of Information Technology Credit Hour: 3 ICS 21400 - Foundations of Networking Credit Hour: 3 ICS 31000 - Foundations of Cybersecurity Credit Hour: 3 ICS 32700 - Network and Cloud Security Credit Hour: 3 ICS 32800 - Digital Forensics and Cyber Investigation Credit Hour: 3 ICS 41200 - Linux Server Ins",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ICS 21300",
+            "ICS 21400",
+            "ICS 31000",
+            "ICS 32700",
+            "ICS 32800",
+            "ICS 41200",
+            "ICS 41500",
+            "ICS 41700",
+            "ICS 42100",
+            "ICS 42300",
+            "ICS 42400",
+            "ICS 43200",
+            "ICS 43300",
+            "ICS 48900",
+            "IIT 21500",
+            "IIT 22000",
+            "IIT 33400",
+            "IIT 33500",
+            "IIT 35100",
+            "IIT 48100"
+          ]
+        }
+      ]
     },
     {
       "id": "it_app_dev_bs_2026",
@@ -379,7 +411,39 @@
       },
       "program_name": "Cybersecurity, BS",
       "degree_type": "BS",
-      "catalog_year": "2025-2026"
+      "catalog_year": "2025-2026",
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 60,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 60 credit hours of coursework from the following options: ICS 21300 - Foundations of Information Technology Credit Hour: 3 ICS 21400 - Foundations of Networking Credit Hour: 3 ICS 31000 - Foundations of Cybersecurity Credit Hour: 3 ICS 32700 - Network and Cloud Security Credit Hour: 3 ICS 32800 - Digital Forensics and Cyber Investigation Credit Hour: 3 ICS 41200 - Linux Server Ins",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ICS 21300",
+            "ICS 21400",
+            "ICS 31000",
+            "ICS 32700",
+            "ICS 32800",
+            "ICS 41200",
+            "ICS 41500",
+            "ICS 41700",
+            "ICS 42100",
+            "ICS 42300",
+            "ICS 42400",
+            "ICS 43200",
+            "ICS 43300",
+            "ICS 48900",
+            "IIT 21500",
+            "IIT 22000",
+            "IIT 33400",
+            "IIT 33500",
+            "IIT 35100",
+            "IIT 48100"
+          ]
+        }
+      ]
     },
     {
       "id": "it_app_dev_bs_2025",
@@ -613,7 +677,39 @@
           }
         ],
         "notes": "2024-2025 Catalog Year. Total program credits: 66."
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 60,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 60 credit hours of coursework from the following options: ICS 21300 - Foundations of Information Technology 3 Credit Hour(s) ICS 21400 - Foundations of Networking 3 Credit Hour(s) ICS 31000 - Foundations of Cybersecurity 3 Credit Hour(s) ICS 32700 - Network and Cloud Security 3 Credit Hour(s) ICS 32800 - Digital Forensics and Cyber Investigation 3 Credit Hour(s) ICS 41200 - Linux ",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ICS 21300",
+            "ICS 21400",
+            "ICS 31000",
+            "ICS 32700",
+            "ICS 32800",
+            "ICS 41200",
+            "ICS 41500",
+            "ICS 41700",
+            "ICS 42100",
+            "ICS 42300",
+            "ICS 42400",
+            "ICS 43200",
+            "ICS 43300",
+            "ICS 48900",
+            "IIT 21500",
+            "IIT 22000",
+            "IIT 33400",
+            "IIT 33500",
+            "IIT 35100",
+            "IIT 48100"
+          ]
+        }
+      ]
     },
     {
       "id": "it_app_dev_bs_2024",
@@ -890,7 +986,73 @@
           "oral_communication": "COM 11000",
           "natural_science": "NAT_SCI_SEQUENCE"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 47,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 47 credit hours of coursework from the following options: COM 11000 - Public Speaking Credit Hour: 3 CSC 14400 - Computer Science I Credit Hour: 4 CSC 21000 - Ethical Issues in Technology Credit Hour: 3 CSC 24400 - Computer Science II Credit Hour: 4 CSC 28500 - Applied Discrete Structures Credit Hour: 3 CSC 30500 - Principles of Database Systems Credit Hour: 3 CSC 35500 - Computer",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "COM 11000",
+            "CSC 14400",
+            "CSC 21000",
+            "CSC 24400",
+            "CSC 28500",
+            "CSC 30500",
+            "CSC 35500",
+            "CSC 36000",
+            "CSC 43000",
+            "CSC 45500",
+            "MTH 24100",
+            "MTH 27100",
+            "MTH 27200"
+          ]
+        },
+        {
+          "category_id": "INTRO_TO_COMPUTER_SCIENCE_COURSEWORK",
+          "title": "Intro to Computer Science Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Intro to Computer Science Coursework 3 credit hours of coursework from the following options: CSC 10011 - Introduction to Computer Science: Python Credit Hour: 3 CSC 10022 - Introduction to Computer Science: Javascript Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 10011",
+            "CSC 10022"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 15,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 15 credit hours of coursework from the following options: CSC 31000 - Applied AI Credit Hour: 3 CSC 34400 - GUI Application Design Credit Hour: 3 CSC 40500 - Computer Graphics Credit Hour: 3 CSC 40800 - Organization of Programming Languages Credit Hour: 3 CSC 41100 - Artificial Intelligence Credit Hour: 3 CSC 44000 - The Internet of Things Credit Hour: 3 CSC 44700 - Project Man",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 31000",
+            "CSC 34400",
+            "CSC 40500",
+            "CSC 40800",
+            "CSC 41100",
+            "CSC 44000",
+            "CSC 44700",
+            "CSC 45100",
+            "CSC 45111",
+            "CSC 45200",
+            "CSC 45211",
+            "CSC 48000",
+            "DSCI 30100",
+            "DSCI 35600",
+            "GAM 30120",
+            "IIT 48100",
+            "MTH 28500",
+            "MTH 31500",
+            "MTH 35100"
+          ]
+        }
+      ]
     },
     {
       "id": "data_science_bs_2026",
@@ -1052,7 +1214,99 @@
           "math": "MTH 27100",
           "social_science": "ECON 23020"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 45,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 45 credit hours of coursework from the following: CSC 14400 - Computer Science I Credit Hour: 4 CSC 24400 - Computer Science II Credit Hour: 4 CSC 30500 - Principles of Database Systems Credit Hour: 3 DSCI 11000 - Introduction to Data Science Credit Hour: 3 DSCI 30100 - Data Analysis with R Credit Hour: 3 DSCI 35600 - Machine Learning Credit Hour: 3 MTH 24100 - Statistics for Natu",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 14400",
+            "CSC 24400",
+            "CSC 30500",
+            "DSCI 11000",
+            "DSCI 30100",
+            "DSCI 35600",
+            "MTH 24100",
+            "MTH 27100",
+            "MTH 27200",
+            "MTH 31500",
+            "MTH 34100",
+            "MTH 34200",
+            "MTH 34500"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 30,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 27-30 credit hours of coursework from the following options: Students completing the Bachelor of Science in data science must also complete 27 - 30 credit hours of elective courses selected from the two groups below. The elective requirements can be satisfied by completing either of the following options: 9 credit hours of courses from Group 1 and 18 credit hours of courses fro",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "GROUP_1",
+          "title": "Group 1",
+          "credits_required": 15,
+          "category_type": "CORE",
+          "rule_narrative": "Group 1 9-15 credit hours of coursework from the following options: BSC 23400 - Introduction to Organismal Biology Credit Hour: 4 BSC 24400 - Introduction to Cellular and Molecular Biology Credit Hour: 4 BSC 24800 - Introduction to Ecology and Evolution Credit Hour: 4 CHM 23000 - General Chemistry 1 Credit Hour: 3 CHM 23100 - General Chemistry 2 Credit Hour: 3 CHM 24100 - General Chemistry 2 Labor",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 23400",
+            "BSC 24400",
+            "BSC 24800",
+            "CHM 23000",
+            "CHM 23100",
+            "CHM 24100",
+            "CHM 23200",
+            "CHM 24200",
+            "ECON 23020",
+            "ECON 23030",
+            "MGMT 24000",
+            "MGMT 26014",
+            "PHY 30100",
+            "PHY 30200"
+          ]
+        },
+        {
+          "category_id": "GROUP_2",
+          "title": "Group 2",
+          "credits_required": 18,
+          "category_type": "CORE",
+          "rule_narrative": "Group 2 15-18 credit hours of coursework from the following options: BSC 32000 - Plant Biology Credit Hour: 4 BSC 35300 - Microbiology Credit Hour: 4 BSC 40400 - Cell Biology Credit Hour: 4 BSC 40800 - Genetics Credit Hour: 4 BSC 46400 - Evolution Credit Hour: 3 BSC 46500 - General Ecology Credit Hour: 4 CHM 35500 - Analytical Chemistry Credit Hour: 4 CHM 36100 - Organic Chemistry I Credit Hour: 4",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 32000",
+            "BSC 35300",
+            "BSC 40400",
+            "BSC 40800",
+            "BSC 46400",
+            "BSC 46500",
+            "CHM 35500",
+            "CHM 36100",
+            "CHM 45500",
+            "CHM 47200",
+            "CHM 47300",
+            "CSC 28500",
+            "CSC 36000",
+            "CSC 45100",
+            "CSC 45111",
+            "ECON 33040",
+            "ECON 33045",
+            "ECON 43078",
+            "MGMT 36033",
+            "MGMT 46033",
+            "MTH 32400",
+            "MTH 32500",
+            "MTH 32600",
+            "MTH 48001"
+          ]
+        }
+      ]
     },
     {
       "id": "business_administration_bs_2026",
@@ -1195,7 +1449,63 @@
           "oral_communication": "COM 11000",
           "math": "MTH 14100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "PCBE_BUSINESS_CORE",
+          "title": "PCB&E Core Coursework",
+          "credits_required": 36,
+          "category_type": "CORE",
+          "rule_narrative": "36 credit hours of foundational business core coursework required for all PCB&E business majors.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ACCT 21010",
+            "ACCT 21011",
+            "FIN 32000",
+            "MGMT 16025",
+            "MGMT 24000",
+            "MGMT 26032",
+            "MGMT 26061",
+            "MGMT 36000",
+            "MGMT 36033",
+            "MGMT 46082",
+            "MRKT 35010",
+            "HRM 36510",
+            "MGMT 36050"
+          ]
+        },
+        {
+          "category_id": "BUSINESS_ADMINISTRATION_MAJOR_CORE",
+          "title": "Business Administration Major Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 3 credit hours of coursework from the following option: MGMT 36043 - Principles of Operations Management Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MGMT 36043"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 24,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 24 credit hours of coursework from the following options: Courses are selected from any business course at or above the 30000-level, including no more than one special topics and/or internship course. Students pursuing an emphasis area will complete 12 credit hours of elective coursework from within one business discipline.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "THE 30000"
+          ]
+        },
+        {
+          "category_id": "EMPHASES_",
+          "title": "Emphases:",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Emphases: Accounting Emphasis Advertising and Public Relations Emphasis Business Law Emphasis Economics Emphasis Entrepreneurial Studies Emphasis Finance Emphasis Health Management Emphasis Human Resource Management Emphasis International Business Emphasis Investments Emphasis Management Emphasis Marketing Emphasis Sport Management Emphasis Supply Chain Management Emphasis",
+          "per_course_credit_requirement": null,
+          "courses": []
+        }
+      ]
     },
     {
       "id": "nursing_bs_2026",
@@ -1450,7 +1760,130 @@
           "math": "MTH 27100",
           "natural_science": "CHM 23000"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 54,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 54 credit hours of coursework from the following options: BSC 23400 - Introduction to Organismal Biology Credit Hour: 4 BSC 24400 - Introduction to Cellular and Molecular Biology Credit Hour: 4 BSC 28600 - Biological Experimentation and Communication Credit Hour: 3 BSC 32000 - Plant Biology Credit Hour: 4 BSC 40400 - Cell Biology Credit Hour: 4 BSC 40800 - Genetics Credit Hour: 4 ",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 23400",
+            "BSC 24400",
+            "BSC 28600",
+            "BSC 32000",
+            "BSC 40400",
+            "BSC 40800",
+            "BSC 46400",
+            "BSC 46500",
+            "BSC 48800",
+            "CHM 23000",
+            "CHM 23100",
+            "CHM 23200",
+            "CHM 24100",
+            "CHM 24200",
+            "CHM 36100",
+            "CHM 36200",
+            "MTH 24100"
+          ]
+        },
+        {
+          "category_id": "ADDITIONAL_BSC_COURSEWORK",
+          "title": "Additional BSC Coursework",
+          "credits_required": 4,
+          "category_type": "CORE",
+          "rule_narrative": "Additional BSC Coursework 4 credit hours of coursework from the following options: BSC 34100 - Vertebrate Zoology Credit Hour: 4 BSC 36400 - Entomology Credit Hour: 4",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 34100",
+            "BSC 36400"
+          ]
+        },
+        {
+          "category_id": "MTH_AND_PHY_COURSEWORK",
+          "title": "MTH and PHY Coursework",
+          "credits_required": 12,
+          "category_type": "CORE",
+          "rule_narrative": "MTH and PHY Coursework 10-12 credit hours of coursework from the following options:",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "OPTION_1",
+          "title": "Option 1",
+          "credits_required": 9,
+          "category_type": "CHOICE",
+          "rule_narrative": "Option 1 MTH 17300 - Survey of Calculus Credit Hour: 4 PHY 25100 - Introductory Physics I Credit Hour: 4 PHY 25200 - Introductory Physics II Credit Hour: 4",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 17300",
+            "PHY 25100",
+            "PHY 25200"
+          ]
+        },
+        {
+          "category_id": "OR",
+          "title": "Or",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Or",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "OPTION_2",
+          "title": "Option 2",
+          "credits_required": 6,
+          "category_type": "CHOICE",
+          "rule_narrative": "Option 2 MTH 27100 - Calculus I Credit Hour: 5 MTH 27200 - Calculus II Credit Hour: 5",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 27100",
+            "MTH 27200"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 6,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 6 credit hours of coursework from the following options: BSC 22700 - Human Anatomy and Physiology I Credit Hour: 4 BSC 22800 - Human Anatomy and Physiology II Credit Hour: 4 BSC 26300 - Environmental Policy Credit Hour: 3 BSC 28000 - Introduction to Clinical Laboratory Science Credit Hour: 3 BSC 30200 - Biometry I: Introduction to R Credit Hour: 2 BSC 35300 - Microbiology Credi",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 22700",
+            "BSC 22800",
+            "BSC 26300",
+            "BSC 28000",
+            "BSC 30200",
+            "BSC 35300",
+            "BSC 35800",
+            "BSC 36200",
+            "BSC 36400",
+            "BSC 36600",
+            "BSC 36800",
+            "BSC 37400",
+            "BSC 41300",
+            "BSC 42200",
+            "BSC 48000",
+            "BSC 48400",
+            "CHM 42200",
+            "ESC 26300"
+          ]
+        },
+        {
+          "category_id": "NOTES_",
+          "title": "Notes:",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Notes: Alternatively, other 30000-level or above courses may be an accepted elective with prior approval by the department. Additional credits will be required to meet the university 42 credit minimum of 30000 or higher level courses and may be fulfilled with biological sciences or other department electives.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "OF 30000"
+          ]
+        }
+      ]
     },
     {
       "id": "communications_ba_journalism_2026",
@@ -1660,7 +2093,119 @@
           "social_science": "PSY 10000",
           "math": "MTH 24100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 12,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 12 credit hours of coursework from the following options: PSY 10000 - Principles of Psychology Credit Hour: 3 PSY 30400 - Basic Research Methods Credit Hour: 3 PSY 30600 - Behavioral Science Statistics Credit Hour: 3 PSY 48500 - Senior Seminar Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 10000",
+            "PSY 30400",
+            "PSY 30600",
+            "PSY 48500"
+          ]
+        },
+        {
+          "category_id": "STATISTICS_COURSEWORK",
+          "title": "Statistics Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Statistics Coursework 3 credit hours of coursework from the following options: MTH 14100 - Basic Statistics Credit Hour: 3 MTH 24100 - Statistics for Natural Science Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 14100",
+            "MTH 24100"
+          ]
+        },
+        {
+          "category_id": "CLINICAL_PSYCHOLOGY_COURSEWORK",
+          "title": "Clinical Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Clinical Psychology Coursework 6 credit hours of coursework from the following options: PSY 30300 - Abnormal Psychology Credit Hour: 3 PSY 30900 - Personality Credit Hour: 3 PSY 31100 - Behavior Modification Credit Hour: 3 PSY 32100 - Health Psychology Credit Hour: 3 PSY 32400 - Psychological Testing Credit Hour: 3 PSY 34100 - Psychotherapy Credit Hour: 3 PSY 35100 - Understanding Depression Credi",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 30300",
+            "PSY 30900",
+            "PSY 31100",
+            "PSY 32100",
+            "PSY 32400",
+            "PSY 34100",
+            "PSY 35100"
+          ]
+        },
+        {
+          "category_id": "EXPERIMENTAL_PSYCHOLOGY_COURSEWORK",
+          "title": "Experimental Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Experimental Psychology Coursework 6 credit hours of coursework from the following options: PSY 31500 - Psychology of Prejudice Credit Hour: 3 PSY 32500 - Behavioral Neuroscience Credit Hour: 3 PSY 32600 - Sensation and Perception Credit Hour: 3 PSY 33000 - Learning and Memory Credit Hour: 3 PSY 33100 - Cognitive Psychology Credit Hour: 3 PSY 33200 - Psychology of Motivation and Emotion Credit Hou",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 31500",
+            "PSY 32500",
+            "PSY 32600",
+            "PSY 33000",
+            "PSY 33100",
+            "PSY 33200",
+            "PSY 33400"
+          ]
+        },
+        {
+          "category_id": "DEVELOPMENTAL_PSYCHOLOGY_COURSEWORK",
+          "title": "Developmental Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Developmental Psychology Coursework 6 credit hours of coursework from the following options: PSY 20500 - Human Development Credit Hour: 3 PSY 20800 - Child Psychology Credit Hour: 3 PSY 21000 - Psychology of Parenting Credit Hour: 3 PSY 31200 - Psychology of Aging Credit Hour: 3 PSY 31300 - Psychology of Adolescence Credit Hour: 3 PSY 36500 - Human Sexuality Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 20500",
+            "PSY 20800",
+            "PSY 21000",
+            "PSY 31200",
+            "PSY 31300",
+            "PSY 36500"
+          ]
+        },
+        {
+          "category_id": "GENERAL_PSYCHOLOGY_COURSEWORK",
+          "title": "General Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "General Psychology Coursework 6 credit hours of coursework from the following options: PSY 15700 - Psychology of Leadership Credit Hour: 3 PSY 18100 - Cultural Psychology Credit Hour: 3 PSY 21200 - Japanese Culture, Society, and Mind Credit Hour: 3 PSY 21500 - Careers in Psychology Credit Hour: 3 PSY 23500 - Death, Dying, Life, & Living Credit Hour: 3 PSY 29000-29999 - Special Topics in Psychology",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 15700",
+            "PSY 18100",
+            "PSY 21200",
+            "PSY 21500",
+            "PSY 23500",
+            "PSY 29000",
+            "PSY 30800",
+            "PSY 31400",
+            "PSY 39000",
+            "PSY 40440",
+            "PSY 45000",
+            "PSY 48000",
+            "PSY 48300"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 3,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 3 credit hours of PSY coursework at the 30000- or 40000-level.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "THE 30000"
+          ]
+        }
+      ]
     },
     {
       "id": "english_ba_2026",
@@ -1751,7 +2296,141 @@
         "prescribed_ge_satisfactions": {
           "literature": "ENGL 20100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 6 credit hours of coursework from the following options: ENGL 30100 - Methods of Literary Study Credit Hour: 3 ENGL 45400 - Senior Capstone in English Credit Hour: 3 English majors should take ENGL 30100 as soon as possible after completing ENGL 17000.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 30100",
+            "ENGL 45400",
+            "ENGL 17000"
+          ]
+        },
+        {
+          "category_id": "BRITISH_LITERATURE_COURSEWORK",
+          "title": "British Literature Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "British Literature Coursework 6 credit hours of coursework from the following options: ENGL 33200 - Chaucer Credit Hour: 3 ENGL 33300 - Shakespeare Credit Hour: 3 ENGL 33800 - Medieval Literature Credit Hour: 3 ENGL 33900 - Early Modern Literature Credit Hour: 3 ENGL 34101 - London in the Eighteenth Century Credit Hour: 3 ENGL 34200 - Politics, Passion, Poetry and Problems: The Romantic Movement C",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 33200",
+            "ENGL 33300",
+            "ENGL 33800",
+            "ENGL 33900",
+            "ENGL 34101",
+            "ENGL 34200",
+            "ENGL 34300",
+            "ENGL 35700"
+          ]
+        },
+        {
+          "category_id": "AMERICAN_LITERATURE_COURSEWORK",
+          "title": "American Literature Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "American Literature Coursework 6 credit hours of coursework from the following options: ENGL 34400 - LatinX Literature Credit Hour: 3 or SPA 34400 - LatinX Literature 3 Credit Hour(s) ENGL 34700-34799 - Topics in American Literature Credit Hour: 3 ENGL 35200 - Early American Literature Credit Hour: 3 ENGL 35300 - Twentieth-Century American Literature Credit Hour: 3 ENGL 35400 - Finding Home: Space",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 34400",
+            "SPA 34400",
+            "ENGL 34700",
+            "ENGL 35200",
+            "ENGL 35300",
+            "ENGL 35400",
+            "ENGL 37600"
+          ]
+        },
+        {
+          "category_id": "ADDITIONAL_LITERATURE_COURSEWORK",
+          "title": "Additional Literature Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Additional Literature Coursework 6 credit hours of coursework from the following options and/or from the options in British literature or American literature above: ENGL 30900 - The Novel Credit Hour: 3 ENGL 36200 - Translation and Literature Credit Hour: 3 ENGL 37100 - Reading and Writing of the Young Adult Novel Credit Hour: 3 ENGL 38000-38099 - Topics in Literature Credit Hour: 3 Note that stud",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 30900",
+            "ENGL 36200",
+            "ENGL 37100",
+            "ENGL 38000"
+          ]
+        },
+        {
+          "category_id": "LANGUAGE_LINGUISTICS_AND_COMMUNICATION_COURSEWORK",
+          "title": "Language, Linguistics, and Communication Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Language, Linguistics, and Communication Coursework 6 credit hours of coursework from the following options: CAH 36500 - Digital Research Credit Hour: 3 CINE 35000 - Screenwriting Credit Hour: 3 COM 24200 - Basic Reporting Credit Hour: 3 COM 38200 - Feature Writing Credit Hour: 3 DCS 35000 - Personal Branding Credit Hour: 3 ENGL 20900 - Writing for Game Design Credit Hour: 3 ENGL 21100 - Introduct",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CAH 36500",
+            "CINE 35000",
+            "COM 24200",
+            "COM 38200",
+            "DCS 35000",
+            "ENGL 20900",
+            "ENGL 21100",
+            "ENGL 22200",
+            "ENGL 23000",
+            "ENGL 25000",
+            "SPA 25000",
+            "ENGL 30700",
+            "ENGL 31200",
+            "ENGL 31400",
+            "ENGL 31500",
+            "ENGL 37200",
+            "ENGL 38200",
+            "ENGL 40400",
+            "MGMT 36015",
+            "MRKT 35040"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 6,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 6 credit hours of coursework from any of the above listed ENGL courses, or any other 30000- or 40000-level ENGL course. Note that students pursuing 9-12 English teaching certification must satisfy this elective coursework by completing ENGL 37200 and ENGL 40400.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "OR 40000",
+            "ENGL 37200",
+            "ENGL 40400"
+          ]
+        },
+        {
+          "category_id": "FOREIGN_LANGUAGE_PROFICIENCY",
+          "title": "Foreign Language Proficiency",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Foreign Language Proficiency English majors must demonstrate proficiency in one foreign language equivalent to Lindenwood University’s Elementary II level. Students who transfer in at least six college credit hours in such a language or who have a sufficient AP exam score in such a language are considered to have demonstrated proficiency. Students who have studied a language offered by Lindenwood ",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "NOTES_",
+          "title": "Notes:",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Notes: (1) At least two of the courses taken for the degree must be marked as GE-Human Diversity courses. (2) ENG courses may satisfy program requirements at the discretion of the advisor. No duplication of coursework is permitted within the program.",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "ENGLISH_BA_9_12_SECONDARY_EDUCATION_CERTIFICATION_PREPARATION",
+          "title": "English, BA 9-12 Secondary Education Certification Preparation",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "English, BA 9-12 Secondary Education Certification Preparation See the requirements in English, BA 9-12 Secondary Education Certification Preparation section of this catalog Students seeking (Grades K-12) certification must (1) earn a Bachelor of Arts in English and (2) complete the requirements for a minor in education (Grades K-12). Note: Students seeking grades K-12 or 9-12 certification will w",
+          "per_course_credit_requirement": null,
+          "courses": []
+        }
+      ]
     },
     {
       "id": "mathematics_minor_2026",
@@ -1830,7 +2509,47 @@
         "prescribed_ge_satisfactions": {
           "math": "MTH 27100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MINOR_COURSEWORK",
+          "title": "Minor Coursework",
+          "credits_required": 21,
+          "category_type": "CORE",
+          "rule_narrative": "Minor Coursework 21 credit hours of coursework from the following options: MTH 27100 - Calculus I Credit Hour: 5 MTH 27200 - Calculus II Credit Hour: 5 MTH 28500 - Introduction to Mathematical Proof Writing Credit Hour: 3 MTH 30300 - Calculus III Credit Hour: 5 MTH 31500 - Linear Algebra I Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 27100",
+            "MTH 27200",
+            "MTH 28500",
+            "MTH 30300",
+            "MTH 31500"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 3,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 3 credit hours of coursework from the following options: MTH 31100 - Differential Equations Credit Hour: 3 MTH 31300 - History of Mathematics Credit Hour: 3 MTH 31600 - Linear Algebra II Credit Hour: 3 MTH 32000 - Abstract Algebra Credit Hour: 3 MTH 33000 - Geometry Credit Hour: 3 MTH 34100 - Probability and Mathematical Statistics I Credit Hour: 3 MTH 34200 - Probability and M",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 31100",
+            "MTH 31300",
+            "MTH 31600",
+            "MTH 32000",
+            "MTH 33000",
+            "MTH 34100",
+            "MTH 34200",
+            "MTH 34500",
+            "MTH 35100",
+            "MTH 36100",
+            "MTH 37000",
+            "MTH 39000",
+            "MTH 49000"
+          ]
+        }
+      ]
     },
     {
       "id": "cybersecurity_minor_2026",
@@ -1903,7 +2622,43 @@
         "flexible_elective_configurations": null,
         "advising_notes": "Students may substitute CSC 48000 for ICS 32700. Only one of IIT 35100 or CSC 30500 may be counted toward the elective options.",
         "prescribed_ge_satisfactions": {}
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MINOR_COURSEWORK",
+          "title": "Minor Coursework",
+          "credits_required": 15,
+          "category_type": "CORE",
+          "rule_narrative": "Minor Coursework 15 credit hours of coursework from the following options: ICS 31000 - Foundations of Cybersecurity Credit Hour: 3 ICS 32700 - Network and Cloud Security Credit Hour: 3 ICS 42100 - Ethical Hacking Credit Hour: 3 ICS 42300 - Advanced Penetration Testing Credit Hour: 3 ICS 42400 - Cybersecurity Analysis Credit Hour: 3 Students may substitute CSC 48000 in place of ICS 32700.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ICS 31000",
+            "ICS 32700",
+            "ICS 42100",
+            "ICS 42300",
+            "ICS 42400",
+            "CSC 48000"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 9,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 9 credit hours of coursework from the following options: ICS 32800 - Digital Forensics and Cyber Investigation Credit Hour: 3 ICS 41200 - Linux Server Installation & Configuration Credit Hour: 3 ICS 43200 - Secure Software Development Credit Hour: 3 ICS 43300 - Web Based Application Security Credit Hour: 3 IIT 33400 - Ethical Issues in Cybersecurity Credit Hour: 3 IIT 33500 - B",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ICS 32800",
+            "ICS 41200",
+            "ICS 43200",
+            "ICS 43300",
+            "IIT 33400",
+            "IIT 33500",
+            "IIT 35100",
+            "CSC 30500"
+          ]
+        }
+      ]
     },
     {
       "id": "data_analysis_certificate_2026",
@@ -1988,7 +2743,68 @@
         "prescribed_ge_satisfactions": {
           "math": "MTH 14100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "CERTIFICATE_COURSEWORK",
+          "title": "Certificate Coursework",
+          "credits_required": 9,
+          "category_type": "CORE",
+          "rule_narrative": "Certificate Coursework 9 credit hours of coursework from the following options: DSCI 30100 - Data Analysis with R Credit Hour: 3 MGMT 26014 - Excel for Professionals Credit Hour: 3 MTH 34500 - Regression Analysis Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "DSCI 30100",
+            "MGMT 26014",
+            "MTH 34500"
+          ]
+        },
+        {
+          "category_id": "STATISTICS_COURSEWORK",
+          "title": "Statistics Coursework",
+          "credits_required": 4,
+          "category_type": "CORE",
+          "rule_narrative": "Statistics Coursework 3-4 credit hours of coursework from the following options: MTH 14100 - Basic Statistics Credit Hour: 3 and MTH 24000 - Bridge Course: Statistics for Natural Science 1 Credit Hour(s) or MTH 24100 - Statistics for Natural Science Credit Hour: 3 or PSY 30600 - Behavioral Science Statistics Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 14100",
+            "MTH 24000",
+            "MTH 24100",
+            "PSY 30600"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 4,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 2-4 credit hours of coursework from the following options: BSC 36600 - Field Biology Credit Hour: 3 BSC 40800 - Genetics Credit Hour: 4 BSC 46500 - General Ecology Credit Hour: 4 CHM 35500 - Analytical Chemistry Credit Hour: 4 ECON 43078 - Econometrics Credit Hour: 3 GEO 20000 - Introduction to Geographic Information Systems (GIS) Credit Hour: 3 MGMT 36033 - Introduction to Bus",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 36600",
+            "BSC 40800",
+            "BSC 46500",
+            "CHM 35500",
+            "ECON 43078",
+            "GEO 20000",
+            "MGMT 36033",
+            "PSY 30400",
+            "SW 42500"
+          ]
+        },
+        {
+          "category_id": "PRACTICAL_APPLICATION_COURSEWORK",
+          "title": "Practical Application Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Practical Application Coursework 1-3 credit hours of coursework from the following options: CSC 45111 - Internship Credit Hour: 3 MTH 38901 - Undergraduate Research Credit Hour: 3 MTH 48001 - Mathematics Internship Credit Hour: 1-3 This project or internship should be taken as a capstone to the program, and should employ and build upon skills developed in other courses taken as part of the require",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 45111",
+            "MTH 38901",
+            "MTH 48001"
+          ]
+        }
+      ]
     },
     {
       "id": "project_management_certificate_2026",
@@ -2225,7 +3041,73 @@
           "oral_communication": "COM 11000",
           "natural_science": "NAT_SCI_SEQUENCE"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 47,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 47 credit hours of coursework from the following options: COM 11000 - Public Speaking Credit Hour: 3 CSC 14400 - Computer Science I Credit Hour: 4 CSC 21000 - Ethical Issues in Technology Credit Hour: 3 CSC 24400 - Computer Science II Credit Hour: 4 CSC 28500 - Applied Discrete Structures Credit Hour: 3 CSC 30500 - Principles of Database Systems Credit Hour: 3 CSC 35500 - Computer",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "COM 11000",
+            "CSC 14400",
+            "CSC 21000",
+            "CSC 24400",
+            "CSC 28500",
+            "CSC 30500",
+            "CSC 35500",
+            "CSC 36000",
+            "CSC 43000",
+            "CSC 45500",
+            "MTH 24100",
+            "MTH 27100",
+            "MTH 27200"
+          ]
+        },
+        {
+          "category_id": "INTRO_TO_COMPUTER_SCIENCE_COURSEWORK",
+          "title": "Intro to Computer Science Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Intro to Computer Science Coursework 3 credit hours of coursework from the following options: CSC 10011 - Introduction to Computer Science: Python Credit Hour: 3 CSC 10022 - Introduction to Computer Science: Javascript Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 10011",
+            "CSC 10022"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 15,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 15 credit hours of coursework from the following options: CSC 31000 - Applied AI Credit Hour: 3 CSC 34400 - GUI Application Design Credit Hour: 3 CSC 40500 - Computer Graphics Credit Hour: 3 CSC 40800 - Organization of Programming Languages Credit Hour: 3 CSC 41100 - Artificial Intelligence Credit Hour: 3 CSC 44000 - The Internet of Things Credit Hour: 3 CSC 44700 - Project Man",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 31000",
+            "CSC 34400",
+            "CSC 40500",
+            "CSC 40800",
+            "CSC 41100",
+            "CSC 44000",
+            "CSC 44700",
+            "CSC 45100",
+            "CSC 45111",
+            "CSC 45200",
+            "CSC 45211",
+            "CSC 48000",
+            "DSCI 30100",
+            "DSCI 35600",
+            "GAM 30120",
+            "IIT 48100",
+            "MTH 28500",
+            "MTH 31500",
+            "MTH 35100"
+          ]
+        }
+      ]
     },
     {
       "id": "data_science_bs_2025",
@@ -2387,7 +3269,100 @@
           "math": "MTH 27100",
           "social_science": "ECON 23020"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 45,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 45 credit hours of coursework from the following: CSC 14400 - Computer Science I Credit Hour: 4 CSC 24400 - Computer Science II Credit Hour: 4 CSC 30500 - Principles of Database Systems Credit Hour: 3 DSCI 11000 - Introduction to Data Science Credit Hour: 3 DSCI 30100 - Data Analysis with R Credit Hour: 3 DSCI 35600 - Machine Learning Credit Hour: 3 MTH 24100 - Statistics for Natu",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 14400",
+            "CSC 24400",
+            "CSC 30500",
+            "DSCI 11000",
+            "DSCI 30100",
+            "DSCI 35600",
+            "MTH 24100",
+            "MTH 27100",
+            "MTH 27200",
+            "MTH 31500",
+            "MTH 34100",
+            "MTH 34200",
+            "MTH 34500"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 30,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 27-30 credit hours of coursework from the following options: Students completing the Bachelor of Science in data science must also complete 27 - 30 credit hours of elective courses selected from the two groups below. The elective requirements can be satisfied by completing either of the following options: 9 credit hours of courses from Group 1 and 18 credit hours of courses fro",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "GROUP_1",
+          "title": "Group 1",
+          "credits_required": 15,
+          "category_type": "CORE",
+          "rule_narrative": "Group 1 9-15 credit hours of coursework from the following options: BSC 24200 - Introduction to Biodiversity Credit Hour: 3 BSC 24300 - Introduction to Biodiversity Laboratory Credit Hour: 1 BSC 24400 - Introduction to Cellular and Molecular Biology Credit Hour: 4 BSC 24800 - Introduction to Ecology and Evolution Credit Hour: 4 CHM 23000 - General Chemistry 1 Credit Hour: 3 CHM 23100 - General Che",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 24200",
+            "BSC 24300",
+            "BSC 24400",
+            "BSC 24800",
+            "CHM 23000",
+            "CHM 23100",
+            "CHM 24100",
+            "CHM 23200",
+            "CHM 24200",
+            "ECON 23020",
+            "ECON 23030",
+            "MGMT 24000",
+            "MGMT 26014",
+            "PHY 30100",
+            "PHY 30200"
+          ]
+        },
+        {
+          "category_id": "GROUP_2",
+          "title": "Group 2",
+          "credits_required": 18,
+          "category_type": "CORE",
+          "rule_narrative": "Group 2 15-18 credit hours of coursework from the following options: BSC 32000 - Plant Biology Credit Hour: 4 BSC 35300 - Microbiology Credit Hour: 4 BSC 40400 - Cell Biology Credit Hour: 4 BSC 40800 - Genetics Credit Hour: 4 BSC 46400 - Evolution Credit Hour: 3 BSC 46500 - General Ecology Credit Hour: 4 CHM 35500 - Analytical Chemistry Credit Hour: 4 CHM 36100 - Organic Chemistry I Credit Hour: 4",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 32000",
+            "BSC 35300",
+            "BSC 40400",
+            "BSC 40800",
+            "BSC 46400",
+            "BSC 46500",
+            "CHM 35500",
+            "CHM 36100",
+            "CHM 45500",
+            "CHM 47200",
+            "CHM 47300",
+            "CSC 28500",
+            "CSC 36000",
+            "CSC 45100",
+            "CSC 45111",
+            "ECON 33040",
+            "ECON 33045",
+            "ECON 43078",
+            "MGMT 36033",
+            "MGMT 46033",
+            "MTH 32400",
+            "MTH 32500",
+            "MTH 32600",
+            "MTH 48001"
+          ]
+        }
+      ]
     },
     {
       "id": "business_administration_bs_2025",
@@ -2530,7 +3505,63 @@
           "oral_communication": "COM 11000",
           "math": "MTH 14100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "PCBE_BUSINESS_CORE",
+          "title": "PCB&E Core Coursework",
+          "credits_required": 36,
+          "category_type": "CORE",
+          "rule_narrative": "36 credit hours of foundational business core coursework required for all PCB&E business majors.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ACCT 21010",
+            "ACCT 21011",
+            "FIN 32000",
+            "MGMT 16025",
+            "MGMT 24000",
+            "MGMT 26032",
+            "MGMT 26061",
+            "MGMT 36000",
+            "MGMT 36033",
+            "MGMT 46082",
+            "MRKT 35010",
+            "HRM 36510",
+            "MGMT 36050"
+          ]
+        },
+        {
+          "category_id": "BUSINESS_ADMINISTRATION_MAJOR_CORE",
+          "title": "Business Administration Major Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 3 credit hours of coursework from the following option: MGMT 36043 - Principles of Operations Management Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MGMT 36043"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 24,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 24 credit hours of coursework from the following options: Courses are selected from any business course at or above the 30000-level, including no more than one special topics and/or internship course. Students pursuing an emphasis area will complete 12 credit hours of elective coursework from within one business discipline.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "THE 30000"
+          ]
+        },
+        {
+          "category_id": "EMPHASES_",
+          "title": "Emphases:",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Emphases: Accounting Emphasis Advertising and Public Relations Emphasis Business Law Emphasis Economics Emphasis Entrepreneurial Studies Emphasis Finance Emphasis Health Management Emphasis Human Resource Management Emphasis International Business Emphasis Investments Emphasis Management Emphasis Marketing Emphasis Sport Management Emphasis Supply Chain Management Emphasis",
+          "per_course_credit_requirement": null,
+          "courses": []
+        }
+      ]
     },
     {
       "id": "nursing_bs_2025",
@@ -2785,7 +3816,132 @@
           "math": "MTH 27100",
           "natural_science": "CHM 23000"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 56,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 56 credit hours of coursework from the following options: BSC 24200 - Introduction to Biodiversity Credit Hour: 3 BSC 24300 - Introduction to Biodiversity Laboratory Credit Hour: 1 BSC 24400 - Introduction to Cellular and Molecular Biology Credit Hour: 4 BSC 24800 - Introduction to Ecology and Evolution Credit Hour: 4 BSC 28500 - Methods and Writing for Biology Credit Hour: 1 BSC ",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 24200",
+            "BSC 24300",
+            "BSC 24400",
+            "BSC 24800",
+            "BSC 28500",
+            "BSC 32000",
+            "BSC 40400",
+            "BSC 40800",
+            "BSC 46400",
+            "BSC 46500",
+            "BSC 48800",
+            "CHM 23000",
+            "CHM 23100",
+            "CHM 23200",
+            "CHM 24100",
+            "CHM 24200",
+            "CHM 36100",
+            "CHM 36200",
+            "MTH 24100"
+          ]
+        },
+        {
+          "category_id": "ADDITIONAL_BSC_COURSEWORK",
+          "title": "Additional BSC Coursework",
+          "credits_required": 4,
+          "category_type": "CORE",
+          "rule_narrative": "Additional BSC Coursework 4 credit hours of coursework from the following options: BSC 34100 - Vertebrate Zoology Credit Hour: 4 BSC 36400 - Entomology Credit Hour: 4",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 34100",
+            "BSC 36400"
+          ]
+        },
+        {
+          "category_id": "MTH_AND_PHY_COURSEWORK",
+          "title": "MTH and PHY Coursework",
+          "credits_required": 12,
+          "category_type": "CORE",
+          "rule_narrative": "MTH and PHY Coursework 10-12 credit hours of coursework from the following options:",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "OPTION_1",
+          "title": "Option 1",
+          "credits_required": 9,
+          "category_type": "CHOICE",
+          "rule_narrative": "Option 1 MTH 17300 - Survey of Calculus Credit Hour: 4 PHY 25100 - Introductory Physics I Credit Hour: 4 PHY 25200 - Introductory Physics II Credit Hour: 4",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 17300",
+            "PHY 25100",
+            "PHY 25200"
+          ]
+        },
+        {
+          "category_id": "OR",
+          "title": "Or",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Or",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "OPTION_2",
+          "title": "Option 2",
+          "credits_required": 6,
+          "category_type": "CHOICE",
+          "rule_narrative": "Option 2 MTH 27100 - Calculus I Credit Hour: 5 MTH 27200 - Calculus II Credit Hour: 5",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 27100",
+            "MTH 27200"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 6,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 6 credit hours of coursework from the following options: BSC 22700 - Human Anatomy and Physiology I Credit Hour: 4 BSC 22800 - Human Anatomy and Physiology II Credit Hour: 4 BSC 26300 - Environmental Policy Credit Hour: 3 BSC 28000 - Introduction to Clinical Laboratory Science Credit Hour: 3 BSC 30200 - Biometry I: Introduction to R Credit Hour: 2 BSC 35300 - Microbiology Credi",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 22700",
+            "BSC 22800",
+            "BSC 26300",
+            "BSC 28000",
+            "BSC 30200",
+            "BSC 35300",
+            "BSC 35800",
+            "BSC 36200",
+            "BSC 36400",
+            "BSC 36600",
+            "BSC 36800",
+            "BSC 37400",
+            "BSC 41300",
+            "BSC 42200",
+            "BSC 48000",
+            "BSC 48400",
+            "CHM 42200",
+            "ESC 26300"
+          ]
+        },
+        {
+          "category_id": "NOTES_",
+          "title": "Notes:",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Notes: Alternatively, other 30000-level or above courses may be an accepted elective with prior approval by the department. Additional credits will be required to meet the university 42 credit minimum of 30000 or higher level courses and may be fulfilled with biological sciences or other department electives.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "OF 30000"
+          ]
+        }
+      ]
     },
     {
       "id": "communications_ba_journalism_2025",
@@ -2995,7 +4151,118 @@
           "social_science": "PSY 10000",
           "math": "MTH 24100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 12,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 12 credit hours of coursework from the following options: PSY 10000 - Principles of Psychology Credit Hour: 3 PSY 30400 - Basic Research Methods Credit Hour: 3 PSY 30600 - Behavioral Science Statistics Credit Hour: 3 PSY 48500 - Senior Seminar Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 10000",
+            "PSY 30400",
+            "PSY 30600",
+            "PSY 48500"
+          ]
+        },
+        {
+          "category_id": "STATISTICS_COURSEWORK",
+          "title": "Statistics Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Statistics Coursework 3 credit hours of coursework from the following options: MTH 14100 - Basic Statistics Credit Hour: 3 MTH 24100 - Statistics for Natural Science Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 14100",
+            "MTH 24100"
+          ]
+        },
+        {
+          "category_id": "CLINICAL_PSYCHOLOGY_COURSEWORK",
+          "title": "Clinical Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Clinical Psychology Coursework 6 credit hours of coursework from the following options: PSY 30300 - Abnormal Psychology Credit Hour: 3 PSY 30900 - Personality Credit Hour: 3 PSY 31100 - Behavior Modification Credit Hour: 3 PSY 32100 - Health Psychology Credit Hour: 3 PSY 32400 - Psychological Testing Credit Hour: 3 PSY 34100 - Psychotherapy Credit Hour: 3 PSY 35100 - Understanding Depression Credi",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 30300",
+            "PSY 30900",
+            "PSY 31100",
+            "PSY 32100",
+            "PSY 32400",
+            "PSY 34100",
+            "PSY 35100"
+          ]
+        },
+        {
+          "category_id": "EXPERIMENTAL_PSYCHOLOGY_COURSEWORK",
+          "title": "Experimental Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Experimental Psychology Coursework 6 credit hours of coursework from the following options: PSY 31500 - Psychology of Prejudice Credit Hour: 3 PSY 32500 - Behavioral Neuroscience Credit Hour: 3 PSY 32600 - Sensation and Perception Credit Hour: 3 PSY 33000 - Learning and Memory Credit Hour: 3 PSY 33100 - Cognitive Psychology Credit Hour: 3 PSY 33200 - Psychology of Motivation and Emotion Credit Hou",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 31500",
+            "PSY 32500",
+            "PSY 32600",
+            "PSY 33000",
+            "PSY 33100",
+            "PSY 33200",
+            "PSY 33400"
+          ]
+        },
+        {
+          "category_id": "DEVELOPMENTAL_PSYCHOLOGY_COURSEWORK",
+          "title": "Developmental Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Developmental Psychology Coursework 6 credit hours of coursework from the following options: PSY 20500 - Human Development Credit Hour: 3 PSY 20800 - Child Psychology Credit Hour: 3 PSY 21000 - Psychology of Parenting Credit Hour: 3 PSY 31200 - Psychology of Aging Credit Hour: 3 PSY 31300 - Psychology of Adolescence Credit Hour: 3 PSY 36500 - Human Sexuality Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 20500",
+            "PSY 20800",
+            "PSY 21000",
+            "PSY 31200",
+            "PSY 31300",
+            "PSY 36500"
+          ]
+        },
+        {
+          "category_id": "GENERAL_PSYCHOLOGY_COURSEWORK",
+          "title": "General Psychology Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "General Psychology Coursework 6 credit hours of coursework from the following options: PSY 15700 - Psychology of Leadership Credit Hour: 3 PSY 18100 - Cultural Psychology Credit Hour: 3 PSY 21200 - Japanese Culture, Society, and Mind Credit Hour: 3 PSY 21500 - Careers in Psychology Credit Hour: 3 PSY 23500 - Death, Dying, Life, & Living Credit Hour: 3 PSY 29000-29999 - Special Topics in Psychology",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "PSY 15700",
+            "PSY 18100",
+            "PSY 21200",
+            "PSY 21500",
+            "PSY 23500",
+            "PSY 29000",
+            "PSY 30800",
+            "PSY 39000",
+            "PSY 40440",
+            "PSY 45000",
+            "PSY 48000",
+            "PSY 48300"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 3,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 3 credit hours of PSY coursework at the 30000- or 40000-level.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "THE 30000"
+          ]
+        }
+      ]
     },
     {
       "id": "english_ba_2025",
@@ -3086,7 +4353,141 @@
         "prescribed_ge_satisfactions": {
           "literature": "ENGL 20100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MAJOR_COURSEWORK",
+          "title": "Major Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Major Coursework 6 credit hours of coursework from the following options: ENGL 30100 - Methods of Literary Study Credit Hour: 3 ENGL 45400 - Senior Capstone in English Credit Hour: 3 English majors should take ENGL 30100 as soon as possible after completing ENGL 17000.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 30100",
+            "ENGL 45400",
+            "ENGL 17000"
+          ]
+        },
+        {
+          "category_id": "BRITISH_LITERATURE_COURSEWORK",
+          "title": "British Literature Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "British Literature Coursework 6 credit hours of coursework from the following options: ENGL 33200 - Chaucer Credit Hour: 3 ENGL 33300 - Shakespeare Credit Hour: 3 ENGL 33800 - Medieval Literature Credit Hour: 3 ENGL 33900 - Early Modern Literature Credit Hour: 3 ENGL 34101 - London in the Eighteenth Century Credit Hour: 3 ENGL 34200 - Politics, Passion, Poetry and Problems: The Romantic Movement C",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 33200",
+            "ENGL 33300",
+            "ENGL 33800",
+            "ENGL 33900",
+            "ENGL 34101",
+            "ENGL 34200",
+            "ENGL 34300",
+            "ENGL 35700"
+          ]
+        },
+        {
+          "category_id": "AMERICAN_LITERATURE_COURSEWORK",
+          "title": "American Literature Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "American Literature Coursework 6 credit hours of coursework from the following options: ENGL 34400 - LatinX Literature Credit Hour: 3 or SPA 34400 - LatinX Literature 3 Credit Hour(s) ENGL 34700-34799 - Topics in American Literature Credit Hour: 3 ENGL 35200 - Early American Literature Credit Hour: 3 ENGL 35300 - Twentieth-Century American Literature Credit Hour: 3 ENGL 35400 - Finding Home: Space",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 34400",
+            "SPA 34400",
+            "ENGL 34700",
+            "ENGL 35200",
+            "ENGL 35300",
+            "ENGL 35400",
+            "ENGL 37600"
+          ]
+        },
+        {
+          "category_id": "ADDITIONAL_LITERATURE_COURSEWORK",
+          "title": "Additional Literature Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Additional Literature Coursework 6 credit hours of coursework from the following options and/or from the options in British literature or American literature above: ENGL 30900 - The Novel Credit Hour: 3 ENGL 36200 - Translation and Literature Credit Hour: 3 ENGL 37100 - Reading and Writing of the Young Adult Novel Credit Hour: 3 ENGL 38000-38099 - Topics in Literature Credit Hour: 3 Students pursu",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ENGL 30900",
+            "ENGL 36200",
+            "ENGL 37100",
+            "ENGL 38000"
+          ]
+        },
+        {
+          "category_id": "LANGUAGE_LINGUISTICS_AND_COMMUNICATION_COURSEWORK",
+          "title": "Language, Linguistics, and Communication Coursework",
+          "credits_required": 6,
+          "category_type": "CORE",
+          "rule_narrative": "Language, Linguistics, and Communication Coursework 6 credit hours of coursework from the following options: CAH 36500 - Digital Research Credit Hour: 3 CINE 35000 - Screenwriting Credit Hour: 3 COM 24200 - Basic Reporting Credit Hour: 3 COM 38200 - Feature Writing Credit Hour: 3 DCS 35000 - Personal Branding Credit Hour: 3 ENGL 20900 - Writing for Game Design Credit Hour: 3 ENGL 21100 - Introduct",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CAH 36500",
+            "CINE 35000",
+            "COM 24200",
+            "COM 38200",
+            "DCS 35000",
+            "ENGL 20900",
+            "ENGL 21100",
+            "ENGL 22200",
+            "ENGL 23000",
+            "ENGL 25000",
+            "SPA 25000",
+            "ENGL 30700",
+            "ENGL 31200",
+            "ENGL 31400",
+            "ENGL 31500",
+            "ENGL 37200",
+            "ENGL 38200",
+            "ENGL 40400",
+            "MGMT 36015",
+            "MRKT 35040"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 6,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 6 credit hours of coursework from any of the above listed ENGL courses, or any other 30000- or 40000-level ENGL course. Note that students pursuing 9-12 English teaching certification must satisfy this elective coursework by completing ENGL 37200 and ENGL 40400.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "OR 40000",
+            "ENGL 37200",
+            "ENGL 40400"
+          ]
+        },
+        {
+          "category_id": "FOREIGN_LANGUAGE_PROFICIENCY",
+          "title": "Foreign Language Proficiency",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Foreign Language Proficiency English majors must demonstrate proficiency in one foreign language equivalent to Lindenwood University’s Elementary II level. Students who transfer in at least six college credit hours in such a language or who have a sufficient AP exam score in such a language are considered to have demonstrated proficiency. Students who have studied a language offered by Lindenwood ",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "NOTES_",
+          "title": "Notes:",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "Notes: (1) At least two of the courses taken for the degree must be marked as GE-Human Diversity courses. (2) ENG courses may satisfy program requirements at the discretion of the advisor. No duplication of coursework is permitted within the program.",
+          "per_course_credit_requirement": null,
+          "courses": []
+        },
+        {
+          "category_id": "ENGLISH_BA_9_12_SECONDARY_EDUCATION_CERTIFICATION_PREPARATION",
+          "title": "English, BA 9-12 Secondary Education Certification Preparation",
+          "credits_required": 0,
+          "category_type": "CORE",
+          "rule_narrative": "English, BA 9-12 Secondary Education Certification Preparation See the requirements in English, BA 9-12 Secondary Education Certification Preparation section of this catalog Students seeking (Grades K-12) certification must (1) earn a Bachelor of Arts in English and (2) complete the requirements for a minor in education (Grades K-12). Note: Students seeking grades K-12 or 9-12 certification will w",
+          "per_course_credit_requirement": null,
+          "courses": []
+        }
+      ]
     },
     {
       "id": "mathematics_minor_2025",
@@ -3165,7 +4566,47 @@
         "prescribed_ge_satisfactions": {
           "math": "MTH 27100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MINOR_COURSEWORK",
+          "title": "Minor Coursework",
+          "credits_required": 21,
+          "category_type": "CORE",
+          "rule_narrative": "Minor Coursework 21 credit hours of coursework from the following options: MTH 27100 - Calculus I Credit Hour: 5 MTH 27200 - Calculus II Credit Hour: 5 MTH 28500 - Introduction to Mathematical Proof Writing Credit Hour: 3 MTH 30300 - Calculus III Credit Hour: 5 MTH 31500 - Linear Algebra I Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 27100",
+            "MTH 27200",
+            "MTH 28500",
+            "MTH 30300",
+            "MTH 31500"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 3,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 3 credit hours of coursework from the following options: MTH 31100 - Differential Equations Credit Hour: 3 MTH 31300 - History of Mathematics Credit Hour: 3 MTH 31600 - Linear Algebra II Credit Hour: 3 MTH 32000 - Abstract Algebra Credit Hour: 3 MTH 33000 - Geometry Credit Hour: 3 MTH 34100 - Probability and Mathematical Statistics I Credit Hour: 3 MTH 34200 - Probability and M",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 31100",
+            "MTH 31300",
+            "MTH 31600",
+            "MTH 32000",
+            "MTH 33000",
+            "MTH 34100",
+            "MTH 34200",
+            "MTH 34500",
+            "MTH 35100",
+            "MTH 36100",
+            "MTH 37000",
+            "MTH 39000",
+            "MTH 49000"
+          ]
+        }
+      ]
     },
     {
       "id": "cybersecurity_minor_2025",
@@ -3238,7 +4679,43 @@
         "flexible_elective_configurations": null,
         "advising_notes": "Students may substitute CSC 48000 for ICS 32700. Only one of IIT 35100 or CSC 30500 may be counted toward the elective options.",
         "prescribed_ge_satisfactions": {}
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "MINOR_COURSEWORK",
+          "title": "Minor Coursework",
+          "credits_required": 15,
+          "category_type": "CORE",
+          "rule_narrative": "Minor Coursework 15 credit hours of coursework from the following options: ICS 31000 - Foundations of Cybersecurity Credit Hour: 3 ICS 32700 - Network and Cloud Security Credit Hour: 3 ICS 42100 - Ethical Hacking Credit Hour: 3 ICS 42300 - Advanced Penetration Testing Credit Hour: 3 ICS 42400 - Cybersecurity Analysis Credit Hour: 3 Students may substitute CSC 48000 in place of ICS 32700.",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ICS 31000",
+            "ICS 32700",
+            "ICS 42100",
+            "ICS 42300",
+            "ICS 42400",
+            "CSC 48000"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 9,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 9 credit hours of coursework from the following options: ICS 32800 - Digital Forensics and Cyber Investigation Credit Hour: 3 ICS 41200 - Linux Server Installation & Configuration Credit Hour: 3 ICS 43200 - Secure Software Development Credit Hour: 3 ICS 43300 - Web Based Application Security Credit Hour: 3 IIT 33400 - Ethical Issues in Cybersecurity Credit Hour: 3 IIT 33500 - B",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "ICS 32800",
+            "ICS 41200",
+            "ICS 43200",
+            "ICS 43300",
+            "IIT 33400",
+            "IIT 33500",
+            "IIT 35100",
+            "CSC 30500"
+          ]
+        }
+      ]
     },
     {
       "id": "data_analysis_certificate_2025",
@@ -3323,7 +4800,68 @@
         "prescribed_ge_satisfactions": {
           "math": "MTH 14100"
         }
-      }
+      },
+      "requirement_categories": [
+        {
+          "category_id": "CERTIFICATE_COURSEWORK",
+          "title": "Certificate Coursework",
+          "credits_required": 9,
+          "category_type": "CORE",
+          "rule_narrative": "Certificate Coursework 9 credit hours of coursework from the following options: DSCI 30100 - Data Analysis with R Credit Hour: 3 MGMT 26014 - Excel for Professionals Credit Hour: 3 MTH 34500 - Regression Analysis Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "DSCI 30100",
+            "MGMT 26014",
+            "MTH 34500"
+          ]
+        },
+        {
+          "category_id": "STATISTICS_COURSEWORK",
+          "title": "Statistics Coursework",
+          "credits_required": 4,
+          "category_type": "CORE",
+          "rule_narrative": "Statistics Coursework 3-4 credit hours of coursework from the following options: MTH 14100 - Basic Statistics Credit Hour: 3 and MTH 24000 - Bridge Course: Statistics for Natural Science 1 Credit Hour(s) or MTH 24100 - Statistics for Natural Science Credit Hour: 3 or PSY 30600 - Behavioral Science Statistics Credit Hour: 3",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "MTH 14100",
+            "MTH 24000",
+            "MTH 24100",
+            "PSY 30600"
+          ]
+        },
+        {
+          "category_id": "ELECTIVE_COURSEWORK",
+          "title": "Elective Coursework",
+          "credits_required": 4,
+          "category_type": "CHOICE",
+          "rule_narrative": "Elective Coursework 2-4 credit hours of coursework from the following options: BSC 36600 - Field Biology Credit Hour: 3 BSC 40800 - Genetics Credit Hour: 4 BSC 46500 - General Ecology Credit Hour: 4 CHM 35500 - Analytical Chemistry Credit Hour: 4 ECON 43078 - Econometrics Credit Hour: 3 GEO 20000 - Introduction to Geographic Information Systems (GIS) Credit Hour: 3 MGMT 36033 - Business Analytics ",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "BSC 36600",
+            "BSC 40800",
+            "BSC 46500",
+            "CHM 35500",
+            "ECON 43078",
+            "GEO 20000",
+            "MGMT 36033",
+            "PSY 30400",
+            "SW 42500"
+          ]
+        },
+        {
+          "category_id": "PRACTICAL_APPLICATION_COURSEWORK",
+          "title": "Practical Application Coursework",
+          "credits_required": 3,
+          "category_type": "CORE",
+          "rule_narrative": "Practical Application Coursework 1-3 credit hours of coursework from the following options: CSC 45111 - Internship Credit Hour: 3 MTH 38901 - Undergraduate Research Credit Hour: 3 MTH 48001 - Mathematics Internship Credit Hour: 1-3 This project or internship should be taken as a capstone to the program, and should employ and build upon skills developed in other courses taken as part of the require",
+          "per_course_credit_requirement": null,
+          "courses": [
+            "CSC 45111",
+            "MTH 38901",
+            "MTH 48001"
+          ]
+        }
+      ]
     },
     {
       "id": "project_management_certificate_2025",
@@ -7893,7 +9431,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 15100",
@@ -8036,7 +9575,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 15200",
@@ -8147,7 +9687,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 27100",
@@ -8258,7 +9799,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 27200",
@@ -8369,7 +9911,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "CSC 10011",
@@ -8955,7 +10498,8 @@
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [
         "ENGL 11000"
-      ]
+      ],
+      "geTag": "GE-Comm"
     },
     {
       "code": "EPP 15000",
@@ -9066,7 +10610,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Comm"
     },
     {
       "code": "ENGL 17000",
@@ -9228,7 +10773,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Comm"
     },
     {
       "code": "UNIV 10100",
@@ -9369,7 +10915,8 @@
       "pe_notes": [],
       "type": "concrete",
       "repeatable": false,
-      "max_repeat_credits": null
+      "max_repeat_credits": null,
+      "geTag": "GE-HC: USHisGov"
     },
     {
       "code": "PS 15500",
@@ -9499,7 +11046,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-HC:USHisGov"
     },
     {
       "code": "PSY 10000",
@@ -9634,7 +11182,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-SocSci"
     },
     {
       "code": "SOC 10200",
@@ -9763,7 +11312,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-SocSci/HD"
     },
     {
       "code": "BSC 10000",
@@ -9859,7 +11409,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-NatSciLec/Lab"
     },
     {
       "code": "ESC 10000",
@@ -9954,7 +11505,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-NatSciLec/Lab"
     },
     {
       "code": "ART 18100",
@@ -9994,7 +11546,8 @@
       "pe_notes": [],
       "type": "concrete",
       "repeatable": false,
-      "max_repeat_credits": null
+      "max_repeat_credits": null,
+      "geTag": "GE-Human Culture: Art"
     },
     {
       "code": "TA 11700",
@@ -10110,7 +11663,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Human Culture: Art"
     },
     {
       "code": "ENGL 20100",
@@ -10253,7 +11807,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Human Culture: Literature"
     },
     {
       "code": "ENGL 21600",
@@ -10293,7 +11848,8 @@
       ],
       "type": "concrete",
       "repeatable": false,
-      "max_repeat_credits": null
+      "max_repeat_credits": null,
+      "geTag": "GE-Human Culture: Literature / HD"
     },
     {
       "code": "REL 20000",
@@ -10335,7 +11891,8 @@
       ],
       "type": "concrete",
       "repeatable": false,
-      "max_repeat_credits": null
+      "max_repeat_credits": null,
+      "geTag": "GE-HC / HD"
     },
     {
       "code": "PHL 10000",
@@ -10370,7 +11927,8 @@
       "pe_notes": [],
       "type": "concrete",
       "repeatable": false,
-      "max_repeat_credits": null
+      "max_repeat_credits": null,
+      "geTag": "GE-HC"
     },
     {
       "code": "ANT 11200",
@@ -10407,7 +11965,8 @@
       ],
       "type": "concrete",
       "repeatable": false,
-      "max_repeat_credits": null
+      "max_repeat_credits": null,
+      "geTag": "GE-HC / HD"
     },
     {
       "code": "REQ_GE_COMP1",
@@ -11802,7 +13361,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 15300",
@@ -11991,7 +13551,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 17500",
@@ -12108,7 +13669,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 22100",
@@ -12515,7 +14077,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Math"
     },
     {
       "code": "MTH 28500",
@@ -31417,7 +32980,7 @@
       "code": "BSC 22700",
       "department": "BSC",
       "number": "22700",
-      "title": "Human Anatomy and Physiology I",
+      "title": "Human Anatomy and Physiology I (GE-NatSciLec/Lab)",
       "credits": 4,
       "level": 20000,
       "description": "Science with Lab This course is a study of structure and function in the human body, including the following systems: integumentary, skeletal, muscle, endocrine, nervous, and sensory.",
@@ -31547,7 +33110,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-NatSciLec/Lab"
     },
     {
       "code": "BSC 23400",
@@ -34850,7 +36414,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-SocSci"
     },
     {
       "code": "CAH 44444",
@@ -43772,7 +45337,8 @@
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
-      "annual_session_availability": null
+      "annual_session_availability": null,
+      "geTag": "GE-Comm"
     },
     {
       "code": "COM 10200",
@@ -43834,7 +45400,8 @@
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
       "prereq_or_coreqs": [],
-      "annual_session_availability": null
+      "annual_session_availability": null,
+      "geTag": "GE-Comm"
     },
     {
       "code": "COM 15100",
@@ -44231,7 +45798,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Comm"
     },
     {
       "code": "COL 45100",
@@ -56583,7 +58151,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-SocSci"
     },
     {
       "code": "DSCI 11000",
@@ -57590,7 +59159,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-SocSci"
     },
     {
       "code": "ECON 33031",
@@ -58058,7 +59628,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-SocSci"
     },
     {
       "code": "ECON 33055",
@@ -67521,7 +69092,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Comm"
     },
     {
       "code": "ENGL 21100",
@@ -84058,7 +85630,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Comm"
     },
     {
       "code": "GEO 10300",
@@ -135791,7 +137364,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-HC:USHisGov"
     },
     {
       "code": "PS 18000",
@@ -150987,7 +152561,8 @@
       "repeatable": false,
       "max_repeat_credits": null,
       "strict_concurrent_coreqs": [],
-      "prereq_or_coreqs": []
+      "prereq_or_coreqs": [],
+      "geTag": "GE-Comm/HD"
     },
     {
       "code": "SW 30000",
@@ -161819,6 +163394,89 @@
       },
       "repeatable": false,
       "max_repeat_credits": null
+    },
+    {
+      "code": "BSC 11000",
+      "department": "BSC",
+      "number": "11000",
+      "title": "Introduction to Biology (GE-NatSci)",
+      "credits": 3,
+      "level": 10000,
+      "description": "Science Non-Lab This course provides an introduction to the study of biology.",
+      "fee_info": "$0",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground",
+        "Online"
+      ],
+      "prereq_logic": null,
+      "prereqs": [],
+      "coreq_codes": [],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "geTag": "GE-NatSci"
+    },
+    {
+      "code": "BSC 11020",
+      "department": "BSC",
+      "number": "11020",
+      "title": "Introduction to Biology Laboratory (GE-NatSciLab)",
+      "credits": 1,
+      "level": 10000,
+      "description": "Science Lab This course provides laboratory experiments to accompany Introduction to Biology.",
+      "fee_info": "$50",
+      "offered_sessions": [
+        "Fall-16wk",
+        "Spring-16wk"
+      ],
+      "FA_I_8wk": false,
+      "FA_II_8wk": false,
+      "FA_16wk": true,
+      "SP_I_8wk": false,
+      "SP_II_8wk": false,
+      "SP_16wk": true,
+      "SU_8wk": false,
+      "offerings": [
+        "FA-16wk",
+        "SP-16wk"
+      ],
+      "modalities": [
+        "On-Ground"
+      ],
+      "prereq_logic": null,
+      "prereqs": [],
+      "coreq_codes": [
+        "BSC 11000"
+      ],
+      "grade_prereq_rules": [],
+      "cross_listed_codes": [],
+      "legacy_substitutions": [],
+      "math_placement_eligible": false,
+      "verification_status": "Verified",
+      "submitted_by": "system",
+      "pe_notes": [],
+      "type": "concrete",
+      "geTag": "GE-NatSciLab"
     }
   ],
   "ge_popularity_stats": [
@@ -162070,13 +163728,16 @@
             "CHM 23000",
             "ESC 10000",
             "PHY 25100",
-            "PHY 30100"
+            "PHY 30100",
+            "BSC 22700",
+            "BSC 11020"
           ],
           "approved_non_lab_courses": [
             "AST 10000",
             "BSC 10700",
             "ESC 11100",
-            "SCI 10500"
+            "SCI 10500",
+            "BSC 11000"
           ]
         },
         "additional_ge_electives": {
@@ -162220,13 +163881,16 @@
             "CHM 23000",
             "ESC 10000",
             "PHY 25100",
-            "PHY 30100"
+            "PHY 30100",
+            "BSC 22700",
+            "BSC 11020"
           ],
           "approved_non_lab_courses": [
             "AST 10000",
             "BSC 10700",
             "ESC 11100",
-            "SCI 10500"
+            "SCI 10500",
+            "BSC 11000"
           ]
         },
         "additional_ge_electives": {

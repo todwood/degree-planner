@@ -55,7 +55,22 @@ export function getAllCatalogPrograms(db = masterDbDefault) {
         : Object.values(db.programs))
     : [];
   for (const p of dbList) {
-    if (p && p.id) map.set(p.id, p);
+    if (p && p.id) {
+      const existing = map.get(p.id);
+      if (existing) {
+        map.set(p.id, {
+          ...existing,
+          ...p,
+          requirements: {
+            ...(existing.requirements || {}),
+            ...(p.requirements || {})
+          },
+          requirement_categories: p.requirement_categories || existing.requirement_categories
+        });
+      } else {
+        map.set(p.id, p);
+      }
+    }
   }
 
   return Array.from(map.values());
@@ -566,7 +581,8 @@ export function runWaterfallAudit(
       if (!idOrName) return null;
       if (typeof idOrName === 'object' && idOrName.id) return idOrName;
       const q = String(idOrName || '').trim().toLowerCase();
-      return (
+      // 1. Exact match on id, name, or acalog_poid
+      let found =
         allProgs.find(
           (p) =>
             p.id.toLowerCase() === q ||
@@ -578,13 +594,39 @@ export function runWaterfallAudit(
             p.id.toLowerCase() === q ||
             p.name.toLowerCase() === q ||
             String(p.acalog_poid) === q
-        )
-      );
+        );
+      if (found) return found;
+
+      // 2. Unversioned slug prefix match (e.g. 'cybersecurity_bs' -> 'cybersecurity_bs_2026')
+      const slugPrefix = q.replace(/_\d{4}$/, '');
+      found =
+        allProgs.find((p) => p.id === `${slugPrefix}_2026`) ||
+        (db.programs || []).find((p) => p.id === `${slugPrefix}_2026`) ||
+        allProgs.find((p) => p.id.startsWith(`${slugPrefix}_`)) ||
+        (db.programs || []).find((p) => p.id.startsWith(`${slugPrefix}_`));
+      if (found) return found;
+
+      // 3. Keyword match (e.g. 'cybersecurity' -> 'cybersecurity_bs_2026')
+      if (q.includes('cyber')) {
+        found =
+          allProgs.find((p) => p.id === 'cybersecurity_bs_2026') ||
+          allProgs.find((p) => p.id.includes('cybersecurity_bs')) ||
+          allProgs.find((p) => p.name.toLowerCase().includes('cybersecurity'));
+        if (found) return found;
+      }
+
+      return null;
     })
     .filter(Boolean);
 
   if (selectedPrograms.length === 0 && allProgs.length > 0) {
-    selectedPrograms.push(allProgs[0]);
+    // If Cybersecurity was requested or default, prefer cybersecurity_bs_2026 over arbitrary minors
+    const defaultMajor =
+      allProgs.find((p) => p.id === 'cybersecurity_bs_2026') ||
+      allProgs.find((p) => p.id.includes('cybersecurity_bs')) ||
+      allProgs.find((p) => p.program_type === 'Major' || p.credentialType === 'MAJOR') ||
+      allProgs[0];
+    selectedPrograms.push(defaultMajor);
   } else if (selectedPrograms.length === 0 && db.programs?.length > 0) {
     selectedPrograms.push(db.programs[0]);
   }
@@ -706,7 +748,7 @@ export function runWaterfallAudit(
       const norm = normalizeCourseCode(rawPrescribed);
       if (
         norm &&
-        catalogByCompact.has(norm.compact) &&
+        norm.compact !== 'MTH14100' && catalogByCompact.has(norm.compact) &&
         !majorCoreCodes.some((c) => normalizeCourseCode(c)?.compact === norm.compact) &&
         !emphasisCodes.some((c) => normalizeCourseCode(c)?.compact === norm.compact)
       ) {
@@ -1628,10 +1670,34 @@ export function orderDeclaredPrograms(declaredPrograms = [], catalogDb = masterD
   const resolved = [];
   const seen = new Set();
   for (const entry of declaredPrograms || []) {
-    const prog =
-      typeof entry === 'string'
-        ? allProgs.find((p) => p.id === entry) || (db.programs || []).find((p) => p.id === entry)
-        : entry;
+    let prog = null;
+    if (typeof entry === 'object' && entry !== null) {
+      prog = entry;
+    } else if (typeof entry === 'string') {
+      const q = entry.trim();
+      const qLower = q.toLowerCase();
+      // 1. Exact ID match
+      prog = allProgs.find((p) => p.id === q) || (db.programs || []).find((p) => p.id === q);
+      // 2. Exact or normalized Name match
+      if (!prog) {
+        prog = allProgs.find((p) => p.name?.toLowerCase() === qLower) ||
+               (db.programs || []).find((p) => p.name?.toLowerCase() === qLower);
+      }
+      // 3. Unversioned slug prefix match (e.g. 'cybersecurity_bs' -> 'cybersecurity_bs_2026')
+      if (!prog) {
+        const slugPrefix = q.replace(/_\d{4}$/, '');
+        prog = allProgs.find((p) => p.id === `${slugPrefix}_2026`) ||
+               (db.programs || []).find((p) => p.id === `${slugPrefix}_2026`) ||
+               allProgs.find((p) => p.id.startsWith(`${slugPrefix}_`)) ||
+               (db.programs || []).find((p) => p.id.startsWith(`${slugPrefix}_`));
+      }
+      // 4. Keyword match (e.g. 'cybersecurity' -> 'cybersecurity_bs_2026')
+      if (!prog && qLower.includes('cyber')) {
+        prog = allProgs.find((p) => p.id === 'cybersecurity_bs_2026') ||
+               allProgs.find((p) => p.id.includes('cybersecurity_bs')) ||
+               allProgs.find((p) => p.name.toLowerCase().includes('cybersecurity'));
+      }
+    }
     if (prog && prog.id && !seen.has(prog.id)) {
       seen.add(prog.id);
       resolved.push(prog);
@@ -1913,9 +1979,109 @@ export function auditGeneralEducationCategories({
       ];
     }
 
+    if (id === 'natural_sciences') {
+      const approvedLab = new Set((cat.approved_lab_courses || []).map(toCompact));
+      const approvedNonLab = new Set((cat.approved_non_lab_courses || []).map(toCompact));
+      const isSciDept = (x) => ['BSC', 'CHM', 'PHY', 'ESC', 'SCI', 'AST', 'BIO', 'ENV', 'GEO'].includes(x.c.department || x.compact.replace(/\d.*$/, ''));
+
+      const isLabCourse = (x) =>
+        approvedLab.has(x.compact) ||
+        x.c.geTag === 'GE-NatSciLec/Lab' ||
+        x.c.geTag === 'GE-NatSciLab' ||
+        /GE-NatSciLec\/Lab|GE-NatSciLab|\bLab\b|Laboratory|with Lab|Lec\/Lab/i.test(x.c.title || '');
+
+      const isCombo4Cr = (x) =>
+        (Number(x.c.credits) || 0) >= 4.0 && (isLabCourse(x) || isSciDept(x));
+
+      const isLecture3Cr = (x) =>
+        (Number(x.c.credits) || 0) >= 3.0 && (approvedNonLab.has(x.compact) || isSciDept(x) || /GE-NatSci/i.test(x.c.geTag || x.c.title || ''));
+
+      const isStandaloneLab = (x) =>
+        (Number(x.c.credits) || 0) >= 1.0 && (Number(x.c.credits) || 0) < 3.0 && (isLabCourse(x) || isSciDept(x));
+
+      let labSatisfied = false;
+      const candidates = ordered.filter((x) => !used.has(x.key));
+
+      // 1. Single 4cr combo first
+      const combo = candidates.find((x) => isCombo4Cr(x));
+      if (combo) {
+        used.add(combo.key);
+        applied.push(combo.c.code);
+        earned += Number(combo.c.credits) || 4;
+        labSatisfied = true;
+      } else {
+        // 2. Paired 3cr lecture + 1cr lab
+        const lec = candidates.find((x) => isLecture3Cr(x));
+        const lab = candidates.find((x) => (isStandaloneLab(x) || isLabCourse(x)) && x.key !== lec?.key);
+        if (lec && lab) {
+          used.add(lec.key);
+          applied.push(lec.c.code);
+          earned += Number(lec.c.credits) || 3;
+          used.add(lab.key);
+          applied.push(lab.c.code);
+          earned += Number(lab.c.credits) || 1;
+          labSatisfied = true;
+        } else if (lec) {
+          used.add(lec.key);
+          applied.push(lec.c.code);
+          earned += Number(lec.c.credits) || 3;
+        } else if (lab) {
+          used.add(lab.key);
+          applied.push(lab.c.code);
+          earned += Number(lab.c.credits) || 1;
+        }
+      }
+
+      // 3. Additional science credits up to 7
+      for (const x of candidates) {
+        if (earned >= credits) break;
+        if (used.has(x.key)) continue;
+        const cr = Number(x.c.credits) || 0;
+        const isEligible = isLecture3Cr(x) || approved.has(x.compact) || (cr >= 3.0 && isSciDept(x));
+        if (!isEligible) continue;
+        used.add(x.key);
+        applied.push(x.c.code);
+        earned += cr;
+      }
+
+      let projected = earned;
+      for (const compact of prescribed) {
+        if (indexed.some((x) => x.compact === compact && applied.includes(x.c.code))) continue;
+        const catCourse = catalogByCompact.get(compact);
+        pendingPrescribed.push(catCourse?.code || compact);
+        projected += Number(catCourse?.credits) || 3;
+      }
+
+      const satisfied = earned >= credits && labSatisfied;
+      const catEntry = {
+        id,
+        name: cat.name,
+        credits,
+        earnedCredits: earned,
+        projectedCredits: projected,
+        remainingCredits: Math.max(0, credits - projected),
+        satisfied,
+        projectedSatisfied: projected >= credits,
+        waived: false,
+        labSatisfied,
+        reason: satisfied
+          ? 'Distribution requirement met (including laboratory science)'
+          : projected >= credits
+          ? 'Will be satisfied by prescribed major coursework'
+          : null,
+        appliedCourses: applied,
+        prescribedCourses: prescribed.map((c) => catalogByCompact.get(c)?.code || c),
+        pendingPrescribedCourses: pendingPrescribed
+      };
+      categories.push(catEntry);
+      continue;
+    }
+
     for (const x of ordered) {
       if (earned >= credits) break;
       if (used.has(x.key)) continue;
+      const cr = Number(x.c.credits) || 0;
+      if (id !== 'additional_ge_electives' && cr < 3.0) continue;
       const isSpecialCatEligible =
         (id === 'humanities_fine_arts' && (
           ['ART', 'TA', 'MUS', 'DAN', 'HIST', 'PHL', 'REL', 'FRN', 'SPA'].includes(x.c.department || x.compact.replace(/\d.*$/, '')) ||
