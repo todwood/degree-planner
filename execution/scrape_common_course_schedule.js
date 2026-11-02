@@ -53,6 +53,113 @@ export function parseIsEvening(scheduleStr) {
   return hour >= 17; // 05:00 PM or later
 }
 
+export function extractAttributeGeTag(attribute = '') {
+  if (!attribute) return null;
+  const a = attribute.trim();
+  if (/\bGE[-:]NatSciLec\/?Lab\b/i.test(a) || /\bNatural Science with Lab\b/i.test(a)) {
+    return 'GE-NatSciLec/Lab';
+  }
+  if (/\bGE[-:]NatSciLab\b/i.test(a) || /\bNatural Science Lab\b/i.test(a)) {
+    return 'GE-NatSciLab';
+  }
+  if (/\bGE[-:]NatSci\b/i.test(a) || /\bNatural Science\b/i.test(a)) {
+    return 'GE-NatSci';
+  }
+  if (/\bGE[-:]Math\b/i.test(a) || /\bMathematics\b/i.test(a)) {
+    return 'GE-Math';
+  }
+  if (/\bGE[-:](?:Oral\s*Comm|Written\s*Comp|Comm(?:unication)?)\b/i.test(a)) {
+    if (/\bWritten\b/i.test(a)) return 'GE-WrittenComp';
+    return 'GE-Comm';
+  }
+  if (/\bGE[-:](?:SocSci|Social\s*Science)\b/i.test(a)) {
+    return 'GE-SocSci';
+  }
+  if (/\bGE[-:](?:Civics?|US\s*History)\b/i.test(a)) {
+    return 'GE-Civ';
+  }
+  if (/\bGE[-:]Human\s*Culture[:\s]*Arts?\b/i.test(a) || /\bGE[-:]HC:Arts?\b/i.test(a)) {
+    return 'GE-HC:Arts';
+  }
+  if (/\bGE[-:]Human\s*Culture[:\s]*Lit(?:erature)?\b/i.test(a) || /\bGE[-:]HC:Lit\b/i.test(a)) {
+    return 'GE-HC:Lit';
+  }
+  if (/\bGE[-:](?:Human\s*Culture|HC)\b/i.test(a) || /\bHumanities & Fine Arts\b/i.test(a)) {
+    return 'GE-HC';
+  }
+  return null;
+}
+
+export function extractTitleGeTag(title = '') {
+  if (!title) return null;
+  if (/\(GE[-:]NatSciLec\/?Lab\)/i.test(title)) return 'GE-NatSciLec/Lab';
+  if (/\(GE[-:]NatSciLab\)/i.test(title)) return 'GE-NatSciLab';
+  if (/\(GE[-:]NatSci\)/i.test(title)) return 'GE-NatSci';
+  if (/\(GE[-:]Math\)/i.test(title)) return 'GE-Math';
+  if (/\(GE[-:](?:Oral\s*Comm|Written\s*Comp|Comm(?:unication)?)\)/i.test(title)) {
+    if (/\bWritten\b/i.test(title)) return 'GE-WrittenComp';
+    return 'GE-Comm';
+  }
+  if (/\(GE[-:](?:SocSci|Social\s*Science)\)/i.test(title)) return 'GE-SocSci';
+  if (/\(GE[-:](?:Civics?|Civ)\)/i.test(title)) return 'GE-Civ';
+  if (/\(GE[-:]Human\s*Culture[:\s]*Arts?\)/i.test(title) || /\(GE[-:]HC:Arts?\)/i.test(title)) return 'GE-HC:Arts';
+  if (/\(GE[-:]Human\s*Culture[:\s]*Lit(?:erature)?\)/i.test(title) || /\(GE[-:]HC:Lit\)/i.test(title)) return 'GE-HC:Lit';
+  if (/\(GE[-:](?:Human\s*Culture|HC)\)/i.test(title)) return 'GE-HC';
+  const m = title.match(/\((GE[-:][^)]+)\)/i);
+  if (m) return m[1].replace(':', '-').trim();
+  return null;
+}
+
+export function extractScheduleGeTag(title = '', attribute = '') {
+  const attrTag = extractAttributeGeTag(attribute);
+  if (attrTag) return attrTag;
+  return extractTitleGeTag(title);
+}
+
+export function mapAcalogGeToCanonical(line = '') {
+  if (!line) return null;
+  const l = line.trim();
+  if (/GE-Natural Science with Lab/i.test(l)) return 'GE-NatSciLec/Lab';
+  if (/GE-Natural Science Lab/i.test(l)) return 'GE-NatSciLab';
+  if (/GE-Natural Science/i.test(l)) return 'GE-NatSci';
+  if (/GE-Math/i.test(l)) return 'GE-Math';
+  if (/GE-Social Science/i.test(l)) return 'GE-SocSci';
+  if (/GE-Communication/i.test(l)) return 'GE-Comm';
+  if (/GE-Human Culture:\s*Arts?/i.test(l)) return 'GE-HC:Arts';
+  if (/GE-Human Culture:\s*Lit/i.test(l)) return 'GE-HC:Lit';
+  if (/GE-Human Culture:\s*US History/i.test(l)) return 'GE-Civ';
+  if (/GE-Civics?/i.test(l)) return 'GE-Civ';
+  if (/GE-Human Culture/i.test(l)) return 'GE-HC';
+  if (/GE-Written/i.test(l)) return 'GE-WrittenComp';
+  return null;
+}
+
+export function getCanonicalTitleWithGeTag(baseTitle = '', geTag = null) {
+  const cleanTitle = (baseTitle || '')
+    .replace(/\s*\((?:GE[-:][^)]+)\)\s*/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!geTag) return cleanTitle;
+
+  const tagDisplayMap = {
+    'GE-NatSciLec/Lab': '(GE-NatSciLec/Lab)',
+    'GE-NatSciLab': '(GE-NatSciLab)',
+    'GE-NatSci': '(GE-NatSci)',
+    'GE-Math': '(GE-Math)',
+    'GE-Comm': '(GE-Comm)',
+    'GE-SocSci': '(GE-SocSci)',
+    'GE-Civ': '(GE-Civ)',
+    'GE-WrittenComp': '(GE-WrittenComp)',
+    'GE-HC:Arts': '(GE-Human Culture: Arts)',
+    'GE-HC:Lit': '(GE-Human Culture: Literature)',
+    'GE-HC': '(GE-HC)'
+  };
+
+  const displayTag = tagDisplayMap[geTag] || `(${geTag})`;
+  return `${cleanTitle} ${displayTag}`;
+}
+
 export function mapModality(deliveryMethod) {
   const d = (deliveryMethod || '').trim().toLowerCase();
   if (d.includes('online') || d.includes('distance')) {
@@ -182,6 +289,10 @@ export async function scrapeCommonCourseSchedule(page, termConfigs = DEFAULT_TER
 
   const scheduleIndex = {};
   const scheduleTitleMap = {};
+  const scheduleGeTagMap = {};
+  const scheduleAttributeGeTagMap = {};
+  const scheduleTitleGeTagMap = {};
+  const termsOfferedMap = {};
   let totalSections = 0;
 
   for (const term of activeTerms) {
@@ -194,8 +305,8 @@ export async function scrapeCommonCourseSchedule(page, termConfigs = DEFAULT_TER
     await page.fill('#_ctl0_PlaceHolderMain__ctl0_txtKeyword', '');
 
     await Promise.all([
-      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 120000 }).catch(() => {}),
-      page.click('#_ctl0_PlaceHolderMain__ctl0_btnSearch')
+      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 180000 }).catch(() => {}),
+      page.click('#_ctl0_PlaceHolderMain__ctl0_btnSearch', { noWaitAfter: true })
     ]);
 
     await page.waitForSelector('#CourseList', { timeout: 60000 });
@@ -230,7 +341,27 @@ export async function scrapeCommonCourseSchedule(page, termConfigs = DEFAULT_TER
       const normCode = normalizeCode(row.rawCourse);
       if (!normCode) continue;
 
-      // Capture official title from schedule (preserves (GE-Math), (GE:SocSci), etc.)
+      // Track terms offered
+      if (!termsOfferedMap[normCode]) {
+        termsOfferedMap[normCode] = new Set();
+      }
+      termsOfferedMap[normCode].add(term.fullName);
+
+      // Extract schedule GE tags
+      const attrGeTag = extractAttributeGeTag(row.attribute);
+      if (attrGeTag) {
+        scheduleAttributeGeTagMap[normCode] = attrGeTag;
+      }
+      const titleGeTag = extractTitleGeTag(row.title);
+      if (titleGeTag) {
+        scheduleTitleGeTagMap[normCode] = titleGeTag;
+      }
+      const detectedGeTag = attrGeTag || titleGeTag;
+      if (detectedGeTag) {
+        scheduleGeTagMap[normCode] = detectedGeTag;
+      }
+
+      // Capture official title from schedule (preserves (GE-Math), (GE-NatSciLec/Lab), etc.)
       if (row.title && row.title.trim()) {
         const rawTitle = row.title.trim();
         // If row.title contains a GE marker, prioritize it
@@ -270,9 +401,21 @@ export async function scrapeCommonCourseSchedule(page, termConfigs = DEFAULT_TER
     }
   }
 
+  const formattedTermsOffered = {};
+  const termSortOrder = ['2026 Fall', '2027 Spring', '2027 Summer'];
+  for (const [code, termSet] of Object.entries(termsOfferedMap)) {
+    const list = Array.from(termSet);
+    list.sort((a, b) => termSortOrder.indexOf(a) - termSortOrder.indexOf(b));
+    formattedTermsOffered[code] = list;
+  }
+
   return {
     scheduleIndex,
     scheduleTitleMap,
+    scheduleGeTagMap,
+    scheduleAttributeGeTagMap,
+    scheduleTitleGeTagMap,
+    termsOfferedMap: formattedTermsOffered,
     allDropdownTerms,
     totalSections
   };

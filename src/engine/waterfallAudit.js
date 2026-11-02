@@ -1031,11 +1031,13 @@ export function runWaterfallAudit(
         const credits = candidate.credits || 0;
         const numStr = String(candidate.number || '');
 
+        const isCombinedTag = /NatSciLec\/Lab|Lec\/Lab/i.test(title);
         const isLab =
-          /NatSciLab|Lab\b/i.test(title) ||
-          numStr.endsWith('01') ||
-          numStr.endsWith('L') ||
-          (credits <= 2 && ['BSC', 'CHM', 'ESC', 'PHY'].includes(dept));
+          !isCombinedTag &&
+          (/NatSciLab|\bLab\b/i.test(title) ||
+            numStr.endsWith('01') ||
+            numStr.endsWith('L') ||
+            (credits <= 2 && ['BSC', 'CHM', 'ESC', 'PHY'].includes(dept)));
 
         const isLec =
           credits >= 3 &&

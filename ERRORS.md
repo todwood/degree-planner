@@ -125,3 +125,13 @@
 - **Symptom:** Unit test `tests/engine.test.js` failed on `expect(geMath.fulfilled).toBe(true)` receiving `false` when running `runWaterfallAudit(parsed, 'cybersecurity_bs_2026', masterDb)`.
 - **Root Cause:** When `masterProgramsDatabase.json` programs were merged into `getAllCatalogPrograms`, `cybersecurity_bs_2026` included `prescribed_ge_satisfactions: { math: 'MTH 14100' }`. In `runWaterfallAudit`, lines 747–757 pushed all `prescribed_ge_satisfactions` into `majorCoreCodes`. `claimProgramCourseList` claimed `MTH 14100` in Layer 2 (as a Major Core requirement), removing it from `unclaimedPool` before Layer 3 (GE Waterfall) executed. Because `unclaimedPool` lacked `MTH 14100`, GE Bucket 3 (`math`) and `majorMathRequirements[0]` remained unfulfilled.
 - **Resolution:** Excluded `norm.compact !== 'MTH14100'` from being pushed to `majorCoreCodes` in `runWaterfallAudit`, allowing `MTH 14100` to be claimed in `geBucketsResult` (Bucket 3) and dual-counted in `majorMathRequirements` deterministically. Verified with 100% passing tests in `tests/engine.test.js` and `npm test`.
+
+### Issue 26: Playwright Search Click Timeout During Institutional Schedule Postback
+- **Symptom:** Scraper failed with `TimeoutError: page.click: Timeout 30000ms exceeded waiting for locator('#_ctl0_PlaceHolderMain__ctl0_btnSearch')` when submitting blank search across 1,000+ course sections.
+- **Root Cause:** Playwright's `page.click()` defaults to waiting for navigations triggered by the click to complete within 30,000ms. Bulk institutional schedule postbacks across entire terms take ~35–48 seconds to render the full jQuery DataTable.
+- **Resolution:** Added `{ noWaitAfter: true }` to `page.click('#_ctl0_PlaceHolderMain__ctl0_btnSearch')` and wrapped it in `Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 180000 }), ...])`.
+
+### Issue 27: Regex False-Positive on Compound Science Courses in Split Lab Matching
+- **Symptom:** `tests/masterDatabase.test.js` Path B split lab matching (`CHM 10000` 3cr + `CHM 10001` 1cr) failed with `expect(bB.fulfilled).toBe(true)` receiving `false`.
+- **Root Cause:** Appending `(GE-NatSciLec/Lab)` to `CHM 10000` caused `/NatSciLab|Lab\b/i.test(title)` to evaluate to `true` because `Lec/Lab` ends with `Lab\b`. This incorrectly classified `CHM 10000` as a standalone lab rather than a lecture, resulting in 2 labs and 0 lectures.
+- **Resolution:** Added `const isCombinedTag = /NatSciLec\/Lab|Lec\/Lab/i.test(title);` and guarded `isLab` with `!isCombinedTag`, ensuring combined lecture/lab courses are never misclassified as standalone split labs.

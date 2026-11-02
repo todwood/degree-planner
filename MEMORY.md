@@ -1878,3 +1878,34 @@
      - Full Vitest suite: **383 / 383 tests passing (100% green)** across all 37 test files (`npm test`).
      - Production build: `npm run build` compiled cleanly in 5.79s.
      - Headless Playwright script `.tmp/verify_audit_corrections.mjs` verifying Garrett Bullock intake with 2026-2027 catalog year, `[2026-2027]` combobox badge, transition to Screen 2, Major Accordion category headers with credit sub-totals (`Major Coursework`), ICS/IIT completed/active rows, and Natural Sciences section.
+
+### 100. 2026–2027 Skill 2 Catalog Harvest, Common Course Schedule Sync & Canonical GE Title Tag Reconciliation
+- **Objective:** Complete automated harvest across the 2026–2027 Acalog catalog and Common Course Schedule portal (Fall 26, Spring 27, Summer 27), reconcile canonical `(GE-...)` title tags and `geTag` attributes systematically across both sources, populate schedule availability and delivery modalities, and preserve all degree program fixtures.
+- **Architectural Implementation:**
+  1. *Common Course Schedule Scraper (`execution/scrape_common_course_schedule.js`):*
+     - Bulk ingestion across active terms (`908` Fall 26, `909` Spring 27, `910` Summer 27) with `{ noWaitAfter: true }` and 180s postback timeout.
+     - Indexed 3,032 sections across 1,415 course codes.
+     - Extracted institutional section attributes (Column 8) and section titles, exporting `extractScheduleGeTag()`, `extractAttributeGeTag()`, `extractTitleGeTag()`, `mapAcalogGeToCanonical()`, and `getCanonicalTitleWithGeTag()`.
+  2. *Full Catalog Crawl & Staging (`.tmp/harvest_all_courses.mjs`):*
+     - Fixed `geCategoryLookup` to inspect `approved_lab_courses` (`GE-NatSciLec/Lab` or `GE-NatSciLab`), `approved_non_lab_courses` (`GE-NatSci`), and `humanities_fine_arts.sub_groups` (`GE-HC:Arts`, `GE-HC:Lit`, `GE-HC`).
+     - Concurrently parsed 1,881 course pages from Acalog with Acalog GE line extraction.
+     - Enforced Title Authority Rule: official schedule `(GE-...)` adopted if verified by matrix, Acalog, or institutional attribute.
+     - Enforced Acalog Fallback Rule: if unscheduled, mapped Acalog GE line to canonical suffix and `geTag`.
+     - Enforced Non-GE Protection Rule: upper-division non-GE courses (e.g. `PSY 30600`) strip stray schedule markers, keeping `geTag: undefined` and `modalities: ['On-Ground']`.
+     - Preserved canonical `EPP 15000` title `Composition I - English for Academic Purposes (GE-Comm)`.
+     - Synthesized telemetry: `terms_offered`, `modalities` (`['On-Ground']` for unscheduled), outputting to `.tmp/courses_staging_all.json` and `.tmp/courses_staging_all_2026.json`.
+  3. *Deterministic Offline Merge (`execution/merge_staged_courses.js`):*
+     - Updated `geTag`, `title`, and `terms_offered` for existing courses and new course records while preserving all 33 degree program fixtures intact.
+  4. *Waterfall Compound Science Lab Fix (`src/engine/waterfallAudit.js`):*
+     - Guarded `isLab` in `nat_sci_lab` compound matching against `isCombinedTag` (`/NatSciLec\/Lab|Lec\/Lab/i`), preventing 4cr integrated lecture/lab courses with GE tags from being misclassified as standalone labs in split matching.
+  5. *Verification & Zero Regression:*
+     - Created and executed `.tmp/verify_skill2_harvest_2026.mjs`:
+       - Verified total course corpus = 1,938 (> 1,800).
+       - Exactly 33 programs preserved in `masterDatabase.json`.
+       - `BSC 11200`: `geTag === 'GE-NatSciLec/Lab'`, title includes `(GE-NatSciLec/Lab)`, `credits === 4`.
+       - `BSC 22700`, `BSC 11000`, `BSC 11020`, `MTH 14100`, `MTH 27100`, `MTH 27200`, `COM 11000`, `ECON 23020` all carry canonical `geTag` and titles.
+       - `PSY 30600`: `geTag` is undefined, title is `Behavioral Science Statistics` without GE tag, `modalities: ['On-Ground']`.
+       - 897 active courses with populated `terms_offered`.
+       - 1,018 unscheduled courses defaulting to `['On-Ground']`.
+     - Full Vitest suite: **383 / 383 unit tests passing (100% green)** across all 37 test files (`npm test`).
+     - Production build: `npm run build` compiled cleanly in 5.87s.

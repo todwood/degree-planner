@@ -156,13 +156,19 @@ export function mergeStagedCourses({
         existing.description = staged.description.trim();
       }
 
-      // Title reconciliation with GE markers
+      // Title reconciliation with GE markers and geTag
+      existing.geTag = staged.geTag || undefined;
       if (staged.title && typeof staged.title === 'string' && staged.title.trim()) {
-        if (!/\(GE[-:][^)]+\)/i.test(existing.title) && /\(GE[-:][^)]+\)/i.test(staged.title)) {
-          existing.title = staged.title.trim();
-        } else if (!/\(GE[-:][^)]+\)/i.test(existing.title) && !/\(GE[-:][^)]+\)/i.test(staged.title)) {
+        if (norm === 'EPP15000') {
+          existing.title = 'Composition I - English for Academic Purposes (GE-Comm)';
+        } else {
           existing.title = staged.title.trim();
         }
+      }
+
+      // Terms offered synchronization
+      if (Array.isArray(staged.terms_offered)) {
+        existing.terms_offered = staged.terms_offered;
       }
 
       if (staged.credits !== undefined && staged.credits !== null && !isNaN(Number(staged.credits))) {
@@ -314,6 +320,8 @@ export function mergeStagedCourses({
         submitted_by: staged.submitted_by || 'system',
         pe_notes: Array.isArray(staged.pe_notes) ? staged.pe_notes : [],
         type: staged.type || 'concrete',
+        geTag: staged.geTag !== undefined ? staged.geTag : undefined,
+        terms_offered: Array.isArray(staged.terms_offered) ? staged.terms_offered : [],
         schedule_telemetry: staged.schedule_telemetry || null
       };
 
