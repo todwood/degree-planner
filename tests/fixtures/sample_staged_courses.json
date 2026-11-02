@@ -1,0 +1,53 @@
+[
+  {
+    "code": "MTH 14100",
+    "title": "Basic Statistics (GE-Math)",
+    "credits": 3,
+    "level": 10000,
+    "department": "MTH",
+    "description": "An introduction to the concepts and methods of statistics.",
+    "is_variable_credit": false,
+    "min_credits": null,
+    "max_credits": null,
+    "repeatable": false,
+    "max_repeat_credits": null,
+    "prereqs": [],
+    "strict_concurrent_coreqs": [],
+    "prereq_or_coreqs": [],
+    "coreq_codes": [],
+    "grade_prereq_rules": [],
+    "cross_listed_codes": [],
+    "is_shell": false,
+    "geTag": "GE-Math",
+    "terms_offered": [
+      "2026 Fall",
+      "2027 Spring"
+    ],
+    "offerings": [
+      "FA-16wk",
+      "SP-16wk"
+    ],
+    "modalities": [
+      "On-Ground",
+      "Online"
+    ],
+    "annual_session_availability": "FA-16wk, SP-16wk",
+    "schedule_telemetry": {
+      "offering_status_text": "Regularly offered Fall & Spring (On-Ground & Online)",
+      "modalities": [
+        "On-Ground",
+        "Online"
+      ],
+      "has_online_option": true,
+      "has_on_ground_option": true,
+      "has_hybrid_option": false,
+      "has_evening_option": false,
+      "total_sections_observed": 10,
+      "terms_examined": [
+        "2026 Fall",
+        "2027 Spring",
+        "2027 Summer"
+      ]
+    }
+  }
+]

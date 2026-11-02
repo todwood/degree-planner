@@ -215,7 +215,7 @@ describe('Schedule Telemetry & Course Merge Compatibility Suite', () => {
 
     it('executes mergeStagedCourses in dry-run mode without mutating masterDatabase', () => {
       const summary = mergeStagedCourses({
-        stagingPath: '.tmp/courses_staging_all_2026.json',
+        stagingPath: 'tests/fixtures/sample_staged_courses.json',
         dryRun: true
       });
       expect(summary).toBeDefined();
